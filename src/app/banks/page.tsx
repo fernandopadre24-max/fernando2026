@@ -40,12 +40,13 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import type { BankAccount, Event } from '@/types';
-import { BankTransactions } from '@/components/bank-transactions';
+import type { BankAccount, Event, Transaction } from '@/types';
+import { TransferHistoryReport } from '@/components/reports/transfer-history-report';
 
 export default function BanksPage() {
   const [accounts, setAccounts] = useState<BankAccount[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isClient, setIsClient] = useState(false);
 
   const [isAddEditDialogOpen, setIsAddEditDialogOpen] = useState(false);
@@ -66,6 +67,10 @@ export default function BanksPage() {
     const storedEvents = localStorage.getItem('events');
     if (storedEvents) {
       setEvents(JSON.parse(storedEvents));
+    }
+     const storedTransactions = localStorage.getItem('transactions');
+    if (storedTransactions) {
+      setTransactions(JSON.parse(storedTransactions));
     }
   }, []);
 
@@ -227,7 +232,7 @@ export default function BanksPage() {
             </Card>
         </div>
 
-        <BankTransactions events={events} bankAccounts={accounts} />
+        <TransferHistoryReport events={events} transactions={transactions} bankAccounts={accounts} />
       </main>
 
       {/* Add/Edit Dialog */}

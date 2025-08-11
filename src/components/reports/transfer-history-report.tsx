@@ -2,7 +2,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import type { BankAccount, Event } from '@/types';
+import type { BankAccount, Event, Transaction } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
@@ -15,32 +15,63 @@ import {
 } from '@/components/ui/table';
 import { History } from 'lucide-react';
 
-interface BankTransactionsProps {
+interface Transfer {
+    id: string;
+    description: string;
+    value: number;
+    accountName: string;
+    transferDate?: string;
+}
+
+interface TransferHistoryReportProps {
   events: Event[];
+  transactions: Transaction[];
   bankAccounts: BankAccount[];
 }
 
-export function BankTransactions({ events, bankAccounts }: BankTransactionsProps) {
-  const transactions = useMemo(() => {
-    return events
+export function TransferHistoryReport({ events, transactions, bankAccounts }: TransferHistoryReportProps) {
+  const allTransfers = useMemo(() => {
+    const eventTransfers = events
       .filter((event) => event.isTransferred && event.transferredToBankAccountId)
       .map((event) => {
         const account = bankAccounts.find(
           (acc) => acc.id === event.transferredToBankAccountId
         );
         return {
-          ...event,
+          id: event.id,
+          description: `Show ${event.artist} em ${new Date(event.date + 'T00:00:00').toLocaleDateString('pt-BR')}`,
+          value: event.value,
           accountName: account
             ? `${account.bankName} - ${account.accountNumber}`
             : 'Conta não encontrada',
+          transferDate: event.transferDate,
         };
-      })
+      });
+
+      const transactionTransfers = transactions
+        .filter((t) => t.type === 'Receita' && t.isTransferred && t.transferredToBankAccountId)
+        .map((t) => {
+             const account = bankAccounts.find(
+                (acc) => acc.id === t.transferredToBankAccountId
+            );
+            return {
+                id: t.id,
+                description: t.description,
+                value: t.value,
+                 accountName: account
+                    ? `${account.bankName} - ${account.accountNumber}`
+                    : 'Conta não encontrada',
+                transferDate: t.transferDate,
+            }
+        });
+
+    return [...eventTransfers, ...transactionTransfers]
       .sort((a, b) => new Date(b.transferDate!).getTime() - new Date(a.transferDate!).getTime());
-  }, [events, bankAccounts]);
+  }, [events, transactions, bankAccounts]);
 
   const totalTransferred = useMemo(() => {
-    return transactions.reduce((sum, transaction) => sum + transaction.value, 0);
-  }, [transactions]);
+    return allTransfers.reduce((sum, transaction) => sum + transaction.value, 0);
+  }, [allTransfers]);
   
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat('pt-BR', {
@@ -70,18 +101,18 @@ export function BankTransactions({ events, bankAccounts }: BankTransactionsProps
             <TableHeader>
               <TableRow>
                 <TableHead>Data da Transferência</TableHead>
-                <TableHead>Descrição do Evento</TableHead>
+                <TableHead>Descrição</TableHead>
                 <TableHead>Conta de Destino</TableHead>
                 <TableHead className="text-right">Valor</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {transactions.length > 0 ? (
-                transactions.map((transaction) => (
+              {allTransfers.length > 0 ? (
+                allTransfers.map((transaction) => (
                   <TableRow key={transaction.id}>
                     <TableCell>{formatDate(transaction.transferDate)}</TableCell>
                     <TableCell className="font-medium">
-                      Show {transaction.artist} em {new Date(transaction.date + 'T00:00:00').toLocaleDateString('pt-BR')}
+                      {transaction.description}
                     </TableCell>
                     <TableCell>{transaction.accountName}</TableCell>
                     <TableCell className="text-right">{formatCurrency(transaction.value)}</TableCell>

@@ -9,6 +9,7 @@ import { FinancialOverviewReport } from '@/components/reports/financial-overview
 import { BankAccountsReport } from '@/components/reports/bank-accounts-report';
 import { ExpenseCategoryChart } from '@/components/reports/expense-category-chart';
 import { BalanceSheetReport } from '@/components/reports/balance-sheet-report';
+import { TransferHistoryReport } from '@/components/reports/transfer-history-report';
 
 export default function ReportsPage() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -59,6 +60,7 @@ export default function ReportsPage() {
                 <ExpenseCategoryChart transactions={transactions} categories={categories} />
             </div>
             </div>
+            <TransferHistoryReport events={events} transactions={transactions} bankAccounts={bankAccounts} />
         </div>
       </main>
     </AppShell>

@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Artist, Contractor, Event, PaymentMethod } from '@/types';
-import { History, MoreHorizontal, Trash2, Edit } from 'lucide-react';
+import { History, Trash2, Edit } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import {
   Select,
@@ -23,13 +23,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from './ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from './ui/dropdown-menu';
 import {
   Dialog,
   DialogContent,
@@ -224,7 +217,7 @@ export function EventHistory({
                 <TableHead className="text-center">Feito</TableHead>
                 <TableHead className="text-center">Pago</TableHead>
                 <TableHead>Método Pgto.</TableHead>
-                <TableHead className="w-[50px]"></TableHead>
+                <TableHead className="w-[100px] text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -256,28 +249,21 @@ export function EventHistory({
                       {event.isPaid && <Badge variant="secondary">{event.paymentMethod}</Badge>}
                     </TableCell>
                     <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Abrir menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleEditClick(event)}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Editar
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() => handleDeleteClick(event)}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Excluir
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      <div className="flex items-center justify-end gap-2">
+                        <Button variant="ghost" size="icon" onClick={() => handleEditClick(event)}>
+                          <Edit className="h-4 w-4" />
+                          <span className="sr-only">Editar</span>
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => handleDeleteClick(event)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                           <span className="sr-only">Excluir</span>
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
@@ -402,5 +388,3 @@ export function EventHistory({
     </Card>
   );
 }
-
-    

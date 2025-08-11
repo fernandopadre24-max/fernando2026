@@ -197,8 +197,8 @@ export default function Home() {
   return (
     <AppShell>
       <main className="container mx-auto px-4 pb-16">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start mb-8">
-          <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start mb-8">
+          <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-8">
             <ValueSummary events={events} />
           </div>
           <div className="lg:col-span-1">

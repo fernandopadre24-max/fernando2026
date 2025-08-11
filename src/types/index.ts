@@ -7,3 +7,13 @@ export type Event = {
   value: number;
   historicalFeedback: string;
 };
+
+export type Artist = {
+  id: string;
+  name: string;
+};
+
+export type Contractor = {
+  id: string;
+  name: string;
+};

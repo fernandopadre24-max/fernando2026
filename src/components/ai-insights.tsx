@@ -11,7 +11,7 @@ export function AiInsights({ insights, isLoading }: AiInsightsProps) {
   return (
     <Card className="min-h-[200px]">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium font-body">AI Insights</CardTitle>
+        <CardTitle className="text-sm font-medium font-body">Insights da IA</CardTitle>
         <Lightbulb className="h-5 w-5 text-muted-foreground" />
       </CardHeader>
       <CardContent>
@@ -31,7 +31,7 @@ export function AiInsights({ insights, isLoading }: AiInsightsProps) {
           <div className="flex flex-col items-center justify-center h-[140px] text-center">
             <Sparkles className="h-8 w-8 text-muted-foreground/50 mb-2" />
             <p className="text-sm text-muted-foreground font-body">
-              Submit an event to generate profitability and discoverability tips.
+              Envie um evento para gerar dicas de lucratividade e visibilidade.
             </p>
           </div>
         )}

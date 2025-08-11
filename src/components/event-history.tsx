@@ -15,25 +15,25 @@ interface EventHistoryProps {
 }
 
 export function EventHistory({ events }: EventHistoryProps) {
-    const formatCurrency = (value: number) => new Intl.NumberFormat('en-US', {
+    const formatCurrency = (value: number) => new Intl.NumberFormat('pt-BR', {
         style: 'currency',
-        currency: 'USD',
+        currency: 'BRL',
     }).format(value);
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-headline text-2xl">Event History</CardTitle>
+        <CardTitle className="font-headline text-2xl">Histórico de Eventos</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="border rounded-md">
             <Table>
             <TableHeader>
                 <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Artist</TableHead>
-                <TableHead>Contractor</TableHead>
-                <TableHead className="text-right">Value</TableHead>
+                <TableHead>Data</TableHead>
+                <TableHead>Artista</TableHead>
+                <TableHead>Contratante</TableHead>
+                <TableHead className="text-right">Valor</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -51,13 +51,13 @@ export function EventHistory({ events }: EventHistoryProps) {
                     <TableCell colSpan={4} className="h-48 text-center">
                     <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
                         <History className="h-8 w-8" />
-                        <span>No events yet.</span>
+                        <span>Nenhum evento ainda.</span>
                     </div>
                     </TableCell>
                 </TableRow>
                 )}
             </TableBody>
-            </Table>>
+            </Table>
         </div>
       </CardContent>
     </Card>

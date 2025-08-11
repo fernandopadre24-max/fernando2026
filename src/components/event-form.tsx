@@ -9,13 +9,15 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CalendarDays, Clock, DollarSign, Loader2, Mic, UserSquare, MessageSquareText } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import type { Artist, Contractor } from '@/types';
 
 const formSchema = z.object({
-  date: z.string().min(1, 'Date is required.'),
-  time: z.string().min(1, 'Time is required.'),
-  artist: z.string().min(2, 'Artist name must be at least 2 characters.'),
-  contractor: z.string().min(2, 'Contractor name must be at least 2 characters.'),
-  value: z.coerce.number().min(0, 'Value must be a positive number.'),
+  date: z.string().min(1, 'Data é obrigatória.'),
+  time: z.string().min(1, 'Hora é obrigatória.'),
+  artistId: z.string().min(1, 'Selecione um artista.'),
+  contractorId: z.string().min(1, 'Selecione um contratante.'),
+  value: z.coerce.number().min(0, 'Valor deve ser um número positivo.'),
   historicalFeedback: z.string().optional(),
 });
 
@@ -24,16 +26,18 @@ export type EventFormValues = z.infer<typeof formSchema>;
 interface EventFormProps {
   onEventAdd: (data: EventFormValues) => Promise<void>;
   isSubmitting: boolean;
+  artists: Artist[];
+  contractors: Contractor[];
 }
 
-export function EventForm({ onEventAdd, isSubmitting }: EventFormProps) {
+export function EventForm({ onEventAdd, isSubmitting, artists, contractors }: EventFormProps) {
   const form = useForm<EventFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       date: '',
       time: '',
-      artist: '',
-      contractor: '',
+      artistId: '',
+      contractorId: '',
       value: 0,
       historicalFeedback: '',
     },
@@ -47,7 +51,7 @@ export function EventForm({ onEventAdd, isSubmitting }: EventFormProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-headline text-2xl">Create New Event</CardTitle>
+        <CardTitle className="font-headline text-2xl">Criar Novo Evento</CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -58,7 +62,7 @@ export function EventForm({ onEventAdd, isSubmitting }: EventFormProps) {
                 name="date"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Event Date</FormLabel>
+                    <FormLabel>Data do Evento</FormLabel>
                     <div className="relative">
                       <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <FormControl>
@@ -74,7 +78,7 @@ export function EventForm({ onEventAdd, isSubmitting }: EventFormProps) {
                 name="time"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Event Time</FormLabel>
+                    <FormLabel>Hora do Evento</FormLabel>
                     <div className="relative">
                       <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <FormControl>
@@ -88,14 +92,25 @@ export function EventForm({ onEventAdd, isSubmitting }: EventFormProps) {
             </div>
             <FormField
               control={form.control}
-              name="artist"
+              name="artistId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Artist</FormLabel>
+                  <FormLabel>Artista</FormLabel>
                   <div className="relative">
                     <Mic className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <FormControl>
-                      <Input placeholder="e.g., The Vibe Setters" className="pl-10" {...field} />
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <SelectTrigger className="pl-10">
+                          <SelectValue placeholder="Selecione um artista" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {artists.map((artist) => (
+                            <SelectItem key={artist.id} value={artist.id}>
+                              {artist.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </FormControl>
                   </div>
                   <FormMessage />
@@ -104,14 +119,25 @@ export function EventForm({ onEventAdd, isSubmitting }: EventFormProps) {
             />
             <FormField
               control={form.control}
-              name="contractor"
+              name="contractorId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Contractor</FormLabel>
+                  <FormLabel>Contratante</FormLabel>
                    <div className="relative">
                     <UserSquare className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <FormControl>
-                      <Input placeholder="e.g., Venue Masters Inc." className="pl-10" {...field} />
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <SelectTrigger className="pl-10">
+                          <SelectValue placeholder="Selecione um contratante" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {contractors.map((contractor) => (
+                            <SelectItem key={contractor.id} value={contractor.id}>
+                              {contractor.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </FormControl>
                   </div>
                   <FormMessage />
@@ -123,11 +149,11 @@ export function EventForm({ onEventAdd, isSubmitting }: EventFormProps) {
                 name="value"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Event Value</FormLabel>
+                    <FormLabel>Valor do Evento</FormLabel>
                      <div className="relative">
                       <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <FormControl>
-                        <Input type="number" placeholder="e.g., 5000" className="pl-10" {...field} />
+                        <Input type="number" placeholder="ex: 5000" className="pl-10" {...field} />
                       </FormControl>
                     </div>
                     <FormMessage />
@@ -139,12 +165,12 @@ export function EventForm({ onEventAdd, isSubmitting }: EventFormProps) {
                 name="historicalFeedback"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Historical Feedback (Optional)</FormLabel>
+                    <FormLabel>Feedback Histórico (Opcional)</FormLabel>
                     <div className="relative">
                        <MessageSquareText className="absolute left-3 top-4 h-4 w-4 text-muted-foreground" />
                        <FormControl>
                         <Textarea
-                          placeholder="Provide any past feedback for similar events to improve AI insights..."
+                          placeholder="Forneça qualquer feedback anterior de eventos semelhantes para melhorar os insights da IA..."
                           className="pl-10 resize-none"
                           {...field}
                         />
@@ -156,7 +182,7 @@ export function EventForm({ onEventAdd, isSubmitting }: EventFormProps) {
               />
             <Button type="submit" disabled={isSubmitting} className="w-full font-headline">
               {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Add Event & Get Insights
+              Adicionar Evento e Obter Insights
             </Button>
           </form>
         </Form>

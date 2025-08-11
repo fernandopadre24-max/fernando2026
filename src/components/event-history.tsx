@@ -254,73 +254,79 @@ export function EventHistory({
             </TableHeader>
             <TableBody>
               {filteredEvents.length > 0 ? (
-                filteredEvents.map((event) => (
-                  <TableRow key={event.id}>
-                    <TableCell className="font-medium">
-                      {event.date ? new Date(event.date + 'T00:00:00').toLocaleDateString(
-                        'pt-BR'
-                      ) : 'N/A'}
-                    </TableCell>
-                    <TableCell>{event.artist}</TableCell>
-                    <TableCell>{event.contractor}</TableCell>
-                    <TableCell>{formatCurrency(event.value)}</TableCell>
-                    <TableCell className="max-w-[200px] truncate" title={event.observations}>{event.observations}</TableCell>
-                    <TableCell className="text-center">
-                      <Switch
-                        checked={event.isDone}
-                        onCheckedChange={(value) =>
-                          onStatusChange(event.id, 'isDone', value)
-                        }
-                      />
-                    </TableCell>
-                    <TableCell className="text-center">
-                       <Switch
-                        checked={event.isPaid}
-                        onCheckedChange={(value) => handlePaymentSwitchChange(event, value)}
-                      />
-                    </TableCell>
-                     <TableCell>
-                      {event.isPaid && <Badge variant="secondary">{event.paymentMethod}</Badge>}
-                    </TableCell>
-                    <TableCell>
-                      {event.isTransferred && event.transferredToBankAccountId && (
-                        <div className="flex flex-col text-xs">
-                          <span className="font-medium">
-                            {bankAccounts.find(b => b.id === event.transferredToBankAccountId)?.bankName || 'N/A'}
-                          </span>
-                          <span className="text-muted-foreground">
-                            {formatDate(event.transferDate)}
-                          </span>
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center justify-end gap-2">
-                        {event.isPaid && !event.isTransferred && (
-                          <Button variant="ghost" size="icon" title="Transferir valor" onClick={() => handleTransferClick(event)}>
-                            <ArrowRightLeft className="h-4 w-4" />
-                            <span className="sr-only">Transferir</span>
-                          </Button>
+                filteredEvents.map((event) => {
+                  const transferredAccount = event.isTransferred && event.transferredToBankAccountId 
+                    ? bankAccounts.find(b => b.id === event.transferredToBankAccountId) 
+                    : null;
+
+                  return (
+                    <TableRow key={event.id}>
+                      <TableCell className="font-medium">
+                        {event.date ? new Date(event.date + 'T00:00:00').toLocaleDateString(
+                          'pt-BR'
+                        ) : 'N/A'}
+                      </TableCell>
+                      <TableCell>{event.artist}</TableCell>
+                      <TableCell>{event.contractor}</TableCell>
+                      <TableCell>{formatCurrency(event.value)}</TableCell>
+                      <TableCell className="max-w-[200px] truncate" title={event.observations}>{event.observations}</TableCell>
+                      <TableCell className="text-center">
+                        <Switch
+                          checked={event.isDone}
+                          onCheckedChange={(value) =>
+                            onStatusChange(event.id, 'isDone', value)
+                          }
+                        />
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Switch
+                          checked={event.isPaid}
+                          onCheckedChange={(value) => handlePaymentSwitchChange(event, value)}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        {event.isPaid && <Badge variant="secondary">{event.paymentMethod}</Badge>}
+                      </TableCell>
+                      <TableCell>
+                        {transferredAccount && (
+                          <div className="flex flex-col text-xs">
+                            <span className="font-medium">
+                              {transferredAccount.bankName} - {transferredAccount.accountNumber}
+                            </span>
+                            <span className="text-muted-foreground">
+                              {formatDate(event.transferDate)}
+                            </span>
+                          </div>
                         )}
-                        
-                        <Button variant="ghost" size="icon" title="Editar" onClick={() => handleEditClick(event)}>
-                          <Edit className="h-4 w-4" />
-                          <span className="sr-only">Editar</span>
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          title="Excluir"
-                          className="text-destructive hover:text-destructive"
-                          onClick={() => handleDeleteClick(event)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                           <span className="sr-only">Excluir</span>
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center justify-end gap-2">
+                          {event.isPaid && !event.isTransferred && (
+                            <Button variant="ghost" size="icon" title="Transferir valor" onClick={() => handleTransferClick(event)}>
+                              <ArrowRightLeft className="h-4 w-4" />
+                              <span className="sr-only">Transferir</span>
+                            </Button>
+                          )}
+                          
+                          <Button variant="ghost" size="icon" title="Editar" onClick={() => handleEditClick(event)}>
+                            <Edit className="h-4 w-4" />
+                            <span className="sr-only">Editar</span>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            title="Excluir"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => handleDeleteClick(event)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            <span className="sr-only">Excluir</span>
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })
               ) : (
                 <TableRow>
                   <TableCell colSpan={10} className="h-48 text-center">
@@ -475,3 +481,5 @@ export function EventHistory({
     </Card>
   );
 }
+
+    

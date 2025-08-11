@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { AppShell } from '@/components/app-shell';
-import type { Event, Expense, ExpenseCategory } from '@/types';
+import type { Event, Transaction, ExpenseCategory } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -44,24 +44,35 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { DollarSign, TrendingDown, TrendingUp, PiggyBank, PlusCircle, MoreHorizontal, Trash2, Edit, CalendarDays, Tag } from 'lucide-react';
+import { DollarSign, TrendingDown, TrendingUp, PiggyBank, PlusCircle, MoreHorizontal, Trash2, Edit, CalendarDays, Tag, Package } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Link from 'next/link';
+import { Badge } from '@/components/ui/badge';
 
-const expenseSchema = z.object({
+const transactionSchema = z.object({
   description: z.string().min(1, 'Descrição é obrigatória.'),
   value: z.coerce.number().min(0.01, 'Valor deve ser maior que zero.'),
   date: z.string().min(1, 'Data é obrigatória.'),
-  categoryId: z.string().min(1, 'Categoria é obrigatória.'),
+  type: z.enum(['Receita', 'Despesa']),
+  categoryId: z.string().optional().nullable(),
+}).refine(data => {
+    if (data.type === 'Despesa') {
+        return !!data.categoryId;
+    }
+    return true;
+}, {
+    message: 'Categoria é obrigatória para despesas.',
+    path: ['categoryId'],
 });
 
-type ExpenseFormValues = z.infer<typeof expenseSchema>;
+
+type TransactionFormValues = z.infer<typeof transactionSchema>;
 
 export default function FinancePage() {
   const [events, setEvents] = useState<Event[]>([]);
-  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<ExpenseCategory[]>([]);
   const [isClient, setIsClient] = useState(false);
   
@@ -69,17 +80,20 @@ export default function FinancePage() {
 
   const [isAddEditDialogOpen, setIsAddEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
 
-  const form = useForm<ExpenseFormValues>({
-    resolver: zodResolver(expenseSchema),
+  const form = useForm<TransactionFormValues>({
+    resolver: zodResolver(transactionSchema),
     defaultValues: {
       description: '',
       value: 0,
       date: '',
-      categoryId: '',
+      type: 'Despesa',
+      categoryId: null,
     },
   });
+
+  const transactionType = form.watch('type');
 
   useEffect(() => {
     setIsClient(true);
@@ -87,9 +101,9 @@ export default function FinancePage() {
     if (storedEvents) {
       setEvents(JSON.parse(storedEvents));
     }
-    const storedExpenses = localStorage.getItem('expenses');
-    if (storedExpenses) {
-        setExpenses(JSON.parse(storedExpenses));
+    const storedTransactions = localStorage.getItem('transactions');
+    if (storedTransactions) {
+        setTransactions(JSON.parse(storedTransactions));
     }
      const storedCategories = localStorage.getItem('expenseCategories');
     if (storedCategories) {
@@ -99,64 +113,69 @@ export default function FinancePage() {
 
   useEffect(() => {
     if (isClient) {
-      localStorage.setItem('expenses', JSON.stringify(expenses));
+      localStorage.setItem('transactions', JSON.stringify(transactions));
     }
-  }, [expenses, isClient]);
+  }, [transactions, isClient]);
 
-  const handleSaveExpense = (data: ExpenseFormValues) => {
-    if (selectedExpense) {
+  const handleSaveTransaction = (data: TransactionFormValues) => {
+    const transactionData = {
+        ...data,
+        categoryId: data.type === 'Receita' ? null : data.categoryId,
+    };
+
+    if (selectedTransaction) {
       // Edit
-      setExpenses(
-        expenses.map((exp) =>
-          exp.id === selectedExpense.id ? { ...exp, ...data } : exp
+      setTransactions(
+        transactions.map((t) =>
+          t.id === selectedTransaction.id ? { ...t, ...transactionData } : t
         )
       );
-      toast({ title: "Despesa Atualizada", description: "A despesa foi atualizada com sucesso."});
+      toast({ title: "Transação Atualizada", description: "A transação foi atualizada com sucesso."});
     } else {
       // Add
-      const newExpense: Expense = {
+      const newTransaction: Transaction = {
         id: crypto.randomUUID(),
-        ...data,
+        ...transactionData,
       };
-      setExpenses([...expenses, newExpense]);
-      toast({ title: "Despesa Adicionada", description: "A nova despesa foi adicionada."});
+      setTransactions([...transactions, newTransaction]);
+      toast({ title: "Transação Adicionada", description: "A nova transação foi adicionada."});
     }
     closeAddEditDialog();
   };
 
-  const handleDeleteExpense = () => {
-    if (selectedExpense) {
-      setExpenses(expenses.filter((exp) => exp.id !== selectedExpense.id));
-      toast({ title: "Despesa Excluída", variant: "destructive", description: "A despesa foi excluída permanentemente."});
+  const handleDeleteTransaction = () => {
+    if (selectedTransaction) {
+      setTransactions(transactions.filter((t) => t.id !== selectedTransaction.id));
+      toast({ title: "Transação Excluída", variant: "destructive", description: "A transação foi excluída permanentemente."});
       closeDeleteDialog();
     }
   };
   
   const openAddDialog = () => {
-    setSelectedExpense(null);
-    form.reset({ description: '', value: 0, date: '', categoryId: '' });
+    setSelectedTransaction(null);
+    form.reset({ description: '', value: 0, date: '', type: 'Despesa', categoryId: null });
     setIsAddEditDialogOpen(true);
   };
 
-  const openEditDialog = (expense: Expense) => {
-    setSelectedExpense(expense);
-    form.reset(expense);
+  const openEditDialog = (transaction: Transaction) => {
+    setSelectedTransaction(transaction);
+    form.reset(transaction);
     setIsAddEditDialogOpen(true);
   };
 
   const closeAddEditDialog = () => {
     setIsAddEditDialogOpen(false);
-    setSelectedExpense(null);
+    setSelectedTransaction(null);
   };
 
-  const openDeleteDialog = (expense: Expense) => {
-    setSelectedExpense(expense);
+  const openDeleteDialog = (transaction: Transaction) => {
+    setSelectedTransaction(transaction);
     setIsDeleteDialogOpen(true);
   };
 
   const closeDeleteDialog = () => {
     setIsDeleteDialogOpen(false);
-    setSelectedExpense(null);
+    setSelectedTransaction(null);
   };
 
   
@@ -170,12 +189,15 @@ export default function FinancePage() {
     return new Date(dateString + 'T00:00:00').toLocaleDateString('pt-BR');
   }
 
-  const getCategoryName = (categoryId: string) => {
+  const getCategoryName = (categoryId: string | null | undefined) => {
+      if (!categoryId) return '-';
       return categories.find(c => c.id === categoryId)?.name || 'N/A';
   }
 
-  const totalRevenue = events.reduce((sum, event) => sum + event.value, 0);
-  const totalExpenses = expenses.reduce((sum, expense) => sum + expense.value, 0);
+  const totalEventRevenue = events.reduce((sum, event) => sum + event.value, 0);
+  const manualRevenue = transactions.filter(t => t.type === 'Receita').reduce((sum, t) => sum + t.value, 0);
+  const totalRevenue = totalEventRevenue + manualRevenue;
+  const totalExpenses = transactions.filter(t => t.type === 'Despesa').reduce((sum, t) => sum + t.value, 0);
   const netProfit = totalRevenue - totalExpenses;
 
   if (!isClient) {
@@ -192,7 +214,7 @@ export default function FinancePage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <Card className="bg-emerald-50 border-emerald-200 dark:bg-emerald-950 dark:border-emerald-800">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium font-body text-emerald-800 dark:text-emerald-200">Receita Total (Eventos)</CardTitle>
+                    <CardTitle className="text-sm font-medium font-body text-emerald-800 dark:text-emerald-200">Receita Total</CardTitle>
                     <TrendingUp className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                 </CardHeader>
                 <CardContent>
@@ -221,14 +243,14 @@ export default function FinancePage() {
 
         <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Gerenciamento de Despesas</CardTitle>
+                <CardTitle>Lançamentos Financeiros</CardTitle>
                 <div className='flex gap-2'>
                     <Button variant="outline" asChild>
                         <Link href="/finance/categories">Gerenciar Categorias</Link>
                     </Button>
                     <Button onClick={openAddDialog}>
                         <PlusCircle className="mr-2 h-4 w-4" />
-                        Adicionar Despesa
+                        Adicionar Lançamento
                     </Button>
                 </div>
             </CardHeader>
@@ -238,6 +260,7 @@ export default function FinancePage() {
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Descrição</TableHead>
+                                <TableHead>Tipo</TableHead>
                                 <TableHead>Categoria</TableHead>
                                 <TableHead>Data</TableHead>
                                 <TableHead className="text-right">Valor</TableHead>
@@ -245,13 +268,20 @@ export default function FinancePage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                        {expenses.length > 0 ? (
-                            expenses.map((expense) => (
-                            <TableRow key={expense.id}>
-                                <TableCell className="font-medium">{expense.description}</TableCell>
-                                <TableCell>{getCategoryName(expense.categoryId)}</TableCell>
-                                <TableCell>{formatDate(expense.date)}</TableCell>
-                                <TableCell className="text-right">{formatCurrency(expense.value)}</TableCell>
+                        {transactions.length > 0 ? (
+                            transactions.map((transaction) => (
+                            <TableRow key={transaction.id}>
+                                <TableCell className="font-medium">{transaction.description}</TableCell>
+                                <TableCell>
+                                  <Badge variant={transaction.type === 'Receita' ? 'default' : 'destructive'} className={transaction.type === 'Receita' ? 'bg-emerald-500' : 'bg-rose-500'}>
+                                      {transaction.type}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell>{getCategoryName(transaction.categoryId)}</TableCell>
+                                <TableCell>{formatDate(transaction.date)}</TableCell>
+                                <TableCell className={`text-right font-medium ${transaction.type === 'Receita' ? 'text-emerald-600' : 'text-rose-600'}`}>
+                                    {transaction.type === 'Despesa' ? '-' : '+'} {formatCurrency(transaction.value)}
+                                </TableCell>
                                 <TableCell>
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
@@ -261,13 +291,13 @@ export default function FinancePage() {
                                     </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
-                                    <DropdownMenuItem onClick={() => openEditDialog(expense)}>
+                                    <DropdownMenuItem onClick={() => openEditDialog(transaction)}>
                                         <Edit className="mr-2 h-4 w-4" />
                                         Editar
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
                                         className="text-destructive"
-                                        onClick={() => openDeleteDialog(expense)}
+                                        onClick={() => openDeleteDialog(transaction)}
                                     >
                                         <Trash2 className="mr-2 h-4 w-4" />
                                         Excluir
@@ -279,8 +309,8 @@ export default function FinancePage() {
                             ))
                         ) : (
                             <TableRow>
-                            <TableCell colSpan={5} className="h-24 text-center">
-                                Nenhuma despesa encontrada.
+                            <TableCell colSpan={6} className="h-24 text-center">
+                                Nenhum lançamento encontrado.
                             </TableCell>
                             </TableRow>
                         )}
@@ -292,16 +322,16 @@ export default function FinancePage() {
 
       </main>
 
-      {/* Add/Edit Expense Dialog */}
+      {/* Add/Edit Transaction Dialog */}
       <Dialog open={isAddEditDialogOpen} onOpenChange={setIsAddEditDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>
-              {selectedExpense ? 'Editar Despesa' : 'Adicionar Despesa'}
+              {selectedTransaction ? 'Editar Lançamento' : 'Adicionar Lançamento'}
             </DialogTitle>
           </DialogHeader>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSaveExpense)} className="space-y-4 py-4">
+            <form onSubmit={form.handleSubmit(handleSaveTransaction)} className="space-y-4 py-4">
               <FormField
                 control={form.control}
                 name="description"
@@ -315,29 +345,23 @@ export default function FinancePage() {
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
-                name="categoryId"
+                name="type"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Categoria</FormLabel>
+                    <FormLabel>Tipo</FormLabel>
                      <div className="relative">
-                        <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Package className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <FormControl>
                           <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                             <SelectTrigger className="pl-10">
-                              <SelectValue placeholder="Selecione uma categoria" />
+                              <SelectValue placeholder="Selecione o tipo" />
                             </SelectTrigger>
                             <SelectContent>
-                              {categories.length > 0 ? (
-                                categories.map((category) => (
-                                <SelectItem key={category.id} value={category.id}>
-                                  {category.name}
-                                </SelectItem>
-                              ))
-                              ) : (
-                                <div className="text-center text-sm text-muted-foreground p-4">Nenhuma categoria cadastrada.</div>
-                              )}
+                                <SelectItem value="Despesa">Despesa</SelectItem>
+                                <SelectItem value="Receita">Receita</SelectItem>
                             </SelectContent>
                           </Select>
                         </FormControl>
@@ -346,6 +370,41 @@ export default function FinancePage() {
                   </FormItem>
                 )}
               />
+
+              {transactionType === 'Despesa' && (
+                <FormField
+                  control={form.control}
+                  name="categoryId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Categoria</FormLabel>
+                       <div className="relative">
+                          <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <FormControl>
+                            <Select onValueChange={field.onChange} defaultValue={field.value || ''} value={field.value || ''}>
+                              <SelectTrigger className="pl-10">
+                                <SelectValue placeholder="Selecione uma categoria" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {categories.length > 0 ? (
+                                  categories.map((category) => (
+                                  <SelectItem key={category.id} value={category.id}>
+                                    {category.name}
+                                  </SelectItem>
+                                ))
+                                ) : (
+                                  <div className="text-center text-sm text-muted-foreground p-4">Nenhuma categoria cadastrada.</div>
+                                )}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+
                <div className="grid grid-cols-2 gap-4">
                  <FormField
                     control={form.control}
@@ -401,13 +460,13 @@ export default function FinancePage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
             <AlertDialogDescription>
-              Essa ação não pode ser desfeita. Isso excluirá permanentemente a
-              despesa &quot;{selectedExpense?.description}&quot;.
+              Essa ação não pode ser desfeita. Isso excluirá permanentemente o
+              lançamento &quot;{selectedTransaction?.description}&quot;.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={closeDeleteDialog}>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteExpense}>Excluir</AlertDialogAction>
+            <AlertDialogAction onClick={handleDeleteTransaction}>Excluir</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

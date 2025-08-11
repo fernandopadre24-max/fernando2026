@@ -37,12 +37,13 @@ export type BankAccount = {
   balance: number;
 };
 
-export type Expense = {
+export type Transaction = {
     id: string;
     description: string;
     value: number;
     date: string;
-    categoryId: string;
+    type: 'Receita' | 'Despesa';
+    categoryId?: string | null;
     category?: string; // Optional, for display purposes
 }
 

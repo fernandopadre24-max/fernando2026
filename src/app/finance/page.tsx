@@ -50,6 +50,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const transactionSchema = z.object({
   description: z.string().min(1, 'Descrição é obrigatória.'),
@@ -243,6 +244,11 @@ export default function FinancePage() {
       if (!categoryId) return '-';
       return categories.find(c => c.id === categoryId)?.name || 'N/A';
   }
+   const getBankAccountName = (bankAccountId: string | null | undefined) => {
+      if (!bankAccountId) return '-';
+      const account = bankAccounts.find(c => c.id === bankAccountId)
+      return account ? `${account.bankName} - ${account.accountNumber}` : 'N/A';
+  }
 
   const totalEventRevenue = events.reduce((sum, event) => sum + event.value, 0);
   const manualRevenue = transactions.filter(t => t.type === 'Receita').reduce((sum, t) => sum + t.value, 0);
@@ -305,6 +311,7 @@ export default function FinancePage() {
                 </div>
             </CardHeader>
             <CardContent>
+              <TooltipProvider>
                 <div className="border rounded-md">
                     <Table>
                         <TableHeader>
@@ -341,7 +348,14 @@ export default function FinancePage() {
                                     </Button>
                                 )}
                                  {transaction.isTransferred && (
-                                    <Badge variant="outline">Transferido</Badge>
+                                    <Tooltip>
+                                      <TooltipTrigger>
+                                        <Badge variant="outline">Transferido</Badge>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p>Transferido para: {getBankAccountName(transaction.transferredToBankAccountId)}</p>
+                                      </TooltipContent>
+                                    </Tooltip>
                                 )}
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
@@ -378,6 +392,7 @@ export default function FinancePage() {
                         </TableBody>
                     </Table>
                 </div>
+              </TooltipProvider>
             </CardContent>
         </Card>
 
@@ -569,3 +584,5 @@ export default function FinancePage() {
     </AppShell>
   );
 }
+
+    

@@ -36,3 +36,11 @@ export type BankAccount = {
   accountNumber: string;
   balance: number;
 };
+
+export type Expense = {
+    id: string;
+    description: string;
+    value: number;
+    date: string;
+    category: string;
+}

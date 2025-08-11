@@ -1,3 +1,4 @@
+
 'use client';
 import * as React from 'react';
 import Link from 'next/link';
@@ -15,7 +16,7 @@ import {
 } from '@/components/ui/sidebar';
 import { Header } from '@/components/header';
 import { cn } from '@/lib/utils';
-import { Calendar, Mic, Music4, UserSquare, LogOut, Landmark } from 'lucide-react';
+import { Calendar, Mic, Music4, UserSquare, LogOut, Landmark, DollarSign } from 'lucide-react';
 import { Button } from './ui/button';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -45,6 +46,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <SidebarMenuButton isActive={isActive('/')} tooltip="Eventos">
                   <Calendar />
                   Eventos
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+             <SidebarMenuItem>
+              <Link href="/finance">
+                <SidebarMenuButton isActive={isActive('/finance')} tooltip="Financeiro">
+                  <DollarSign />
+                  Financeiro
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>

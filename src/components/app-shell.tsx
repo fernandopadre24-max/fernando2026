@@ -33,10 +33,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <SidebarHeader>
              <div className="flex items-center gap-2">
                 <div className="p-2 bg-primary/10 rounded-lg">
-                    <Music4 className="h-6 w-6 text-primary" />
+                    <DollarSign className="h-6 w-6 text-primary" />
                 </div>
                 <h1 className="text-xl font-semibold text-primary font-headline">
-                    Controle de Eventos 2026
+                    Controle Financeiro
                 </h1>
             </div>
           </SidebarHeader>

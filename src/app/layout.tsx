@@ -4,8 +4,8 @@ import { Toaster } from "@/components/ui/toaster";
 
 
 export const metadata: Metadata = {
-  title: 'Controle de Eventos 2026',
-  description: 'Gerenciamento de Eventos com IA',
+  title: 'Controle Financeiro',
+  description: 'Seu gerenciador financeiro completo',
 };
 
 export default function RootLayout({

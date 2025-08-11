@@ -60,12 +60,12 @@ export function BankTransactions({ events, bankAccounts }: BankTransactionsProps
   }
 
   return (
-    <Card>
+    <Card className="bg-yellow-100/60 border-yellow-200/80 dark:bg-yellow-950/50 dark:border-yellow-800/60">
       <CardHeader>
         <CardTitle>Histórico de Movimentações Bancárias</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="border rounded-md">
+        <div className="border rounded-md bg-card">
           <Table>
             <TableHeader>
               <TableRow>

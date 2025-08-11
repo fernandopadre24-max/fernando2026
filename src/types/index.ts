@@ -45,6 +45,9 @@ export type Transaction = {
     type: 'Receita' | 'Despesa';
     categoryId?: string | null;
     category?: string; // Optional, for display purposes
+    isTransferred: boolean;
+    transferredToBankAccountId?: string | null;
+    transferDate?: string;
 }
 
 export type ExpenseCategory = {

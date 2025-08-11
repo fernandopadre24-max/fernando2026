@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { AppShell } from '@/components/app-shell';
-import type { Event, Transaction, ExpenseCategory } from '@/types';
+import type { Event, Transaction, ExpenseCategory, BankAccount } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -44,7 +44,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { DollarSign, TrendingDown, TrendingUp, PiggyBank, PlusCircle, MoreHorizontal, Trash2, Edit, CalendarDays, Tag, Package } from 'lucide-react';
+import { DollarSign, TrendingDown, TrendingUp, PiggyBank, PlusCircle, MoreHorizontal, Trash2, Edit, CalendarDays, Tag, Package, ArrowRightLeft } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -74,13 +74,18 @@ export default function FinancePage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<ExpenseCategory[]>([]);
+  const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
   const [isClient, setIsClient] = useState(false);
   
   const { toast } = useToast();
 
   const [isAddEditDialogOpen, setIsAddEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isTransferDialogOpen, setIsTransferDialogOpen] = useState(false);
+
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [selectedBankAccountId, setSelectedBankAccountId] = useState<string>('');
+
 
   const form = useForm<TransactionFormValues>({
     resolver: zodResolver(transactionSchema),
@@ -103,19 +108,24 @@ export default function FinancePage() {
     }
     const storedTransactions = localStorage.getItem('transactions');
     if (storedTransactions) {
-        setTransactions(JSON.parse(storedTransactions));
+        setTransactions(JSON.parse(storedTransactions).map((t: Transaction) => ({...t, isTransferred: t.isTransferred || false})));
     }
      const storedCategories = localStorage.getItem('expenseCategories');
     if (storedCategories) {
       setCategories(JSON.parse(storedCategories));
+    }
+    const storedBankAccounts = localStorage.getItem('bankAccounts');
+    if (storedBankAccounts) {
+      setBankAccounts(JSON.parse(storedBankAccounts));
     }
   }, []);
 
   useEffect(() => {
     if (isClient) {
       localStorage.setItem('transactions', JSON.stringify(transactions));
+      localStorage.setItem('bankAccounts', JSON.stringify(bankAccounts));
     }
-  }, [transactions, isClient]);
+  }, [transactions, bankAccounts, isClient]);
 
   const handleSaveTransaction = (data: TransactionFormValues) => {
     const transactionData = {
@@ -136,6 +146,7 @@ export default function FinancePage() {
       const newTransaction: Transaction = {
         id: crypto.randomUUID(),
         ...transactionData,
+        isTransferred: false,
       };
       setTransactions([...transactions, newTransaction]);
       toast({ title: "Transação Adicionada", description: "A nova transação foi adicionada."});
@@ -149,6 +160,45 @@ export default function FinancePage() {
       toast({ title: "Transação Excluída", variant: "destructive", description: "A transação foi excluída permanentemente."});
       closeDeleteDialog();
     }
+  };
+
+  const handleTransferClick = (transaction: Transaction) => {
+    setSelectedTransaction(transaction);
+    setSelectedBankAccountId('');
+    setIsTransferDialogOpen(true);
+  };
+
+  const handleConfirmTransfer = () => {
+    if (!selectedTransaction || !selectedBankAccountId) return;
+
+    const accountToUpdate = bankAccounts.find(acc => acc.id === selectedBankAccountId);
+    if (!accountToUpdate) return;
+    
+    // Update bank account balance
+    setBankAccounts(prevAccounts => 
+      prevAccounts.map(account => 
+        account.id === selectedBankAccountId 
+          ? { ...account, balance: account.balance + selectedTransaction.value }
+          : account
+      )
+    );
+
+    // Update transaction status
+    setTransactions(prevTransactions => 
+      prevTransactions.map(transaction => 
+        transaction.id === selectedTransaction.id 
+          ? { ...transaction, isTransferred: true, transferredToBankAccountId: selectedBankAccountId, transferDate: new Date().toISOString() }
+          : transaction
+      )
+    );
+     toast({
+      title: "Transferência Realizada",
+      description: `Valor de ${formatCurrency(selectedTransaction.value)} transferido para a conta ${accountToUpdate.bankName} com sucesso.`
+    })
+
+    setIsTransferDialogOpen(false);
+    setSelectedTransaction(null);
+    setSelectedBankAccountId('');
   };
   
   const openAddDialog = () => {
@@ -264,7 +314,7 @@ export default function FinancePage() {
                                 <TableHead>Categoria</TableHead>
                                 <TableHead>Data</TableHead>
                                 <TableHead className="text-right">Valor</TableHead>
-                                <TableHead className="w-[50px]"></TableHead>
+                                <TableHead className="w-[100px] text-right">Ações</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -282,7 +332,17 @@ export default function FinancePage() {
                                 <TableCell className={`text-right font-medium ${transaction.type === 'Receita' ? 'text-emerald-600' : 'text-rose-600'}`}>
                                     {transaction.type === 'Despesa' ? '-' : '+'} {formatCurrency(transaction.value)}
                                 </TableCell>
-                                <TableCell>
+                                <TableCell className="text-right">
+                                <div className="flex items-center justify-end gap-0.5">
+                                 {transaction.type === 'Receita' && !transaction.isTransferred && (
+                                    <Button variant="ghost" size="icon" title="Transferir valor" onClick={() => handleTransferClick(transaction)}>
+                                        <ArrowRightLeft className="h-4 w-4" />
+                                        <span className="sr-only">Transferir</span>
+                                    </Button>
+                                )}
+                                 {transaction.isTransferred && (
+                                    <Badge variant="outline">Transferido</Badge>
+                                )}
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                     <Button variant="ghost" className="h-8 w-8 p-0">
@@ -304,6 +364,7 @@ export default function FinancePage() {
                                     </DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
+                                </div>
                                 </TableCell>
                             </TableRow>
                             ))
@@ -470,6 +531,40 @@ export default function FinancePage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+       {/* Transfer Dialog */}
+      <Dialog open={isTransferDialogOpen} onOpenChange={setIsTransferDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Transferir para Conta Bancária</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-muted-foreground mb-2">
+              Selecione a conta para transferir o valor de <strong className='text-foreground'>{formatCurrency(selectedTransaction?.value || 0)}</strong>.
+            </p>
+            <Select onValueChange={setSelectedBankAccountId} value={selectedBankAccountId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione uma conta bancária" />
+              </SelectTrigger>
+              <SelectContent>
+                {bankAccounts.length > 0 ? bankAccounts.map((account) => (
+                  <SelectItem key={account.id} value={account.id}>
+                    {account.bankName} - {account.accountNumber} (Saldo: {formatCurrency(account.balance)})
+                  </SelectItem>
+                )) : <p className='p-4 text-sm text-muted-foreground'>Nenhuma conta cadastrada.</p>}
+              </SelectContent>
+            </Select>
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button type="button" variant="secondary">Cancelar</Button>
+            </DialogClose>
+            <Button type="button" onClick={handleConfirmTransfer} disabled={!selectedBankAccountId}>
+              Confirmar Transferência
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
     </AppShell>
   );

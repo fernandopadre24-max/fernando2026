@@ -1,13 +1,14 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { Event } from '@/types';
+import type { Event, BankAccount } from '@/types';
 import { PiggyBank, Landmark, ArrowRightLeft } from 'lucide-react';
 
 interface ValueSummaryProps {
   events: Event[];
+  bankAccounts: BankAccount[];
 }
 
-export function ValueSummary({ events }: ValueSummaryProps) {
+export function ValueSummary({ events, bankAccounts }: ValueSummaryProps) {
   const totalReceived = events
     .filter(event => event.isPaid)
     .reduce((sum, event) => sum + event.value, 0);
@@ -16,9 +17,16 @@ export function ValueSummary({ events }: ValueSummaryProps) {
     .filter(event => event.isDone && !event.isPaid)
     .reduce((sum, event) => sum + event.value, 0);
 
-  const totalTransferred = events
-    .filter(event => event.isTransferred)
-    .reduce((sum, event) => sum + event.value, 0);
+  const transferredEvents = events
+    .filter(event => event.isTransferred && event.transferDate)
+    .sort((a, b) => new Date(b.transferDate!).getTime() - new Date(a.transferDate!).getTime());
+    
+  const totalTransferred = transferredEvents.reduce((sum, event) => sum + event.value, 0);
+
+  const lastTransferredEvent = transferredEvents[0];
+  const lastAccountUsed = lastTransferredEvent 
+    ? bankAccounts.find(acc => acc.id === lastTransferredEvent.transferredToBankAccountId)
+    : null;
 
 
   const formatCurrency = (value: number) => new Intl.NumberFormat('pt-BR', {
@@ -59,8 +67,11 @@ export function ValueSummary({ events }: ValueSummaryProps) {
         </CardHeader>
         <CardContent>
           <div className="text-3xl font-bold font-headline text-blue-900 dark:text-blue-100">{formatCurrency(totalTransferred)}</div>
-           <p className="text-xs text-blue-700 dark:text-blue-300 font-body">
-            Soma dos valores transferidos para contas bancárias.
+           <p className="text-xs text-blue-700 dark:text-blue-300 font-body truncate">
+            {lastAccountUsed 
+              ? `Última transferência para: ${lastAccountUsed.bankName} ${lastAccountUsed.accountNumber}`
+              : 'Nenhuma transferência realizada ainda.'
+            }
           </p>
         </CardContent>
       </Card>

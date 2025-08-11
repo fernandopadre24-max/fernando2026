@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Event } from '@/types';
-import { PiggyBank, Landmark, ArrowRightLeft } from 'lucide-react';
+import { PiggyBank, Landmark } from 'lucide-react';
 
 interface ValueSummaryProps {
   events: Event[];
@@ -15,10 +15,6 @@ export function ValueSummary({ events }: ValueSummaryProps) {
   const totalToReceive = events
     .filter(event => event.isDone && !event.isPaid)
     .reduce((sum, event) => sum + event.value, 0);
-    
-  const transferredEvents = events.filter(event => event.isTransferred);
-  const totalTransferred = transferredEvents.reduce((sum, event) => sum + event.value, 0);
-  const numberOfTransfers = transferredEvents.length;
 
 
   const formatCurrency = (value: number) => new Intl.NumberFormat('pt-BR', {
@@ -49,18 +45,6 @@ export function ValueSummary({ events }: ValueSummaryProps) {
           <div className="text-3xl font-bold font-headline text-amber-900 dark:text-amber-100">{formatCurrency(totalToReceive)}</div>
            <p className="text-xs text-amber-700 dark:text-amber-300 font-body">
             Soma dos eventos concluídos e pendentes de pagamento.
-          </p>
-        </CardContent>
-      </Card>
-      <Card className="bg-sky-50 border-sky-200 dark:bg-sky-950 dark:border-sky-800">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium font-body text-sky-800 dark:text-sky-200">Total Transferido</CardTitle>
-          <ArrowRightLeft className="h-5 w-5 text-sky-600 dark:text-sky-400" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-3xl font-bold font-headline text-sky-900 dark:text-sky-100">{formatCurrency(totalTransferred)}</div>
-           <p className="text-xs text-sky-700 dark:text-sky-300 font-body">
-            Soma de {numberOfTransfers} {numberOfTransfers === 1 ? 'transferência' : 'transferências'} para contas.
           </p>
         </CardContent>
       </Card>

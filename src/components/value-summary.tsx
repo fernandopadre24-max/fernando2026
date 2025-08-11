@@ -7,7 +7,9 @@ interface ValueSummaryProps {
 }
 
 export function ValueSummary({ events }: ValueSummaryProps) {
-  const totalValue = events.reduce((sum, event) => sum + event.value, 0);
+  const totalValue = events
+    .filter(event => event.isDone && event.isPaid)
+    .reduce((sum, event) => sum + event.value, 0);
 
   const formattedValue = new Intl.NumberFormat('pt-BR', {
     style: 'currency',
@@ -23,7 +25,7 @@ export function ValueSummary({ events }: ValueSummaryProps) {
       <CardContent>
         <div className="text-3xl font-bold font-headline">{formattedValue}</div>
         <p className="text-xs text-muted-foreground font-body">
-          Soma dos valores de todos os eventos
+          Soma dos valores dos eventos concluídos e pagos
         </p>
       </CardContent>
     </Card>

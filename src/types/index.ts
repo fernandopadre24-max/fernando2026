@@ -5,6 +5,8 @@ export type Event = {
   artist: string;
   contractor: string;
   value: number;
+  isDone: boolean;
+  isPaid: boolean;
 };
 
 export type Artist = {

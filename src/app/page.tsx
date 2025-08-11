@@ -41,6 +41,8 @@ export default function Home() {
         ...data,
         artist: artistName,
         contractor: contractorName,
+        isDone: false,
+        isPaid: false,
       };
       setEvents((prevEvents) => [newEvent, ...prevEvents]);
        toast({
@@ -60,6 +62,14 @@ export default function Home() {
     }
   };
 
+  const handleEventStatusChange = (eventId: string, type: 'isDone' | 'isPaid', value: boolean) => {
+    setEvents(prevEvents =>
+      prevEvents.map(event =>
+        event.id === eventId ? { ...event, [type]: value } : event
+      )
+    );
+  };
+
   return (
     <AppShell>
       <main className="container mx-auto px-4 pb-16">
@@ -74,7 +84,7 @@ export default function Home() {
               onEventAdd={handleEventAdd}
               isSubmitting={isSubmitting}
             />
-            <EventHistory events={events} />
+            <EventHistory events={events} onStatusChange={handleEventStatusChange} />
           </div>
         </div>
       </main>

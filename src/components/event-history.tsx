@@ -278,6 +278,9 @@ export function EventHistory({
                             <span className="sr-only">Transferir</span>
                           </Button>
                         )}
+                        {event.isTransferred && (
+                          <Badge variant="outline">Transferido</Badge>
+                        )}
                         <Button variant="ghost" size="icon" title="Editar" onClick={() => handleEditClick(event)}>
                           <Edit className="h-4 w-4" />
                           <span className="sr-only">Editar</span>

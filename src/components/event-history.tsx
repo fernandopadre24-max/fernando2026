@@ -123,6 +123,17 @@ export function EventHistory({
       style: 'currency',
       currency: 'BRL',
     }).format(value);
+    
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+  }
 
   const handleEditClick = (event: Event) => {
     setSelectedEvent(event);
@@ -237,6 +248,7 @@ export function EventHistory({
                 <TableHead className="text-center">Feito</TableHead>
                 <TableHead className="text-center">Pago</TableHead>
                 <TableHead>Método Pgto.</TableHead>
+                <TableHead>Transferência</TableHead>
                 <TableHead className="w-[120px] text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -271,6 +283,18 @@ export function EventHistory({
                       {event.isPaid && <Badge variant="secondary">{event.paymentMethod}</Badge>}
                     </TableCell>
                     <TableCell>
+                      {event.isTransferred && event.transferredToBankAccountId && (
+                        <div className="flex flex-col text-xs">
+                          <span className="font-medium">
+                            {bankAccounts.find(b => b.id === event.transferredToBankAccountId)?.bankName || 'N/A'}
+                          </span>
+                          <span className="text-muted-foreground">
+                            {formatDate(event.transferDate)}
+                          </span>
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell>
                       <div className="flex items-center justify-end gap-2">
                         {event.isPaid && !event.isTransferred && (
                           <Button variant="ghost" size="icon" title="Transferir valor" onClick={() => handleTransferClick(event)}>
@@ -278,9 +302,7 @@ export function EventHistory({
                             <span className="sr-only">Transferir</span>
                           </Button>
                         )}
-                        {event.isTransferred && (
-                          <Badge variant="outline">Transferido</Badge>
-                        )}
+                        
                         <Button variant="ghost" size="icon" title="Editar" onClick={() => handleEditClick(event)}>
                           <Edit className="h-4 w-4" />
                           <span className="sr-only">Editar</span>
@@ -301,7 +323,7 @@ export function EventHistory({
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={9} className="h-48 text-center">
+                  <TableCell colSpan={10} className="h-48 text-center">
                     <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
                       <History className="h-8 w-8" />
                       <span>Nenhum evento encontrado para os filtros selecionados.</span>
@@ -318,7 +340,7 @@ export function EventHistory({
                 <TableCell className="font-bold">
                   {formatCurrency(subtotal)}
                 </TableCell>
-                <TableCell colSpan={5}></TableCell>
+                <TableCell colSpan={6}></TableCell>
               </TableRow>
             </TableFooter>
           </Table>

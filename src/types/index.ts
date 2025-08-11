@@ -1,9 +1,12 @@
+
 export type Event = {
   id: string;
   date: string;
   time: string;
   artist: string;
+  artistId: string;
   contractor: string;
+  contractorId: string;
   value: number;
   isDone: boolean;
   isPaid: boolean;

@@ -101,6 +101,27 @@ export default function Home() {
       setIsSubmitting(false);
     }
   };
+  
+  const handleEventUpdate = (updatedEvent: Event) => {
+    const artistName = artists.find(a => a.id === updatedEvent.artistId)?.name || 'N/A';
+    const contractorName = contractors.find(c => c.id === updatedEvent.contractorId)?.name || 'N/A';
+
+    setEvents(events.map(event => event.id === updatedEvent.id ? {...updatedEvent, artist: artistName, contractor: contractorName} : event));
+    toast({
+      title: "Evento Atualizado",
+      description: "O evento foi atualizado com sucesso.",
+    });
+  }
+
+  const handleEventDelete = (eventId: string) => {
+    setEvents(events.filter(event => event.id !== eventId));
+     toast({
+      title: "Evento Excluído",
+      description: "O evento foi excluído com sucesso.",
+      variant: "destructive"
+    });
+  }
+
 
   const handleEventStatusChange = (eventId: string, type: 'isDone' | 'isPaid', value: boolean) => {
     setEvents(prevEvents =>
@@ -120,15 +141,22 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
           <div className="lg:col-span-2 flex flex-col gap-8 lg:sticky lg:top-8">
             <ValueSummary events={events} />
-          </div>
-          <div className="lg:col-span-3 flex flex-col gap-8">
             <EventForm
               artists={artists}
               contractors={contractors}
               onEventAdd={handleEventAdd}
               isSubmitting={isSubmitting}
             />
-            <EventHistory events={events} onStatusChange={handleEventStatusChange} />
+          </div>
+          <div className="lg:col-span-3 flex flex-col gap-8">
+            <EventHistory 
+              events={events} 
+              artists={artists}
+              contractors={contractors}
+              onStatusChange={handleEventStatusChange}
+              onEventUpdate={handleEventUpdate}
+              onEventDelete={handleEventDelete}
+            />
           </div>
         </div>
       </main>

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -9,7 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CalendarDays, Clock, DollarSign, Loader2, Mic, UserSquare } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { Artist, Contractor } from '@/types';
+import type { Artist, Contractor, Event } from '@/types';
+import { useEffect } from 'react';
 
 const formSchema = z.object({
   date: z.string().min(1, 'Data é obrigatória.'),
@@ -26,9 +28,12 @@ interface EventFormProps {
   isSubmitting: boolean;
   artists: Artist[];
   contractors: Contractor[];
+  eventToEdit?: Event | null;
+  onEventUpdate?: (data: Event) => void;
+  onClose?: () => void;
 }
 
-export function EventForm({ onEventAdd, isSubmitting, artists, contractors }: EventFormProps) {
+export function EventForm({ onEventAdd, isSubmitting, artists, contractors, eventToEdit, onEventUpdate, onClose }: EventFormProps) {
   const form = useForm<EventFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -40,17 +45,47 @@ export function EventForm({ onEventAdd, isSubmitting, artists, contractors }: Ev
     },
   });
 
+  useEffect(() => {
+    if (eventToEdit) {
+      form.reset({
+        date: eventToEdit.date,
+        time: eventToEdit.time,
+        artistId: eventToEdit.artistId,
+        contractorId: eventToEdit.contractorId,
+        value: eventToEdit.value,
+      });
+    } else {
+        form.reset({
+            date: '',
+            time: '',
+            artistId: '',
+            contractorId: '',
+            value: 0,
+        });
+    }
+  }, [eventToEdit, form]);
+
   async function onSubmit(values: EventFormValues) {
-    await onEventAdd(values);
-    form.reset();
+    if (eventToEdit && onEventUpdate) {
+        onEventUpdate({
+            ...eventToEdit,
+            ...values,
+        });
+        if(onClose) onClose();
+    } else {
+      await onEventAdd(values);
+      form.reset();
+    }
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="font-headline text-2xl">Criar Novo Evento</CardTitle>
+    <Card className={!onEventUpdate ? '' : 'border-0 shadow-none'}>
+      <CardHeader className={!onEventUpdate ? '' : 'px-1'}>
+        <CardTitle className="font-headline text-2xl">
+            {eventToEdit ? 'Editar Evento' : 'Criar Novo Evento'}
+        </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className={!onEventUpdate ? '' : 'px-1'}>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -159,7 +194,7 @@ export function EventForm({ onEventAdd, isSubmitting, artists, contractors }: Ev
               />
             <Button type="submit" disabled={isSubmitting} className="w-full font-headline">
               {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Adicionar Evento
+              {eventToEdit ? 'Salvar Alterações' : 'Adicionar Evento'}
             </Button>
           </form>
         </Form>

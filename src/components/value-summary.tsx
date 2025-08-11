@@ -9,7 +9,7 @@ interface ValueSummaryProps {
 
 export function ValueSummary({ events }: ValueSummaryProps) {
   const totalReceived = events
-    .filter(event => event.isDone && event.isPaid)
+    .filter(event => event.isPaid)
     .reduce((sum, event) => sum + event.value, 0);
 
   const totalToReceive = events
@@ -31,7 +31,7 @@ export function ValueSummary({ events }: ValueSummaryProps) {
         <CardContent>
           <div className="text-3xl font-bold font-headline text-emerald-900 dark:text-emerald-100">{formatCurrency(totalReceived)}</div>
           <p className="text-xs text-emerald-700 dark:text-emerald-300 font-body">
-            Soma dos eventos concluídos e pagos.
+            Soma de todos os eventos pagos.
           </p>
         </CardContent>
       </Card>

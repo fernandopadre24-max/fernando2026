@@ -164,7 +164,8 @@ export default function Home() {
 
   const handleTransfer = (eventId: string, bankAccountId: string) => {
     const eventToTransfer = events.find(e => e.id === eventId);
-    if (!eventToTransfer) return;
+    const accountToUpdate = bankAccounts.find(acc => acc.id === bankAccountId);
+    if (!eventToTransfer || !accountToUpdate) return;
 
     setBankAccounts(prevAccounts => 
       prevAccounts.map(account => 
@@ -184,7 +185,7 @@ export default function Home() {
 
     toast({
       title: "Transferência Realizada",
-      description: `Valor de ${eventToTransfer.value} transferido com sucesso.`
+      description: `Valor de ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(eventToTransfer.value)} transferido para a conta ${accountToUpdate.bankName} com sucesso.`
     })
   }
   
@@ -196,7 +197,7 @@ export default function Home() {
     <AppShell>
       <main className="container mx-auto px-4 pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start mb-8">
-          <div className="lg:col-span-3 flex flex-col gap-8">
+          <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-8">
             <ValueSummary events={events} />
           </div>
           <div className="lg:col-span-2">

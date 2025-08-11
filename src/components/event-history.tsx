@@ -162,6 +162,7 @@ export function EventHistory({
 
   const handleTransferClick = (event: Event) => {
     setSelectedEvent(event);
+    setSelectedBankAccountId('');
     setIsTransferDialogOpen(true);
   };
 
@@ -176,7 +177,7 @@ export function EventHistory({
   
 
   return (
-    <Card className="bg-yellow-100 border-yellow-200 dark:bg-yellow-950/50 dark:border-yellow-800">
+    <Card className="bg-yellow-100/60 border-yellow-200/80 dark:bg-yellow-950/50 dark:border-yellow-800/60">
       <CardHeader>
         <CardTitle className="font-headline text-2xl">
           Histórico de Eventos
@@ -272,18 +273,19 @@ export function EventHistory({
                     <TableCell>
                       <div className="flex items-center justify-end gap-2">
                         {event.isPaid && !event.isTransferred && (
-                          <Button variant="ghost" size="icon" onClick={() => handleTransferClick(event)}>
+                          <Button variant="ghost" size="icon" title="Transferir valor" onClick={() => handleTransferClick(event)}>
                             <ArrowRightLeft className="h-4 w-4" />
                             <span className="sr-only">Transferir</span>
                           </Button>
                         )}
-                        <Button variant="ghost" size="icon" onClick={() => handleEditClick(event)}>
+                        <Button variant="ghost" size="icon" title="Editar" onClick={() => handleEditClick(event)}>
                           <Edit className="h-4 w-4" />
                           <span className="sr-only">Editar</span>
                         </Button>
                         <Button
                           variant="ghost"
                           size="icon"
+                          title="Excluir"
                           className="text-destructive hover:text-destructive"
                           onClick={() => handleDeleteClick(event)}
                         >
@@ -419,16 +421,19 @@ export function EventHistory({
             <DialogTitle>Transferir para Conta Bancária</DialogTitle>
           </DialogHeader>
           <div className="py-4">
+            <p className="text-sm text-muted-foreground mb-2">
+              Selecione a conta para transferir o valor de <strong className='text-foreground'>{formatCurrency(selectedEvent?.value || 0)}</strong>.
+            </p>
             <Select onValueChange={setSelectedBankAccountId} value={selectedBankAccountId}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecione uma conta bancária" />
               </SelectTrigger>
               <SelectContent>
-                {bankAccounts.map((account) => (
+                {bankAccounts.length > 0 ? bankAccounts.map((account) => (
                   <SelectItem key={account.id} value={account.id}>
-                    {account.bankName} - {account.accountNumber}
+                    {account.bankName} - {account.accountNumber} (Saldo: {formatCurrency(account.balance)})
                   </SelectItem>
-                ))}
+                )) : <p className='p-4 text-sm text-muted-foreground'>Nenhuma conta cadastrada.</p>}
               </SelectContent>
             </Select>
           </div>

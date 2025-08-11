@@ -23,7 +23,7 @@ export function EventHistory({ events, onStatusChange }: EventHistoryProps) {
     }).format(value);
 
   return (
-    <Card className="bg-amber-50/50 border-amber-200 dark:bg-amber-950/50 dark:border-amber-800">
+    <Card className="bg-yellow-100 border-yellow-200 dark:bg-yellow-950/50 dark:border-yellow-800">
       <CardHeader>
         <CardTitle className="font-headline text-2xl">Histórico de Eventos</CardTitle>
       </CardHeader>

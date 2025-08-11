@@ -42,5 +42,11 @@ export type Expense = {
     description: string;
     value: number;
     date: string;
-    category: string;
+    categoryId: string;
+    category?: string; // Optional, for display purposes
+}
+
+export type ExpenseCategory = {
+    id: string;
+    name: string;
 }

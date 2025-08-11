@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/sidebar';
 import { Header } from '@/components/header';
 import { cn } from '@/lib/utils';
-import { Calendar, Mic, Music4, UserSquare, LogOut, Landmark, DollarSign } from 'lucide-react';
+import { Calendar, Mic, Music4, UserSquare, LogOut, Landmark, DollarSign, Tag } from 'lucide-react';
 import { Button } from './ui/button';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -78,6 +78,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <SidebarMenuButton isActive={isActive('/banks')} tooltip="Bancos">
                   <Landmark />
                   Bancos
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <Link href="/finance/categories">
+                <SidebarMenuButton isActive={isActive('/finance/categories')} tooltip="Categorias">
+                  <Tag />
+                  Categorias
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>

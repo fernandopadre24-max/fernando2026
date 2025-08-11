@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { AppShell } from '@/components/app-shell';
-import type { Event, Expense } from '@/types';
+import type { Event, Expense, ExpenseCategory } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -44,16 +44,17 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { DollarSign, TrendingDown, TrendingUp, PiggyBank, PlusCircle, MoreHorizontal, Trash2, Edit, CalendarDays, Tag } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import Link from 'next/link';
 
 const expenseSchema = z.object({
   description: z.string().min(1, 'Descrição é obrigatória.'),
   value: z.coerce.number().min(0.01, 'Valor deve ser maior que zero.'),
   date: z.string().min(1, 'Data é obrigatória.'),
-  category: z.string().min(1, 'Categoria é obrigatória.'),
+  categoryId: z.string().min(1, 'Categoria é obrigatória.'),
 });
 
 type ExpenseFormValues = z.infer<typeof expenseSchema>;
@@ -61,6 +62,7 @@ type ExpenseFormValues = z.infer<typeof expenseSchema>;
 export default function FinancePage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [categories, setCategories] = useState<ExpenseCategory[]>([]);
   const [isClient, setIsClient] = useState(false);
   
   const { toast } = useToast();
@@ -75,7 +77,7 @@ export default function FinancePage() {
       description: '',
       value: 0,
       date: '',
-      category: '',
+      categoryId: '',
     },
   });
 
@@ -88,6 +90,10 @@ export default function FinancePage() {
     const storedExpenses = localStorage.getItem('expenses');
     if (storedExpenses) {
         setExpenses(JSON.parse(storedExpenses));
+    }
+     const storedCategories = localStorage.getItem('expenseCategories');
+    if (storedCategories) {
+      setCategories(JSON.parse(storedCategories));
     }
   }, []);
 
@@ -128,7 +134,7 @@ export default function FinancePage() {
   
   const openAddDialog = () => {
     setSelectedExpense(null);
-    form.reset({ description: '', value: 0, date: '', category: '' });
+    form.reset({ description: '', value: 0, date: '', categoryId: '' });
     setIsAddEditDialogOpen(true);
   };
 
@@ -162,6 +168,10 @@ export default function FinancePage() {
   
   const formatDate = (dateString: string) => {
     return new Date(dateString + 'T00:00:00').toLocaleDateString('pt-BR');
+  }
+
+  const getCategoryName = (categoryId: string) => {
+      return categories.find(c => c.id === categoryId)?.name || 'N/A';
   }
 
   const totalRevenue = events.reduce((sum, event) => sum + event.value, 0);
@@ -212,10 +222,15 @@ export default function FinancePage() {
         <Card>
             <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Gerenciamento de Despesas</CardTitle>
-                <Button onClick={openAddDialog}>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Adicionar Despesa
-                </Button>
+                <div className='flex gap-2'>
+                    <Button variant="outline" asChild>
+                        <Link href="/finance/categories">Gerenciar Categorias</Link>
+                    </Button>
+                    <Button onClick={openAddDialog}>
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Adicionar Despesa
+                    </Button>
+                </div>
             </CardHeader>
             <CardContent>
                 <div className="border rounded-md">
@@ -234,7 +249,7 @@ export default function FinancePage() {
                             expenses.map((expense) => (
                             <TableRow key={expense.id}>
                                 <TableCell className="font-medium">{expense.description}</TableCell>
-                                <TableCell>{expense.category}</TableCell>
+                                <TableCell>{getCategoryName(expense.categoryId)}</TableCell>
                                 <TableCell>{formatDate(expense.date)}</TableCell>
                                 <TableCell className="text-right">{formatCurrency(expense.value)}</TableCell>
                                 <TableCell>
@@ -302,14 +317,29 @@ export default function FinancePage() {
               />
               <FormField
                 control={form.control}
-                name="category"
+                name="categoryId"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Categoria</FormLabel>
                      <div className="relative">
                         <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <FormControl>
-                          <Input placeholder="Ex: Equipamento" className="pl-10" {...field} />
+                          <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                            <SelectTrigger className="pl-10">
+                              <SelectValue placeholder="Selecione uma categoria" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {categories.length > 0 ? (
+                                categories.map((category) => (
+                                <SelectItem key={category.id} value={category.id}>
+                                  {category.name}
+                                </SelectItem>
+                              ))
+                              ) : (
+                                <div className="text-center text-sm text-muted-foreground p-4">Nenhuma categoria cadastrada.</div>
+                              )}
+                            </SelectContent>
+                          </Select>
                         </FormControl>
                     </div>
                     <FormMessage />
@@ -385,5 +415,3 @@ export default function FinancePage() {
     </AppShell>
   );
 }
-
-    

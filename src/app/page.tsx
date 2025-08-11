@@ -8,6 +8,7 @@ import { EventHistory } from '@/components/event-history';
 import { RecentTransfers } from '@/components/recent-transfers';
 import { useToast } from '@/hooks/use-toast';
 import { AppShell } from '@/components/app-shell';
+import { DashboardSummary } from '@/components/dashboard-summary';
 
 const initialArtists: Artist[] = [
     { id: '1', name: 'Os Futuristas' },
@@ -198,8 +199,9 @@ export default function Home() {
     <AppShell>
       <main className="container mx-auto px-4 pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start mb-8">
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-3 flex flex-col gap-8">
              <RecentTransfers events={events} bankAccounts={bankAccounts} />
+             <DashboardSummary events={events} />
           </div>
           <div className="lg:col-span-1">
             <EventForm

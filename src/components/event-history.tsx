@@ -210,6 +210,7 @@ export function EventHistory({
               <TableRow>
                 <TableHead>Data</TableHead>
                 <TableHead>Artista</TableHead>
+                <TableHead>Contratante</TableHead>
                 <TableHead>Valor</TableHead>
                 <TableHead>Observações</TableHead>
                 <TableHead className="text-center">Feito</TableHead>
@@ -228,6 +229,7 @@ export function EventHistory({
                       ) : 'N/A'}
                     </TableCell>
                     <TableCell>{event.artist}</TableCell>
+                    <TableCell>{event.contractor}</TableCell>
                     <TableCell>{formatCurrency(event.value)}</TableCell>
                     <TableCell className="max-w-[200px] truncate" title={event.observations}>{event.observations}</TableCell>
                     <TableCell className="text-center">
@@ -268,7 +270,7 @@ export function EventHistory({
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={8} className="h-48 text-center">
+                  <TableCell colSpan={9} className="h-48 text-center">
                     <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
                       <History className="h-8 w-8" />
                       <span>Nenhum evento encontrado para os filtros selecionados.</span>
@@ -279,7 +281,7 @@ export function EventHistory({
             </TableBody>
             <TableFooter>
               <TableRow>
-                <TableCell colSpan={2} className="font-bold">
+                <TableCell colSpan={3} className="font-bold">
                   Subtotal
                 </TableCell>
                 <TableCell className="font-bold">

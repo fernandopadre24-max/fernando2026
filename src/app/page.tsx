@@ -16,6 +16,8 @@ export default function Home() {
   const [isLoadingInsights, setIsLoadingInsights] = useState(false);
   const { toast } = useToast();
 
+  // For now, we'll manage artists and contractors here.
+  // In a real app, this would likely come from a database.
   const [artists, setArtists] = useState<Artist[]>([
       { id: '1', name: 'Os Futuristas' },
       { id: '2', name: 'Sintetizadores Sonoros' },
@@ -24,7 +26,7 @@ export default function Home() {
   const [contractors, setContractors] = useState<Contractor[]>([
     { id: '1', name: 'Palco Principal Produções' },
     { id: '2', name: 'Luz e Som Eventos' },
-     { id: '3', name: 'Festas & Cia' },
+    { id: '3', name: 'Festas & Cia' },
   ]);
 
   const handleEventAdd = async (data: EventFormValues) => {
@@ -34,6 +36,10 @@ export default function Home() {
     try {
       const artistName = artists.find(a => a.id === data.artistId)?.name || 'N/A';
       const contractorName = contractors.find(c => c.id === data.contractorId)?.name || 'N/A';
+
+      if(artistName === 'N/A' || contractorName === 'N/A') {
+        throw new Error("Artista ou Contratante não encontrado.");
+      }
 
       const newInsights = await generateInsightsAction({
         artist: artistName,
@@ -80,10 +86,10 @@ export default function Home() {
           </div>
           <div className="lg:col-span-3 flex flex-col gap-8">
             <EventForm
-              onEventAdd={handleEventAdd}
-              isSubmitting={isLoadingInsights}
               artists={artists}
               contractors={contractors}
+              onEventAdd={handleEventAdd}
+              isSubmitting={isLoadingInsights}
             />
             <EventHistory events={events} />
           </div>

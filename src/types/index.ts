@@ -1,4 +1,6 @@
 
+export type PaymentMethod = 'PIX' | 'Dinheiro' | 'Cartão';
+
 export type Event = {
   id: string;
   date: string;
@@ -10,6 +12,7 @@ export type Event = {
   value: number;
   isDone: boolean;
   isPaid: boolean;
+  paymentMethod?: PaymentMethod | null;
 };
 
 export type Artist = {

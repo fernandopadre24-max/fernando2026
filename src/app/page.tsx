@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import type { Artist, Contractor, Event } from '@/types';
+import type { Artist, Contractor, Event, PaymentMethod } from '@/types';
 import { EventForm, type EventFormValues } from '@/components/event-form';
 import { EventHistory } from '@/components/event-history';
 import { ValueSummary } from '@/components/value-summary';
@@ -36,7 +36,11 @@ export default function Home() {
     // Load events from localStorage
     const storedEvents = localStorage.getItem('events');
     if (storedEvents) {
-      setEvents(JSON.parse(storedEvents));
+      const parsedEvents = JSON.parse(storedEvents).map((event: Event) => ({
+        ...event,
+        paymentMethod: event.paymentMethod || null,
+      }));
+      setEvents(parsedEvents);
     }
 
     // Load artists from localStorage or use initial data
@@ -83,6 +87,7 @@ export default function Home() {
         contractor: contractorName,
         isDone: false,
         isPaid: false,
+        paymentMethod: null,
       };
       setEvents((prevEvents) => [newEvent, ...prevEvents]);
        toast({
@@ -123,13 +128,25 @@ export default function Home() {
   }
 
 
-  const handleEventStatusChange = (eventId: string, type: 'isDone' | 'isPaid', value: boolean) => {
+  const handleEventStatusChange = (eventId: string, type: 'isDone', value: boolean) => {
     setEvents(prevEvents =>
       prevEvents.map(event =>
         event.id === eventId ? { ...event, [type]: value } : event
       )
     );
   };
+
+  const handlePaymentStatusChange = (eventId: string, isPaid: boolean, paymentMethod: PaymentMethod | null) => {
+    setEvents(prevEvents =>
+      prevEvents.map(event =>
+        event.id === eventId ? { ...event, isPaid, paymentMethod } : event
+      )
+    );
+     toast({
+      title: "Status de Pagamento Atualizado",
+      description: "O status de pagamento do evento foi atualizado.",
+    });
+  }
   
   if (!isClient) {
     return null; // Or a loading spinner
@@ -154,6 +171,7 @@ export default function Home() {
               artists={artists}
               contractors={contractors}
               onStatusChange={handleEventStatusChange}
+              onPaymentChange={handlePaymentStatusChange}
               onEventUpdate={handleEventUpdate}
               onEventDelete={handleEventDelete}
             />

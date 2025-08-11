@@ -12,8 +12,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { Artist, Contractor, Event } from '@/types';
-import { History, MoreHorizontal, Trash2, Edit } from 'lucide-react';
+import type { Artist, Contractor, Event, PaymentMethod } from '@/types';
+import { History, MoreHorizontal, Trash2, Edit, CreditCard, Undo2 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import {
   Select,
@@ -28,6 +28,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from './ui/dropdown-menu';
 import {
   Dialog,
@@ -48,6 +49,10 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { EventForm } from './event-form';
+import { RadioGroup, RadioGroupItem } from './ui/radio-group';
+import { Label } from './ui/label';
+import { Badge } from './ui/badge';
+
 
 interface EventHistoryProps {
   events: Event[];
@@ -55,9 +60,10 @@ interface EventHistoryProps {
   contractors: Contractor[];
   onStatusChange: (
     eventId: string,
-    type: 'isDone' | 'isPaid',
+    type: 'isDone',
     value: boolean
   ) => void;
+  onPaymentChange: (eventId: string, isPaid: boolean, paymentMethod: PaymentMethod | null) => void;
   onEventUpdate: (event: Event) => void;
   onEventDelete: (eventId: string) => void;
 }
@@ -67,6 +73,7 @@ export function EventHistory({
   artists,
   contractors,
   onStatusChange,
+  onPaymentChange,
   onEventUpdate,
   onEventDelete,
 }: EventHistoryProps) {
@@ -75,7 +82,11 @@ export function EventHistory({
 
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
+  
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | ''>('');
+
 
   const filteredEvents = useMemo(() => {
     return events.filter((event) => {
@@ -114,6 +125,27 @@ export function EventHistory({
       setSelectedEvent(null);
     }
   };
+
+  const handleMarkAsPaidClick = (event: Event) => {
+    setSelectedEvent(event);
+    setIsPaymentDialogOpen(true);
+  }
+  
+  const handleConfirmPayment = () => {
+    if (selectedEvent && selectedPaymentMethod) {
+      onPaymentChange(selectedEvent.id, true, selectedPaymentMethod);
+      setIsPaymentDialogOpen(false);
+      setSelectedEvent(null);
+      setSelectedPaymentMethod('');
+    }
+  };
+  
+  const handleUnmarkAsPaid = (event: Event) => {
+     if (event) {
+      onPaymentChange(event.id, false, null);
+    }
+  }
+
 
   return (
     <Card className="bg-yellow-100 border-yellow-200 dark:bg-yellow-950/50 dark:border-yellow-800">
@@ -183,12 +215,14 @@ export function EventHistory({
                       />
                     </TableCell>
                     <TableCell className="text-center">
-                      <Switch
-                        checked={event.isPaid}
-                        onCheckedChange={(value) =>
-                          onStatusChange(event.id, 'isPaid', value)
-                        }
-                      />
+                      {event.isPaid ? (
+                        <Badge variant="secondary">{event.paymentMethod}</Badge>
+                      ) : (
+                         <Button variant="outline" size="sm" onClick={() => handleMarkAsPaidClick(event)}>
+                            <CreditCard className="mr-2 h-3.5 w-3.5" />
+                            Pagar
+                        </Button>
+                      )}
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>
@@ -203,6 +237,13 @@ export function EventHistory({
                             <Edit className="mr-2 h-4 w-4" />
                             Editar
                           </DropdownMenuItem>
+                           {event.isPaid && (
+                            <DropdownMenuItem onClick={() => handleUnmarkAsPaid(event)}>
+                                <Undo2 className="mr-2 h-4 w-4" />
+                                <span>Desmarcar como pago</span>
+                            </DropdownMenuItem>
+                            )}
+                          <DropdownMenuSeparator />
                           <DropdownMenuItem
                             className="text-destructive"
                             onClick={() => handleDeleteClick(event)}
@@ -272,6 +313,57 @@ export function EventHistory({
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Payment Method Dialog */}
+      <Dialog open={isPaymentDialogOpen} onOpenChange={setIsPaymentDialogOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                  <DialogTitle>Selecionar Método de Pagamento</DialogTitle>
+              </DialogHeader>
+              <div className="py-4">
+                   <RadioGroup 
+                      defaultValue={selectedPaymentMethod} 
+                      onValueChange={(value: PaymentMethod) => setSelectedPaymentMethod(value)}
+                      className="grid grid-cols-3 gap-4"
+                    >
+                      <div>
+                        <RadioGroupItem value="PIX" id="pix" className="peer sr-only" />
+                        <Label
+                          htmlFor="pix"
+                          className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                        >
+                         PIX
+                        </Label>
+                      </div>
+                       <div>
+                        <RadioGroupItem value="Dinheiro" id="dinheiro" className="peer sr-only" />
+                        <Label
+                          htmlFor="dinheiro"
+                          className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                        >
+                         Dinheiro
+                        </Label>
+                      </div>
+                       <div>
+                        <RadioGroupItem value="Cartão" id="cartao" className="peer sr-only" />
+                        <Label
+                          htmlFor="cartao"
+                          className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                        >
+                         Cartão
+                        </Label>
+                      </div>
+                    </RadioGroup>
+              </div>
+              <DialogFooter>
+                  <DialogClose asChild>
+                      <Button type="button" variant="secondary">Cancelar</Button>
+                  </DialogClose>
+                  <Button type="button" onClick={handleConfirmPayment} disabled={!selectedPaymentMethod}>
+                    Confirmar Pagamento
+                  </Button>
+              </DialogFooter>
+          </DialogContent>
+      </Dialog>
     </Card>
   );
 }

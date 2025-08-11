@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import type { Artist, Contractor, Event, PaymentMethod, BankAccount } from '@/types';
 import { EventForm, type EventFormValues } from '@/components/event-form';
 import { EventHistory } from '@/components/event-history';
-import { ValueSummary } from '@/components/value-summary';
+import { RecentTransfers } from '@/components/recent-transfers';
 import { useToast } from '@/hooks/use-toast';
 import { AppShell } from '@/components/app-shell';
 
@@ -198,8 +198,8 @@ export default function Home() {
     <AppShell>
       <main className="container mx-auto px-4 pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start mb-8">
-          <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-8">
-            <ValueSummary events={events} bankAccounts={bankAccounts} />
+          <div className="lg:col-span-3">
+             <RecentTransfers events={events} bankAccounts={bankAccounts} />
           </div>
           <div className="lg:col-span-1">
             <EventForm

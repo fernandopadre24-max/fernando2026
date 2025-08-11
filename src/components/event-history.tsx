@@ -23,12 +23,12 @@ export function EventHistory({ events, onStatusChange }: EventHistoryProps) {
     }).format(value);
 
   return (
-    <Card>
+    <Card className="bg-amber-50/50 border-amber-200 dark:bg-amber-950/50 dark:border-amber-800">
       <CardHeader>
         <CardTitle className="font-headline text-2xl">Histórico de Eventos</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="border rounded-md">
+        <div className="border rounded-md bg-card">
             <Table>
             <TableHeader>
                 <TableRow>

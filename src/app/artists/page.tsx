@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AppShell } from '@/components/app-shell';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,23 +20,117 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import type { Artist } from '@/types';
 
 export default function ArtistsPage() {
-  const [artists, setArtists] = useState<Artist[]>([
-      { id: '1', name: 'Os Futuristas' },
-      { id: '2', name: 'Sintetizadores Sonoros' },
-      { id: '3', name: 'A Banda de Ontem' },
-  ]);
+  const [artists, setArtists] = useState<Artist[]>([]);
+  const [isClient, setIsClient] = useState(false);
+  
+  const [isAddEditDialogOpen, setIsAddEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
+  const [artistName, setArtistName] = useState('');
 
-  // TODO: Implement add, edit, delete functionality
+  useEffect(() => {
+    setIsClient(true);
+    const storedArtists = localStorage.getItem('artists');
+    if (storedArtists) {
+      setArtists(JSON.parse(storedArtists));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isClient) {
+      localStorage.setItem('artists', JSON.stringify(artists));
+    }
+  }, [artists, isClient]);
+
+  const handleSave = () => {
+    if (selectedArtist) {
+      // Edit
+      setArtists(
+        artists.map((a) =>
+          a.id === selectedArtist.id ? { ...a, name: artistName } : a
+        )
+      );
+    } else {
+      // Add
+      const newArtist: Artist = {
+        id: crypto.randomUUID(),
+        name: artistName,
+      };
+      setArtists([...artists, newArtist]);
+    }
+    closeAddEditDialog();
+  };
+
+  const handleDelete = () => {
+    if (selectedArtist) {
+      setArtists(artists.filter((a) => a.id !== selectedArtist.id));
+      closeDeleteDialog();
+    }
+  };
+  
+  const openAddDialog = () => {
+    setSelectedArtist(null);
+    setArtistName('');
+    setIsAddEditDialogOpen(true);
+  };
+
+  const openEditDialog = (artist: Artist) => {
+    setSelectedArtist(artist);
+    setArtistName(artist.name);
+    setIsAddEditDialogOpen(true);
+  };
+
+  const closeAddEditDialog = () => {
+    setIsAddEditDialogOpen(false);
+    setSelectedArtist(null);
+    setArtistName('');
+  };
+
+  const openDeleteDialog = (artist: Artist) => {
+    setSelectedArtist(artist);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const closeDeleteDialog = () => {
+    setIsDeleteDialogOpen(false);
+    setSelectedArtist(null);
+  };
+
+
+  if (!isClient) {
+    return null; // or a loading spinner
+  }
 
   return (
     <AppShell>
       <main className="container mx-auto px-4 pb-16">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold font-headline">Gerenciar Artistas</h1>
-          <Button>
+          <Button onClick={openAddDialog}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Adicionar Artista
           </Button>
@@ -67,11 +162,14 @@ export default function ArtistsPage() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => openEditDialog(artist)}>
                                 <Edit className="mr-2 h-4 w-4" />
                                 Editar
                               </DropdownMenuItem>
-                              <DropdownMenuItem className="text-destructive">
+                              <DropdownMenuItem
+                                className="text-destructive"
+                                onClick={() => openDeleteDialog(artist)}
+                              >
                                 <Trash2 className="mr-2 h-4 w-4" />
                                 Excluir
                               </DropdownMenuItem>
@@ -93,6 +191,58 @@ export default function ArtistsPage() {
           </CardContent>
         </Card>
       </main>
+
+      {/* Add/Edit Dialog */}
+      <Dialog open={isAddEditDialogOpen} onOpenChange={setIsAddEditDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedArtist ? 'Editar Artista' : 'Adicionar Artista'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="name" className="text-right">
+                Nome
+              </Label>
+              <Input
+                id="name"
+                value={artistName}
+                onChange={(e) => setArtistName(e.target.value)}
+                className="col-span-3"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button type="button" variant="secondary">
+                Cancelar
+              </Button>
+            </DialogClose>
+            <Button type="button" onClick={handleSave}>
+              Salvar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Delete Confirmation Dialog */}
+       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Essa ação não pode ser desfeita. Isso excluirá permanentemente o
+              artista &quot;{selectedArtist?.name}&quot;.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={closeDeleteDialog}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>Excluir</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
     </AppShell>
   );
 }

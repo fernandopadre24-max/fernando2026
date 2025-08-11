@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Artist, Contractor, Event } from '@/types';
 import { EventForm, type EventFormValues } from '@/components/event-form';
 import { EventHistory } from '@/components/event-history';
@@ -8,23 +9,62 @@ import { ValueSummary } from '@/components/value-summary';
 import { useToast } from '@/hooks/use-toast';
 import { AppShell } from '@/components/app-shell';
 
+const initialArtists: Artist[] = [
+    { id: '1', name: 'Os Futuristas' },
+    { id: '2', name: 'Sintetizadores Sonoros' },
+    { id: '3', name: 'A Banda de Ontem' },
+];
+
+const initialContractors: Contractor[] = [
+  { id: '1', name: 'Palco Principal Produções' },
+  { id: '2', name: 'Luz e Som Eventos' },
+  { id: '3', name: 'Festas & Cia' },
+];
+
 export default function Home() {
   const [events, setEvents] = useState<Event[]>([]);
   const { toast } = useToast();
+  const [isClient, setIsClient] = useState(false);
 
-  // For now, we'll manage artists and contractors here.
-  // In a real app, this would likely come from a database.
-  const [artists, setArtists] = useState<Artist[]>([
-      { id: '1', name: 'Os Futuristas' },
-      { id: '2', name: 'Sintetizadores Sonoros' },
-      { id: '3', name: 'A Banda de Ontem' },
-  ]);
-  const [contractors, setContractors] = useState<Contractor[]>([
-    { id: '1', name: 'Palco Principal Produções' },
-    { id: '2', name: 'Luz e Som Eventos' },
-    { id: '3', name: 'Festas & Cia' },
-  ]);
+  const [artists, setArtists] = useState<Artist[]>([]);
+  const [contractors, setContractors] = useState<Contractor[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    
+    // Load events from localStorage
+    const storedEvents = localStorage.getItem('events');
+    if (storedEvents) {
+      setEvents(JSON.parse(storedEvents));
+    }
+
+    // Load artists from localStorage or use initial data
+    const storedArtists = localStorage.getItem('artists');
+    if (storedArtists) {
+      setArtists(JSON.parse(storedArtists));
+    } else {
+      setArtists(initialArtists);
+    }
+    
+    // Load contractors from localStorage or use initial data
+    const storedContractors = localStorage.getItem('contractors');
+    if (storedContractors) {
+      setContractors(JSON.parse(storedContractors));
+    } else {
+      setContractors(initialContractors);
+    }
+
+  }, []);
+
+  useEffect(() => {
+    if(isClient) {
+      localStorage.setItem('events', JSON.stringify(events));
+      localStorage.setItem('artists', JSON.stringify(artists));
+      localStorage.setItem('contractors', JSON.stringify(contractors));
+    }
+  }, [events, artists, contractors, isClient]);
+
 
   const handleEventAdd = async (data: EventFormValues) => {
     setIsSubmitting(true);
@@ -69,6 +109,10 @@ export default function Home() {
       )
     );
   };
+  
+  if (!isClient) {
+    return null; // Or a loading spinner
+  }
 
   return (
     <AppShell>

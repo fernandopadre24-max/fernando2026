@@ -200,8 +200,8 @@ export default function Home() {
       <main className="container mx-auto px-4 pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start mb-8">
           <div className="lg:col-span-3 flex flex-col gap-8">
-             <RecentTransfers events={events} bankAccounts={bankAccounts} />
              <DashboardSummary events={events} />
+             <RecentTransfers events={events} bankAccounts={bankAccounts} />
           </div>
           <div className="lg:col-span-1">
             <EventForm

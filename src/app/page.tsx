@@ -178,7 +178,7 @@ export default function Home() {
     setEvents(prevEvents => 
       prevEvents.map(event => 
         event.id === eventId 
-          ? { ...event, isTransferred: true, transferredToBankAccountId: bankAccountId }
+          ? { ...event, isTransferred: true, transferredToBankAccountId: bankAccountId, transferDate: new Date().toISOString() }
           : event
       )
     );

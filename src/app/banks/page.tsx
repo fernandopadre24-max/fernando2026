@@ -40,10 +40,12 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import type { BankAccount } from '@/types';
+import type { BankAccount, Event } from '@/types';
+import { BankTransactions } from '@/components/bank-transactions';
 
 export default function BanksPage() {
   const [accounts, setAccounts] = useState<BankAccount[]>([]);
+  const [events, setEvents] = useState<Event[]>([]);
   const [isClient, setIsClient] = useState(false);
 
   const [isAddEditDialogOpen, setIsAddEditDialogOpen] = useState(false);
@@ -60,6 +62,10 @@ export default function BanksPage() {
     const storedAccounts = localStorage.getItem('bankAccounts');
     if (storedAccounts) {
       setAccounts(JSON.parse(storedAccounts));
+    }
+    const storedEvents = localStorage.getItem('events');
+    if (storedEvents) {
+      setEvents(JSON.parse(storedEvents));
     }
   }, []);
 
@@ -149,75 +155,79 @@ export default function BanksPage() {
 
   return (
     <AppShell>
-      <main className="container mx-auto px-4 pb-16">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold font-headline">Gerenciar Contas Bancárias</h1>
-          <Button onClick={openAddDialog}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Adicionar Conta
-          </Button>
-        </div>
-        <Card>
-          <CardHeader>
-            <CardTitle>Lista de Contas</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="border rounded-md">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Banco</TableHead>
-                    <TableHead>Agência</TableHead>
-                    <TableHead>Conta</TableHead>
-                    <TableHead>Saldo</TableHead>
-                    <TableHead className="w-[50px]"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {accounts.length > 0 ? (
-                    accounts.map((account) => (
-                      <TableRow key={account.id}>
-                        <TableCell className="font-medium">{account.bankName}</TableCell>
-                        <TableCell>{account.agency}</TableCell>
-                        <TableCell>{account.accountNumber}</TableCell>
-                        <TableCell>{formatCurrency(account.balance)}</TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" className="h-8 w-8 p-0">
-                                <span className="sr-only">Abrir menu</span>
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => openEditDialog(account)}>
-                                <Edit className="mr-2 h-4 w-4" />
-                                Editar
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                className="text-destructive"
-                                onClick={() => openDeleteDialog(account)}
-                              >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Excluir
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={5} className="h-24 text-center">
-                        Nenhuma conta encontrada.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
+      <main className="container mx-auto px-4 pb-16 flex flex-col gap-8">
+        <div>
+            <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl font-bold font-headline">Gerenciar Contas Bancárias</h1>
+            <Button onClick={openAddDialog}>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Adicionar Conta
+            </Button>
             </div>
-          </CardContent>
-        </Card>
+            <Card>
+            <CardHeader>
+                <CardTitle>Lista de Contas</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div className="border rounded-md">
+                <Table>
+                    <TableHeader>
+                    <TableRow>
+                        <TableHead>Banco</TableHead>
+                        <TableHead>Agência</TableHead>
+                        <TableHead>Conta</TableHead>
+                        <TableHead>Saldo</TableHead>
+                        <TableHead className="w-[50px]"></TableHead>
+                    </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                    {accounts.length > 0 ? (
+                        accounts.map((account) => (
+                        <TableRow key={account.id}>
+                            <TableCell className="font-medium">{account.bankName}</TableCell>
+                            <TableCell>{account.agency}</TableCell>
+                            <TableCell>{account.accountNumber}</TableCell>
+                            <TableCell>{formatCurrency(account.balance)}</TableCell>
+                            <TableCell>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="h-8 w-8 p-0">
+                                    <span className="sr-only">Abrir menu</span>
+                                    <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => openEditDialog(account)}>
+                                    <Edit className="mr-2 h-4 w-4" />
+                                    Editar
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    className="text-destructive"
+                                    onClick={() => openDeleteDialog(account)}
+                                >
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Excluir
+                                </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                            </TableCell>
+                        </TableRow>
+                        ))
+                    ) : (
+                        <TableRow>
+                        <TableCell colSpan={5} className="h-24 text-center">
+                            Nenhuma conta encontrada.
+                        </TableCell>
+                        </TableRow>
+                    )}
+                    </TableBody>
+                </Table>
+                </div>
+            </CardContent>
+            </Card>
+        </div>
+
+        <BankTransactions events={events} bankAccounts={accounts} />
       </main>
 
       {/* Add/Edit Dialog */}

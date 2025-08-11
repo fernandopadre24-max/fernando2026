@@ -5,7 +5,6 @@ export type Event = {
   artist: string;
   contractor: string;
   value: number;
-  historicalFeedback: string;
 };
 
 export type Artist = {

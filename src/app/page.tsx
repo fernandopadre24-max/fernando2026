@@ -2,18 +2,14 @@
 
 import { useState } from 'react';
 import type { Artist, Contractor, Event } from '@/types';
-import { generateInsightsAction } from '@/app/actions';
 import { EventForm, type EventFormValues } from '@/components/event-form';
 import { EventHistory } from '@/components/event-history';
 import { ValueSummary } from '@/components/value-summary';
-import { AiInsights } from '@/components/ai-insights';
 import { useToast } from '@/hooks/use-toast';
 import { AppShell } from '@/components/app-shell';
 
 export default function Home() {
   const [events, setEvents] = useState<Event[]>([]);
-  const [insights, setInsights] = useState<string | null>(null);
-  const [isLoadingInsights, setIsLoadingInsights] = useState(false);
   const { toast } = useToast();
 
   // For now, we'll manage artists and contractors here.
@@ -28,11 +24,10 @@ export default function Home() {
     { id: '2', name: 'Luz e Som Eventos' },
     { id: '3', name: 'Festas & Cia' },
   ]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleEventAdd = async (data: EventFormValues) => {
-    setIsLoadingInsights(true);
-    setInsights(null);
-
+    setIsSubmitting(true);
     try {
       const artistName = artists.find(a => a.id === data.artistId)?.name || 'N/A';
       const contractorName = contractors.find(c => c.id === data.contractorId)?.name || 'N/A';
@@ -41,38 +36,27 @@ export default function Home() {
         throw new Error("Artista ou Contratante não encontrado.");
       }
 
-      const newInsights = await generateInsightsAction({
-        artist: artistName,
-        contractor: contractorName,
-        date: data.date,
-        time: data.time,
-        value: data.value,
-        historicalFeedback: data.historicalFeedback || 'Nenhum feedback fornecido.',
-      });
-      setInsights(newInsights);
-
       const newEvent: Event = {
         id: crypto.randomUUID(),
         ...data,
         artist: artistName,
         contractor: contractorName,
-        historicalFeedback: data.historicalFeedback || '',
       };
       setEvents((prevEvents) => [newEvent, ...prevEvents]);
        toast({
         title: "Evento Adicionado",
-        description: `Insights para o evento de ${artistName} estão prontos!`,
+        description: `O evento de ${artistName} foi adicionado com sucesso.`,
       });
 
     } catch (error) {
-      console.error("Falha ao adicionar evento ou gerar insights:", error);
+      console.error("Falha ao adicionar evento:", error);
       toast({
         variant: "destructive",
         title: "Ocorreu um Erro",
-        description: "Não foi possível adicionar o evento ou obter insights. Por favor, tente novamente.",
+        description: "Não foi possível adicionar o evento. Por favor, tente novamente.",
       });
     } finally {
-      setIsLoadingInsights(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -82,14 +66,13 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
           <div className="lg:col-span-2 flex flex-col gap-8 lg:sticky lg:top-8">
             <ValueSummary events={events} />
-            <AiInsights insights={insights} isLoading={isLoadingInsights} />
           </div>
           <div className="lg:col-span-3 flex flex-col gap-8">
             <EventForm
               artists={artists}
               contractors={contractors}
               onEventAdd={handleEventAdd}
-              isSubmitting={isLoadingInsights}
+              isSubmitting={isSubmitting}
             />
             <EventHistory events={events} />
           </div>

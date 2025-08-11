@@ -6,9 +6,8 @@ import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CalendarDays, Clock, DollarSign, Loader2, Mic, UserSquare, MessageSquareText } from 'lucide-react';
+import { CalendarDays, Clock, DollarSign, Loader2, Mic, UserSquare } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { Artist, Contractor } from '@/types';
 
@@ -18,7 +17,6 @@ const formSchema = z.object({
   artistId: z.string().min(1, 'Selecione um artista.'),
   contractorId: z.string().min(1, 'Selecione um contratante.'),
   value: z.coerce.number().min(0, 'Valor deve ser um número positivo.'),
-  historicalFeedback: z.string().optional(),
 });
 
 export type EventFormValues = z.infer<typeof formSchema>;
@@ -39,7 +37,6 @@ export function EventForm({ onEventAdd, isSubmitting, artists, contractors }: Ev
       artistId: '',
       contractorId: '',
       value: 0,
-      historicalFeedback: '',
     },
   });
 
@@ -99,7 +96,7 @@ export function EventForm({ onEventAdd, isSubmitting, artists, contractors }: Ev
                   <div className="relative">
                     <Mic className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <FormControl>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                         <SelectTrigger className="pl-10">
                           <SelectValue placeholder="Selecione um artista" />
                         </SelectTrigger>
@@ -126,7 +123,7 @@ export function EventForm({ onEventAdd, isSubmitting, artists, contractors }: Ev
                    <div className="relative">
                     <UserSquare className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <FormControl>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                         <SelectTrigger className="pl-10">
                           <SelectValue placeholder="Selecione um contratante" />
                         </SelectTrigger>
@@ -160,29 +157,9 @@ export function EventForm({ onEventAdd, isSubmitting, artists, contractors }: Ev
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="historicalFeedback"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Feedback Histórico (Opcional)</FormLabel>
-                    <div className="relative">
-                       <MessageSquareText className="absolute left-3 top-4 h-4 w-4 text-muted-foreground" />
-                       <FormControl>
-                        <Textarea
-                          placeholder="Forneça qualquer feedback anterior de eventos semelhantes para melhorar os insights da IA..."
-                          className="pl-10 resize-none"
-                          {...field}
-                        />
-                      </FormControl>
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             <Button type="submit" disabled={isSubmitting} className="w-full font-headline">
               {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Adicionar Evento e Obter Insights
+              Adicionar Evento
             </Button>
           </form>
         </Form>

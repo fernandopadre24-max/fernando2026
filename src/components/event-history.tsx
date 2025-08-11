@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Artist, Contractor, Event, PaymentMethod } from '@/types';
-import { History, MoreHorizontal, Trash2, Edit, CreditCard, Undo2 } from 'lucide-react';
+import { History, MoreHorizontal, Trash2, Edit } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import {
   Select,
@@ -126,10 +126,14 @@ export function EventHistory({
     }
   };
 
-  const handleMarkAsPaidClick = (event: Event) => {
-    setSelectedEvent(event);
-    setIsPaymentDialogOpen(true);
-  }
+  const handlePaymentSwitchChange = (event: Event, isPaid: boolean) => {
+    if (isPaid) {
+      setSelectedEvent(event);
+      setIsPaymentDialogOpen(true);
+    } else {
+      onPaymentChange(event.id, false, null);
+    }
+  };
   
   const handleConfirmPayment = () => {
     if (selectedEvent && selectedPaymentMethod) {
@@ -140,12 +144,6 @@ export function EventHistory({
     }
   };
   
-  const handleUnmarkAsPaid = (event: Event) => {
-     if (event) {
-      onPaymentChange(event.id, false, null);
-    }
-  }
-
 
   return (
     <Card className="bg-yellow-100 border-yellow-200 dark:bg-yellow-950/50 dark:border-yellow-800">
@@ -192,6 +190,7 @@ export function EventHistory({
                 <TableHead>Valor</TableHead>
                 <TableHead className="text-center">Feito</TableHead>
                 <TableHead className="text-center">Pago</TableHead>
+                <TableHead>Método Pgto.</TableHead>
                 <TableHead className="w-[50px]"></TableHead>
               </TableRow>
             </TableHeader>
@@ -215,14 +214,13 @@ export function EventHistory({
                       />
                     </TableCell>
                     <TableCell className="text-center">
-                      {event.isPaid ? (
-                        <Badge variant="secondary">{event.paymentMethod}</Badge>
-                      ) : (
-                         <Button variant="outline" size="sm" onClick={() => handleMarkAsPaidClick(event)}>
-                            <CreditCard className="mr-2 h-3.5 w-3.5" />
-                            Pagar
-                        </Button>
-                      )}
+                       <Switch
+                        checked={event.isPaid}
+                        onCheckedChange={(value) => handlePaymentSwitchChange(event, value)}
+                      />
+                    </TableCell>
+                     <TableCell>
+                      {event.isPaid && <Badge variant="secondary">{event.paymentMethod}</Badge>}
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>
@@ -237,12 +235,6 @@ export function EventHistory({
                             <Edit className="mr-2 h-4 w-4" />
                             Editar
                           </DropdownMenuItem>
-                           {event.isPaid && (
-                            <DropdownMenuItem onClick={() => handleUnmarkAsPaid(event)}>
-                                <Undo2 className="mr-2 h-4 w-4" />
-                                <span>Desmarcar como pago</span>
-                            </DropdownMenuItem>
-                            )}
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
                             className="text-destructive"
@@ -258,7 +250,7 @@ export function EventHistory({
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-48 text-center">
+                  <TableCell colSpan={7} className="h-48 text-center">
                     <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
                       <History className="h-8 w-8" />
                       <span>Nenhum evento encontrado.</span>
@@ -275,7 +267,7 @@ export function EventHistory({
                 <TableCell className="font-bold">
                   {formatCurrency(subtotal)}
                 </TableCell>
-                <TableCell colSpan={3}></TableCell>
+                <TableCell colSpan={4}></TableCell>
               </TableRow>
             </TableFooter>
           </Table>
@@ -314,7 +306,17 @@ export function EventHistory({
       </AlertDialog>
 
       {/* Payment Method Dialog */}
-      <Dialog open={isPaymentDialogOpen} onOpenChange={setIsPaymentDialogOpen}>
+      <Dialog open={isPaymentDialogOpen} onOpenChange={(isOpen) => {
+        setIsPaymentDialogOpen(isOpen);
+        if (!isOpen) {
+            // If the dialog is closed without confirming, revert the switch
+            if(selectedEvent && !selectedEvent.paymentMethod) {
+                 onPaymentChange(selectedEvent.id, false, null);
+            }
+            setSelectedEvent(null);
+            setSelectedPaymentMethod('');
+        }
+      }}>
           <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
                   <DialogTitle>Selecionar Método de Pagamento</DialogTitle>

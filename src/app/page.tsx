@@ -142,10 +142,12 @@ export default function Home() {
         event.id === eventId ? { ...event, isPaid, paymentMethod } : event
       )
     );
-     toast({
-      title: "Status de Pagamento Atualizado",
-      description: "O status de pagamento do evento foi atualizado.",
-    });
+     if(isPaid) {
+        toast({
+            title: "Status de Pagamento Atualizado",
+            description: "O status de pagamento do evento foi atualizado.",
+        });
+     }
   }
   
   if (!isClient) {

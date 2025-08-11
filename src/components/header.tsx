@@ -8,7 +8,7 @@ export function Header() {
         <div className="flex items-center gap-4">
           <SidebarTrigger className="md:hidden" />
            <h1 className="text-2xl md:text-3xl font-headline font-bold text-primary">
-              EventFlow
+              Controle de Eventos 2026
             </h1>
         </div>
       </div>

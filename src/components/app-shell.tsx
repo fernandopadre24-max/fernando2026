@@ -35,7 +35,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     <Music4 className="h-6 w-6 text-primary" />
                 </div>
                 <h1 className="text-xl font-semibold text-primary font-headline">
-                    EventFlow
+                    Controle de Eventos 2026
                 </h1>
             </div>
           </SidebarHeader>

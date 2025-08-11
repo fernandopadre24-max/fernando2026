@@ -42,14 +42,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </SidebarHeader>
           <SidebarMenu>
             <SidebarMenuItem>
-              <Link href="/">
-                <SidebarMenuButton isActive={isActive('/')} tooltip="Eventos">
-                  <Calendar />
-                  Eventos
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
-             <SidebarMenuItem>
               <Link href="/finance">
                 <SidebarMenuButton isActive={isActive('/finance')} tooltip="Financeiro">
                   <DollarSign />
@@ -62,6 +54,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <SidebarMenuButton isActive={isActive('/banks')} tooltip="Bancos">
                   <Landmark />
                   Bancos
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <Link href="/">
+                <SidebarMenuButton isActive={isActive('/')} tooltip="Eventos">
+                  <Calendar />
+                  Eventos
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>

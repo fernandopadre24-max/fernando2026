@@ -8,6 +8,7 @@ import { EventSummaryReport } from '@/components/reports/event-summary-report';
 import { FinancialOverviewReport } from '@/components/reports/financial-overview-report';
 import { BankAccountsReport } from '@/components/reports/bank-accounts-report';
 import { ExpenseCategoryChart } from '@/components/reports/expense-category-chart';
+import { BalanceSheetReport } from '@/components/reports/balance-sheet-report';
 
 export default function ReportsPage() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -42,18 +43,22 @@ export default function ReportsPage() {
           <h1 className="text-2xl font-bold font-headline">Relatórios Consolidados</h1>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main column */}
-          <div className="lg:col-span-2 flex flex-col gap-8">
-            <FinancialOverviewReport events={events} transactions={transactions} />
-            <EventSummaryReport events={events} />
-            <BankAccountsReport bankAccounts={bankAccounts} />
-          </div>
+        <div className="flex flex-col gap-8">
+            <BalanceSheetReport transactions={transactions} events={events} bankAccounts={bankAccounts} />
 
-          {/* Side column */}
-          <div className="lg:col-span-1 flex flex-col gap-8">
-            <ExpenseCategoryChart transactions={transactions} categories={categories} />
-          </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Main column */}
+            <div className="lg:col-span-2 flex flex-col gap-8">
+                <FinancialOverviewReport events={events} transactions={transactions} />
+                <EventSummaryReport events={events} />
+                <BankAccountsReport bankAccounts={bankAccounts} />
+            </div>
+
+            {/* Side column */}
+            <div className="lg:col-span-1 flex flex-col gap-8">
+                <ExpenseCategoryChart transactions={transactions} categories={categories} />
+            </div>
+            </div>
         </div>
       </main>
     </AppShell>

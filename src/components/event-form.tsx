@@ -41,7 +41,7 @@ export function EventForm({ onEventAdd, isSubmitting, artists, contractors, even
       time: '',
       artistId: '',
       contractorId: '',
-      value: 100,
+      value: 150,
     },
   });
 
@@ -60,7 +60,7 @@ export function EventForm({ onEventAdd, isSubmitting, artists, contractors, even
             time: '',
             artistId: '',
             contractorId: '',
-            value: 100,
+            value: 150,
         });
     }
   }, [eventToEdit, form]);

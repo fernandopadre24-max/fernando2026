@@ -12,8 +12,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { Artist, Contractor, Event, PaymentMethod } from '@/types';
-import { History, Trash2, Edit } from 'lucide-react';
+import type { Artist, Contractor, Event, PaymentMethod, BankAccount } from '@/types';
+import { History, Trash2, Edit, ArrowRightLeft } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import {
   Select,
@@ -48,6 +48,7 @@ interface EventHistoryProps {
   events: Event[];
   artists: Artist[];
   contractors: Contractor[];
+  bankAccounts: BankAccount[];
   onStatusChange: (
     eventId: string,
     type: 'isDone',
@@ -56,16 +57,19 @@ interface EventHistoryProps {
   onPaymentChange: (eventId: string, isPaid: boolean, paymentMethod: PaymentMethod | null) => void;
   onEventUpdate: (event: Event) => void;
   onEventDelete: (eventId: string) => void;
+  onTransfer: (eventId: string, bankAccountId: string) => void;
 }
 
 export function EventHistory({
   events,
   artists,
   contractors,
+  bankAccounts,
   onStatusChange,
   onPaymentChange,
   onEventUpdate,
   onEventDelete,
+  onTransfer,
 }: EventHistoryProps) {
   const [artistFilter, setArtistFilter] = useState('all');
   const [contractorFilter, setContractorFilter] = useState('all');
@@ -74,9 +78,11 @@ export function EventHistory({
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
+  const [isTransferDialogOpen, setIsTransferDialogOpen] = useState(false);
   
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | ''>('');
+  const [selectedBankAccountId, setSelectedBankAccountId] = useState<string>('');
 
   const availableDates = useMemo(() => {
     const dates = new Set<string>();
@@ -153,6 +159,20 @@ export function EventHistory({
       setSelectedPaymentMethod('');
     }
   };
+
+  const handleTransferClick = (event: Event) => {
+    setSelectedEvent(event);
+    setIsTransferDialogOpen(true);
+  };
+
+  const handleConfirmTransfer = () => {
+    if (selectedEvent && selectedBankAccountId) {
+      onTransfer(selectedEvent.id, selectedBankAccountId);
+      setIsTransferDialogOpen(false);
+      setSelectedEvent(null);
+      setSelectedBankAccountId('');
+    }
+  };
   
 
   return (
@@ -216,7 +236,7 @@ export function EventHistory({
                 <TableHead className="text-center">Feito</TableHead>
                 <TableHead className="text-center">Pago</TableHead>
                 <TableHead>Método Pgto.</TableHead>
-                <TableHead className="w-[100px] text-right">Ações</TableHead>
+                <TableHead className="w-[120px] text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -251,6 +271,12 @@ export function EventHistory({
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center justify-end gap-2">
+                        {event.isPaid && !event.isTransferred && (
+                          <Button variant="ghost" size="icon" onClick={() => handleTransferClick(event)}>
+                            <ArrowRightLeft className="h-4 w-4" />
+                            <span className="sr-only">Transferir</span>
+                          </Button>
+                        )}
                         <Button variant="ghost" size="icon" onClick={() => handleEditClick(event)}>
                           <Edit className="h-4 w-4" />
                           <span className="sr-only">Editar</span>
@@ -329,7 +355,6 @@ export function EventHistory({
       <Dialog open={isPaymentDialogOpen} onOpenChange={(isOpen) => {
         setIsPaymentDialogOpen(isOpen);
         if (!isOpen) {
-            // If the dialog is closed without confirming, revert the switch
             if(selectedEvent && !selectedEvent.paymentMethod) {
                  onPaymentChange(selectedEvent.id, false, null);
             }
@@ -385,6 +410,37 @@ export function EventHistory({
                   </Button>
               </DialogFooter>
           </DialogContent>
+      </Dialog>
+
+      {/* Transfer Dialog */}
+      <Dialog open={isTransferDialogOpen} onOpenChange={setIsTransferDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Transferir para Conta Bancária</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <Select onValueChange={setSelectedBankAccountId} value={selectedBankAccountId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione uma conta bancária" />
+              </SelectTrigger>
+              <SelectContent>
+                {bankAccounts.map((account) => (
+                  <SelectItem key={account.id} value={account.id}>
+                    {account.bankName} - {account.accountNumber}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button type="button" variant="secondary">Cancelar</Button>
+            </DialogClose>
+            <Button type="button" onClick={handleConfirmTransfer} disabled={!selectedBankAccountId}>
+              Confirmar Transferência
+            </Button>
+          </DialogFooter>
+        </DialogContent>
       </Dialog>
     </Card>
   );

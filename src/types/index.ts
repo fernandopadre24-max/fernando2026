@@ -14,6 +14,8 @@ export type Event = {
   isPaid: boolean;
   paymentMethod?: PaymentMethod | null;
   observations?: string;
+  isTransferred: boolean;
+  transferredToBankAccountId?: string | null;
 };
 
 export type Artist = {
@@ -24,4 +26,12 @@ export type Artist = {
 export type Contractor = {
   id: string;
   name: string;
+};
+
+export type BankAccount = {
+  id: string;
+  bankName: string;
+  agency: string;
+  accountNumber: string;
+  balance: number;
 };

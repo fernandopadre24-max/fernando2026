@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import type { Artist, Contractor, Event, PaymentMethod } from '@/types';
+import type { Artist, Contractor, Event, PaymentMethod, BankAccount } from '@/types';
 import { EventForm, type EventFormValues } from '@/components/event-form';
 import { EventHistory } from '@/components/event-history';
 import { ValueSummary } from '@/components/value-summary';
@@ -28,6 +28,7 @@ export default function Home() {
 
   const [artists, setArtists] = useState<Artist[]>([]);
   const [contractors, setContractors] = useState<Contractor[]>([]);
+  const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -40,6 +41,8 @@ export default function Home() {
         ...event,
         paymentMethod: event.paymentMethod || null,
         observations: event.observations || '',
+        isTransferred: event.isTransferred || false,
+        transferredToBankAccountId: event.transferredToBankAccountId || null,
       }));
       setEvents(parsedEvents);
     }
@@ -60,6 +63,12 @@ export default function Home() {
       setContractors(initialContractors);
     }
 
+    // Load bank accounts from localStorage
+    const storedBankAccounts = localStorage.getItem('bankAccounts');
+    if (storedBankAccounts) {
+      setBankAccounts(JSON.parse(storedBankAccounts));
+    }
+
   }, []);
 
   useEffect(() => {
@@ -67,8 +76,9 @@ export default function Home() {
       localStorage.setItem('events', JSON.stringify(events));
       localStorage.setItem('artists', JSON.stringify(artists));
       localStorage.setItem('contractors', JSON.stringify(contractors));
+      localStorage.setItem('bankAccounts', JSON.stringify(bankAccounts));
     }
-  }, [events, artists, contractors, isClient]);
+  }, [events, artists, contractors, bankAccounts, isClient]);
 
 
   const handleEventAdd = async (data: EventFormValues) => {
@@ -89,6 +99,7 @@ export default function Home() {
         isDone: false,
         isPaid: false,
         paymentMethod: null,
+        isTransferred: false,
       };
       setEvents((prevEvents) => [newEvent, ...prevEvents]);
        toast({
@@ -140,7 +151,7 @@ export default function Home() {
   const handlePaymentStatusChange = (eventId: string, isPaid: boolean, paymentMethod: PaymentMethod | null) => {
     setEvents(prevEvents =>
       prevEvents.map(event =>
-        event.id === eventId ? { ...event, isPaid, paymentMethod } : event
+        event.id === eventId ? { ...event, isPaid, paymentMethod: isPaid ? paymentMethod : null } : event
       )
     );
      if(isPaid) {
@@ -149,6 +160,32 @@ export default function Home() {
             description: "O status de pagamento do evento foi atualizado.",
         });
      }
+  }
+
+  const handleTransfer = (eventId: string, bankAccountId: string) => {
+    const eventToTransfer = events.find(e => e.id === eventId);
+    if (!eventToTransfer) return;
+
+    setBankAccounts(prevAccounts => 
+      prevAccounts.map(account => 
+        account.id === bankAccountId 
+          ? { ...account, balance: account.balance + eventToTransfer.value }
+          : account
+      )
+    );
+
+    setEvents(prevEvents => 
+      prevEvents.map(event => 
+        event.id === eventId 
+          ? { ...event, isTransferred: true, transferredToBankAccountId: bankAccountId }
+          : event
+      )
+    );
+
+    toast({
+      title: "Transferência Realizada",
+      description: `Valor de ${eventToTransfer.value} transferido com sucesso.`
+    })
   }
   
   if (!isClient) {
@@ -176,10 +213,12 @@ export default function Home() {
             events={events} 
             artists={artists}
             contractors={contractors}
+            bankAccounts={bankAccounts}
             onStatusChange={handleEventStatusChange}
             onPaymentChange={handlePaymentStatusChange}
             onEventUpdate={handleEventUpdate}
             onEventDelete={handleEventDelete}
+            onTransfer={handleTransfer}
           />
         </div>
       </main>

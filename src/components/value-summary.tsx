@@ -16,9 +16,10 @@ export function ValueSummary({ events }: ValueSummaryProps) {
     .filter(event => event.isDone && !event.isPaid)
     .reduce((sum, event) => sum + event.value, 0);
     
-  const totalTransferred = events
-    .filter(event => event.isTransferred)
-    .reduce((sum, event) => sum + event.value, 0);
+  const transferredEvents = events.filter(event => event.isTransferred);
+  const totalTransferred = transferredEvents.reduce((sum, event) => sum + event.value, 0);
+  const numberOfTransfers = transferredEvents.length;
+
 
   const formatCurrency = (value: number) => new Intl.NumberFormat('pt-BR', {
     style: 'currency',
@@ -59,7 +60,7 @@ export function ValueSummary({ events }: ValueSummaryProps) {
         <CardContent>
           <div className="text-3xl font-bold font-headline text-sky-900 dark:text-sky-100">{formatCurrency(totalTransferred)}</div>
            <p className="text-xs text-sky-700 dark:text-sky-300 font-body">
-            Soma de todos os valores transferidos para contas.
+            Soma de {numberOfTransfers} {numberOfTransfers === 1 ? 'transferência' : 'transferências'} para contas.
           </p>
         </CardContent>
       </Card>

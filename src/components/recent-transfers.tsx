@@ -25,7 +25,7 @@ export function RecentTransfers({ events, bankAccounts }: RecentTransfersProps) 
         return {
           ...event,
           accountName: account
-            ? `${account.bankName} - ${account.accountNumber}`
+            ? `${account.bankName} - Conta: ${account.accountNumber}`
             : 'Conta não encontrada',
         };
       });

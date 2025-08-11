@@ -39,6 +39,7 @@ export default function Home() {
       const parsedEvents = JSON.parse(storedEvents).map((event: Event) => ({
         ...event,
         paymentMethod: event.paymentMethod || null,
+        observations: event.observations || '',
       }));
       setEvents(parsedEvents);
     }

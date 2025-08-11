@@ -26,10 +26,6 @@ import { Button } from './ui/button';
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogClose,
 } from '@/components/ui/dialog';
 import {
   AlertDialog,
@@ -45,6 +41,7 @@ import { EventForm } from './event-form';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { Label } from './ui/label';
 import { Badge } from './ui/badge';
+import { DialogHeader, DialogTitle, DialogFooter, DialogClose } from './ui/dialog';
 
 
 interface EventHistoryProps {
@@ -106,7 +103,7 @@ export function EventHistory({
       const contractorMatch =
         contractorFilter === 'all' || event.contractorId === contractorFilter;
       const dateMatch =
-        dateFilter === 'all' || event.date.startsWith(dateFilter);
+        dateFilter === 'all' || (event.date && event.date.startsWith(dateFilter));
       return artistMatch && contractorMatch && dateMatch;
     });
   }, [events, artistFilter, contractorFilter, dateFilter]);
@@ -214,6 +211,7 @@ export function EventHistory({
                 <TableHead>Data</TableHead>
                 <TableHead>Artista</TableHead>
                 <TableHead>Valor</TableHead>
+                <TableHead>Observações</TableHead>
                 <TableHead className="text-center">Feito</TableHead>
                 <TableHead className="text-center">Pago</TableHead>
                 <TableHead>Método Pgto.</TableHead>
@@ -225,12 +223,13 @@ export function EventHistory({
                 filteredEvents.map((event) => (
                   <TableRow key={event.id}>
                     <TableCell className="font-medium">
-                      {new Date(event.date + 'T00:00:00').toLocaleDateString(
+                      {event.date ? new Date(event.date + 'T00:00:00').toLocaleDateString(
                         'pt-BR'
-                      )}
+                      ) : 'N/A'}
                     </TableCell>
                     <TableCell>{event.artist}</TableCell>
                     <TableCell>{formatCurrency(event.value)}</TableCell>
+                    <TableCell className="max-w-[200px] truncate" title={event.observations}>{event.observations}</TableCell>
                     <TableCell className="text-center">
                       <Switch
                         checked={event.isDone}
@@ -269,7 +268,7 @@ export function EventHistory({
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-48 text-center">
+                  <TableCell colSpan={8} className="h-48 text-center">
                     <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
                       <History className="h-8 w-8" />
                       <span>Nenhum evento encontrado para os filtros selecionados.</span>
@@ -286,7 +285,7 @@ export function EventHistory({
                 <TableCell className="font-bold">
                   {formatCurrency(subtotal)}
                 </TableCell>
-                <TableCell colSpan={4}></TableCell>
+                <TableCell colSpan={5}></TableCell>
               </TableRow>
             </TableFooter>
           </Table>

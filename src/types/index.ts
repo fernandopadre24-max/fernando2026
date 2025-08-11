@@ -13,6 +13,7 @@ export type Event = {
   isDone: boolean;
   isPaid: boolean;
   paymentMethod?: PaymentMethod | null;
+  observations?: string;
 };
 
 export type Artist = {

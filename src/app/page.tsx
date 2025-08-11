@@ -16,14 +16,15 @@ export default function Home() {
   const [isLoadingInsights, setIsLoadingInsights] = useState(false);
   const { toast } = useToast();
 
-  // Mock data for artists and contractors, will be replaced with real data management
   const [artists, setArtists] = useState<Artist[]>([
       { id: '1', name: 'Os Futuristas' },
       { id: '2', name: 'Sintetizadores Sonoros' },
-    ]);
+      { id: '3', name: 'A Banda de Ontem' },
+  ]);
   const [contractors, setContractors] = useState<Contractor[]>([
     { id: '1', name: 'Palco Principal Produções' },
     { id: '2', name: 'Luz e Som Eventos' },
+     { id: '3', name: 'Festas & Cia' },
   ]);
 
   const handleEventAdd = async (data: EventFormValues) => {

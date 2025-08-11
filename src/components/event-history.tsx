@@ -79,6 +79,7 @@ export function EventHistory({
 }: EventHistoryProps) {
   const [artistFilter, setArtistFilter] = useState('all');
   const [contractorFilter, setContractorFilter] = useState('all');
+  const [dateFilter, setDateFilter] = useState('all');
 
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -87,6 +88,23 @@ export function EventHistory({
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | ''>('');
 
+  const availableDates = useMemo(() => {
+    const dates = new Set<string>();
+    events.forEach((event) => {
+      if (event.date) {
+        // "2024-07-29" -> "2024-07"
+        dates.add(event.date.substring(0, 7)); 
+      }
+    });
+    return Array.from(dates).sort().reverse();
+  }, [events]);
+
+  const formatMonthYear = (dateString: string) => {
+    const [year, month] = dateString.split('-');
+    const date = new Date(parseInt(year), parseInt(month) - 1);
+    return date.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
+  };
+
 
   const filteredEvents = useMemo(() => {
     return events.filter((event) => {
@@ -94,9 +112,11 @@ export function EventHistory({
         artistFilter === 'all' || event.artistId === artistFilter;
       const contractorMatch =
         contractorFilter === 'all' || event.contractorId === contractorFilter;
-      return artistMatch && contractorMatch;
+      const dateMatch =
+        dateFilter === 'all' || event.date.startsWith(dateFilter);
+      return artistMatch && contractorMatch && dateMatch;
     });
-  }, [events, artistFilter, contractorFilter]);
+  }, [events, artistFilter, contractorFilter, dateFilter]);
 
   const subtotal = useMemo(() => {
     return filteredEvents.reduce((sum, event) => sum + event.value, 0);
@@ -153,7 +173,7 @@ export function EventHistory({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-col sm:flex-row gap-4 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
           <Select value={artistFilter} onValueChange={setArtistFilter}>
             <SelectTrigger>
               <SelectValue placeholder="Filtrar por artista" />
@@ -176,6 +196,19 @@ export function EventHistory({
               {contractors.map((contractor) => (
                 <SelectItem key={contractor.id} value={contractor.id}>
                   {contractor.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+           <Select value={dateFilter} onValueChange={setDateFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filtrar por data" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas as Datas</SelectItem>
+              {availableDates.map((date) => (
+                <SelectItem key={date} value={date}>
+                  {formatMonthYear(date)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -253,7 +286,7 @@ export function EventHistory({
                   <TableCell colSpan={7} className="h-48 text-center">
                     <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
                       <History className="h-8 w-8" />
-                      <span>Nenhum evento encontrado.</span>
+                      <span>Nenhum evento encontrado para os filtros selecionados.</span>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -369,3 +402,5 @@ export function EventHistory({
     </Card>
   );
 }
+
+    

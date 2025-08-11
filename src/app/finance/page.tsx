@@ -321,6 +321,7 @@ export default function FinancePage() {
                                 <TableHead>Categoria</TableHead>
                                 <TableHead>Data</TableHead>
                                 <TableHead className="text-right">Valor</TableHead>
+                                <TableHead>Status Transferência</TableHead>
                                 <TableHead className="w-[100px] text-right">Ações</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -339,52 +340,52 @@ export default function FinancePage() {
                                 <TableCell className={`text-right font-medium ${transaction.type === 'Receita' ? 'text-emerald-600' : 'text-rose-600'}`}>
                                     {transaction.type === 'Despesa' ? '-' : '+'} {formatCurrency(transaction.value)}
                                 </TableCell>
-                                <TableCell className="text-right">
-                                <div className="flex items-center justify-end gap-0.5">
-                                 {transaction.type === 'Receita' && !transaction.isTransferred && (
-                                    <Button variant="ghost" size="icon" title="Transferir valor" onClick={() => handleTransferClick(transaction)}>
-                                        <ArrowRightLeft className="h-4 w-4" />
-                                        <span className="sr-only">Transferir</span>
+                                <TableCell>
+                                  {transaction.type === 'Receita' && !transaction.isTransferred && (
+                                    <Button variant="outline" size="sm" onClick={() => handleTransferClick(transaction)}>
+                                        <ArrowRightLeft className="mr-2 h-4 w-4" />
+                                        Transferir
                                     </Button>
-                                )}
-                                 {transaction.isTransferred && (
+                                  )}
+                                  {transaction.isTransferred && (
                                     <Tooltip>
-                                      <TooltipTrigger>
-                                        <Badge variant="outline">Transferido</Badge>
+                                      <TooltipTrigger asChild>
+                                        <Badge variant="secondary">Transferido</Badge>
                                       </TooltipTrigger>
                                       <TooltipContent>
-                                        <p>Transferido para: {getBankAccountName(transaction.transferredToBankAccountId)}</p>
+                                        <p>Para: {getBankAccountName(transaction.transferredToBankAccountId)}</p>
                                       </TooltipContent>
                                     </Tooltip>
-                                )}
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" className="h-8 w-8 p-0">
-                                        <span className="sr-only">Abrir menu</span>
-                                        <MoreHorizontal className="h-4 w-4" />
-                                    </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                    <DropdownMenuItem onClick={() => openEditDialog(transaction)}>
-                                        <Edit className="mr-2 h-4 w-4" />
-                                        Editar
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                        className="text-destructive"
-                                        onClick={() => openDeleteDialog(transaction)}
-                                    >
-                                        <Trash2 className="mr-2 h-4 w-4" />
-                                        Excluir
-                                    </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                                </div>
+                                  )}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" className="h-8 w-8 p-0">
+                                          <span className="sr-only">Abrir menu</span>
+                                          <MoreHorizontal className="h-4 w-4" />
+                                      </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent align="end">
+                                      <DropdownMenuItem onClick={() => openEditDialog(transaction)}>
+                                          <Edit className="mr-2 h-4 w-4" />
+                                          Editar
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem
+                                          className="text-destructive"
+                                          onClick={() => openDeleteDialog(transaction)}
+                                      >
+                                          <Trash2 className="mr-2 h-4 w-4" />
+                                          Excluir
+                                      </DropdownMenuItem>
+                                      </DropdownMenuContent>
+                                  </DropdownMenu>
                                 </TableCell>
                             </TableRow>
                             ))
                         ) : (
                             <TableRow>
-                            <TableCell colSpan={6} className="h-24 text-center">
+                            <TableCell colSpan={7} className="h-24 text-center">
                                 Nenhum lançamento encontrado.
                             </TableCell>
                             </TableRow>
@@ -584,5 +585,3 @@ export default function FinancePage() {
     </AppShell>
   );
 }
-
-    

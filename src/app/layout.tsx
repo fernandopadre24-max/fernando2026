@@ -1,3 +1,4 @@
+
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
@@ -14,7 +15,7 @@ const applyThemeScript = `
     try {
       const theme = localStorage.getItem('app-theme');
       if (theme) {
-        const { fonts, colors } = JSON.parse(theme);
+        const { fonts, colors, fontSize } = JSON.parse(theme);
         const root = document.documentElement;
         
         if (fonts) {
@@ -38,6 +39,10 @@ const applyThemeScript = `
           if (colors.background) root.style.setProperty('--background-hsl', colors.background);
           if (colors.primary) root.style.setProperty('--primary-hsl', colors.primary);
           if (colors.accent) root.style.setProperty('--accent-hsl', colors.accent);
+        }
+
+        if (fontSize) {
+          root.style.fontSize = \`\${fontSize}px\`;
         }
       }
     } catch (e) {

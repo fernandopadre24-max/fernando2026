@@ -8,7 +8,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Paintbrush, Type, Palette } from 'lucide-react';
+import { Paintbrush, Type, Palette, TextQuote } from 'lucide-react';
+import { Slider } from '@/components/ui/slider';
 
 const fonts = [
   { name: 'Poppins', family: 'Poppins, sans-serif' },
@@ -66,6 +67,7 @@ export default function SettingsPage() {
 
     const [headlineFont, setHeadlineFont] = useState('Poppins, sans-serif');
     const [bodyFont, setBodyFont] = useState('PT Sans, sans-serif');
+    const [fontSize, setFontSize] = useState(16);
     const [backgroundColor, setBackgroundColor] = useState('220 20% 96%');
     const [primaryColor, setPrimaryColor] = useState('262 52% 50%');
     const [accentColor, setAccentColor] = useState('45 95% 55%');
@@ -74,15 +76,18 @@ export default function SettingsPage() {
         setIsClient(true);
         const savedTheme = localStorage.getItem('app-theme');
         if (savedTheme) {
-            const { fonts, colors } = JSON.parse(savedTheme);
+            const { fonts, colors, fontSize: savedFontSize } = JSON.parse(savedTheme);
             if (fonts) {
                 setHeadlineFont(fonts.headline?.family || 'Poppins, sans-serif');
                 setBodyFont(fonts.body?.family || 'PT Sans, sans-serif');
             }
-            if (colors) {
+             if (colors) {
                 setBackgroundColor(colors.background || '220 20% 96%');
                 setPrimaryColor(colors.primary || '262 52% 50%');
                 setAccentColor(colors.accent || '45 95% 55%');
+            }
+            if (savedFontSize) {
+                setFontSize(savedFontSize);
             }
         }
     }, []);
@@ -90,6 +95,9 @@ export default function SettingsPage() {
     const applyTheme = () => {
         const root = document.documentElement;
         
+        // Font Size
+        root.style.fontSize = `${fontSize}px`;
+
         // Fonts
         root.style.setProperty('--font-headline', headlineFont);
         root.style.setProperty('--font-body', bodyFont);
@@ -124,6 +132,7 @@ export default function SettingsPage() {
                 primary: primaryColor,
                 accent: accentColor,
             },
+            fontSize: fontSize,
         };
         localStorage.setItem('app-theme', JSON.stringify(theme));
         toast({
@@ -136,6 +145,7 @@ export default function SettingsPage() {
       const defaultSettings = {
         headline: 'Poppins, sans-serif',
         body: 'PT Sans, sans-serif',
+        fontSize: 16,
         background: '220 20% 96%',
         primary: '262 52% 50%',
         accent: '45 95% 55%',
@@ -143,11 +153,13 @@ export default function SettingsPage() {
 
       setHeadlineFont(defaultSettings.headline);
       setBodyFont(defaultSettings.body);
+      setFontSize(defaultSettings.fontSize);
       setBackgroundColor(defaultSettings.background);
       setPrimaryColor(defaultSettings.primary);
       setAccentColor(defaultSettings.accent);
       
       const root = document.documentElement;
+      root.style.fontSize = `${defaultSettings.fontSize}px`;
       root.style.setProperty('--font-headline', defaultSettings.headline);
       root.style.setProperty('--font-body', defaultSettings.body);
       root.style.setProperty('--background-hsl', defaultSettings.background);
@@ -181,75 +193,90 @@ export default function SettingsPage() {
                     <h1 className="text-2xl font-bold font-headline">Configurações de Aparência</h1>
                 </div>
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><Type /> Fontes</CardTitle>
-                        <CardDescription>Personalize as fontes usadas no aplicativo.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="headline-font">Fonte dos Títulos (Headline)</Label>
-                                <Select value={headlineFont} onValueChange={setHeadlineFont}>
-                                    <SelectTrigger id="headline-font">
-                                        <SelectValue placeholder="Selecione uma fonte" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {fonts.map(font => (
-                                            <SelectItem key={font.name} value={font.family} style={{ fontFamily: font.family }}>
-                                                {font.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="body-font">Fonte do Corpo (Body)</Label>
-                                <Select value={bodyFont} onValueChange={setBodyFont}>
-                                    <SelectTrigger id="body-font">
-                                        <SelectValue placeholder="Selecione uma fonte" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {fonts.map(font => (
-                                            <SelectItem key={font.name} value={font.family} style={{ fontFamily: font.family }}>
-                                                {font.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="flex flex-col gap-8">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2"><Type /> Tipografia</CardTitle>
+                                <CardDescription>Personalize as fontes e o tamanho do texto.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-6">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="headline-font">Fonte dos Títulos</Label>
+                                        <Select value={headlineFont} onValueChange={setHeadlineFont}>
+                                            <SelectTrigger id="headline-font">
+                                                <SelectValue placeholder="Selecione uma fonte" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {fonts.map(font => (
+                                                    <SelectItem key={font.name} value={font.family} style={{ fontFamily: font.family }}>
+                                                        {font.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="body-font">Fonte do Corpo</Label>
+                                        <Select value={bodyFont} onValueChange={setBodyFont}>
+                                            <SelectTrigger id="body-font">
+                                                <SelectValue placeholder="Selecione uma fonte" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {fonts.map(font => (
+                                                    <SelectItem key={font.name} value={font.family} style={{ fontFamily: font.family }}>
+                                                        {font.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="font-size">Tamanho da Fonte ({fontSize}px)</Label>
+                                    <div className="flex items-center gap-4">
+                                        <TextQuote className="h-5 w-5" />
+                                        <Slider
+                                            id="font-size"
+                                            min={12}
+                                            max={20}
+                                            step={1}
+                                            value={[fontSize]}
+                                            onValueChange={(value) => setFontSize(value[0])}
+                                        />
+                                         <TextQuote className="h-7 w-7" />
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
 
-                 <Card className="mt-8">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><Palette /> Cores do Tema</CardTitle>
-                        <CardDescription>Escolha as cores principais da interface.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div className="flex flex-col space-y-2">
-                                <Label htmlFor="bg-color">Cor de Fundo</Label>
-                                 <div className="relative">
-                                    <input type="color" value={colorToHex(backgroundColor)} onChange={handleColorChange(setBackgroundColor)} className="p-1 h-10 w-14 block bg-white border border-gray-200 cursor-pointer rounded-lg disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700" id="bg-color" title="Escolha a cor de fundo" />
+                    <div className="flex flex-col gap-8">
+                         <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2"><Palette /> Cores do Tema</CardTitle>
+                                <CardDescription>Escolha as cores principais da interface.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-6">
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                    <div className="flex flex-col space-y-2 items-center">
+                                        <Label htmlFor="bg-color">Fundo</Label>
+                                        <input type="color" value={colorToHex(backgroundColor)} onChange={handleColorChange(setBackgroundColor)} className="p-1 h-10 w-14 block bg-white border border-gray-200 cursor-pointer rounded-lg disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700" id="bg-color" title="Escolha a cor de fundo" />
+                                    </div>
+                                    <div className="flex flex-col space-y-2 items-center">
+                                        <Label htmlFor="primary-color">Primária</Label>
+                                        <input type="color" value={colorToHex(primaryColor)} onChange={handleColorChange(setPrimaryColor)} className="p-1 h-10 w-14 block bg-white border border-gray-200 cursor-pointer rounded-lg disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700" id="primary-color" title="Escolha a cor primária" />
+                                    </div>
+                                    <div className="flex flex-col space-y-2 items-center">
+                                        <Label htmlFor="accent-color">Destaque</Label>
+                                        <input type="color" value={colorToHex(accentColor)} onChange={handleColorChange(setAccentColor)} className="p-1 h-10 w-14 block bg-white border border-gray-200 cursor-pointer rounded-lg disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700" id="accent-color" title="Escolha a cor de destaque" />
+                                    </div>
                                 </div>
-                            </div>
-                             <div className="flex flex-col space-y-2">
-                                <Label htmlFor="primary-color">Cor Primária</Label>
-                                 <div className="relative">
-                                    <input type="color" value={colorToHex(primaryColor)} onChange={handleColorChange(setPrimaryColor)} className="p-1 h-10 w-14 block bg-white border border-gray-200 cursor-pointer rounded-lg disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700" id="primary-color" title="Escolha a cor primária" />
-                                </div>
-                            </div>
-                            <div className="flex flex-col space-y-2">
-                                <Label htmlFor="accent-color">Cor de Destaque (Accent)</Label>
-                                <div className="relative">
-                                    <input type="color" value={colorToHex(accentColor)} onChange={handleColorChange(setAccentColor)} className="p-1 h-10 w-14 block bg-white border border-gray-200 cursor-pointer rounded-lg disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700" id="accent-color" title="Escolha a cor de destaque" />
-                                </div>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </div>
 
                 <div className="mt-8 flex justify-end gap-2">
                     <Button variant="outline" onClick={handleReset}>Restaurar Padrão</Button>

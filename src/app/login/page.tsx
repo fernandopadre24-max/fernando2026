@@ -11,7 +11,6 @@ import { Label } from '@/components/ui/label';
 import { Banknote } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { loadData } from '@/lib/storage';
 
 const loadUsernames = (): string[] => {
     if (typeof window === 'undefined') {
@@ -19,10 +18,16 @@ const loadUsernames = (): string[] => {
     }
     const storedUsers = localStorage.getItem('users');
     if (storedUsers) {
-        const usersMap: Map<string, any> = new Map(JSON.parse(storedUsers));
-        return Array.from(usersMap.keys());
+        try {
+            const usersMap: Map<string, any> = new Map(JSON.parse(storedUsers));
+            return Array.from(usersMap.keys());
+        } catch (e) {
+            return [];
+        }
     }
-    return [];
+    // If no users are stored, the auth-context will create the admin user.
+    // So we can assume 'admin' will exist on first load.
+    return ['admin']; 
 }
 
 
@@ -31,24 +36,18 @@ export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [userList, setUserList] = useState<string[]>([]);
+  const [userList, setUserList] = useState<string[]>(loadUsernames());
   const { login, signup } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
-
-  useEffect(() => {
-    setUserList(loadUsernames());
-  }, []);
 
   const handleModeChange = () => {
     setIsLoginMode(!isLoginMode);
     setUsername('');
     setPassword('');
     setConfirmPassword('');
-    // Refresh user list in case a new user was just added, though signup redirects.
-    if (!isLoginMode) {
-        setUserList(loadUsernames());
-    }
+    // Refresh user list in case a new user was just added or it's the first time toggling.
+    setUserList(loadUsernames());
   }
 
 

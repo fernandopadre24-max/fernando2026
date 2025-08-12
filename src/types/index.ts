@@ -53,6 +53,7 @@ export type Transaction = {
     isTransferred: boolean;
     transferredToBankAccountId?: string | null;
     transferDate?: string;
+    bankAccountId?: string | null;
 }
 
 export type ExpenseCategory = {

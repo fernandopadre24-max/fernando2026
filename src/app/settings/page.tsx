@@ -45,9 +45,13 @@ const backgroundColorOptions = [
     { value: '0 0% 98%', label: 'Branco Neve', theme: 'light'},
     { value: '60 90% 95%', label: 'Creme', theme: 'light'},
     { value: '210 40% 98%', label: 'Azul Claro', theme: 'light'},
+    { value: '330 80% 96%', label: 'Rosa Claro', theme: 'light' },
+    { value: '120 60% 96%', label: 'Verde Claro', theme: 'light' },
     { value: '222.2 84% 4.9%', label: 'Quase Preto', theme: 'dark'},
     { value: '240 4% 12%', label: 'Cinza Escuro', theme: 'dark'},
-    { value: '200 15% 20%', label: 'Azul Escuro', theme: 'dark'}
+    { value: '200 15% 20%', label: 'Azul Escuro', theme: 'dark'},
+    { value: '260 20% 15%', label: 'Violeta Escuro', theme: 'dark' },
+    { value: '30 30% 12%', label: 'Marrom Escuro', theme: 'dark' },
 ]
 
 

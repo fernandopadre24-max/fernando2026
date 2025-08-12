@@ -29,6 +29,7 @@ export type Event = {
 export type Artist = {
   id: string;
   name: string;
+  imageUrl?: string;
 };
 
 export type Contractor = {

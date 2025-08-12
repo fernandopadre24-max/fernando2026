@@ -1,6 +1,7 @@
 
 'use client';
 
+import Image from 'next/image';
 import {
   Table,
   TableBody,
@@ -10,6 +11,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Pen, Trash2 } from 'lucide-react';
 import { Artist } from '@/types';
 
@@ -20,11 +22,16 @@ interface ArtistListProps {
 }
 
 export function ArtistList({ artists, onEdit, onDelete }: ArtistListProps) {
+  const getInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  }
+
   return (
     <div className="bg-notebook">
       <Table>
         <TableHeader>
           <TableRow className="bg-primary/5 border-b-primary/20">
+            <TableHead className="w-[80px]">Imagem</TableHead>
             <TableHead>Nome</TableHead>
             <TableHead className="text-right">Ações</TableHead>
           </TableRow>
@@ -33,6 +40,12 @@ export function ArtistList({ artists, onEdit, onDelete }: ArtistListProps) {
           {artists.length > 0 ? (
             artists.map((artist) => (
               <TableRow key={artist.id}>
+                <TableCell>
+                  <Avatar>
+                    <AvatarImage src={artist.imageUrl} alt={artist.name} />
+                    <AvatarFallback>{getInitials(artist.name)}</AvatarFallback>
+                  </Avatar>
+                </TableCell>
                 <TableCell className="font-medium">{artist.name}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-2">
@@ -50,7 +63,7 @@ export function ArtistList({ artists, onEdit, onDelete }: ArtistListProps) {
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={2} className="h-24 text-center">
+              <TableCell colSpan={3} className="h-24 text-center">
                 Nenhum artista encontrado.
               </TableCell>
             </TableRow>

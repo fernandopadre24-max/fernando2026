@@ -18,6 +18,7 @@ import { Artist } from '@/types';
 
 const artistSchema = z.object({
   name: z.string().min(1, 'O nome do artista é obrigatório.'),
+  imageUrl: z.string().url().optional().or(z.literal('')),
 });
 
 type ArtistFormData = z.infer<typeof artistSchema>;
@@ -38,6 +39,7 @@ export function ArtistForm({ isOpen, onClose, onSave, artist }: ArtistFormProps)
     resolver: zodResolver(artistSchema),
     defaultValues: {
       name: artist?.name || '',
+      imageUrl: artist?.imageUrl || '',
     },
   });
 
@@ -56,6 +58,12 @@ export function ArtistForm({ isOpen, onClose, onSave, artist }: ArtistFormProps)
             <Label htmlFor="name">Nome do Artista</Label>
             <Input id="name" {...register('name')} />
             {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="imageUrl">URL da Imagem</Label>
+            <Input id="imageUrl" {...register('imageUrl')} placeholder="https://exemplo.com/imagem.png" />
+            {errors.imageUrl && <p className="text-sm text-red-500">{errors.imageUrl.message}</p>}
           </div>
 
           <DialogFooter>

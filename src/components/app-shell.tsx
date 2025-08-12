@@ -64,7 +64,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <SidebarMenu>
             {menuItems.map((item) => (
               <SidebarMenuItem key={item.href}>
-                <Link href={item.href} legacyBehavior passHref>
+                <Link href={item.href}>
                   <SidebarMenuButton
                     isActive={pathname === item.href}
                     icon={<item.icon />}
@@ -76,7 +76,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             ))}
              {user.role === 'admin' && (
                <SidebarMenuItem key={adminMenuItem.href}>
-                <Link href={adminMenuItem.href} legacyBehavior passHref>
+                <Link href={adminMenuItem.href}>
                   <SidebarMenuButton
                     isActive={pathname === adminMenuItem.href}
                     icon={<adminMenuItem.icon />}
@@ -91,7 +91,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
          <SidebarContent className="mt-auto">
              <SidebarMenu>
                  <SidebarMenuItem>
-                     <Link href={settingsMenuItem.href} legacyBehavior passHref>
+                     <Link href={settingsMenuItem.href}>
                          <SidebarMenuButton
                              isActive={pathname === settingsMenuItem.href}
                              icon={<settingsMenuItem.icon />}

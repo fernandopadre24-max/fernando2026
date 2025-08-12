@@ -7,7 +7,7 @@ import { PlusCircle } from 'lucide-react';
 import { EventList } from '@/components/events/event-list';
 import { EventForm } from '@/components/events/event-form';
 import { TransferDialog } from '@/components/events/transfer-dialog';
-import { Event, Artist, Contractor, BankAccount } from '@/types';
+import { Event, Artist, Contractor, BankAccount, Transaction } from '@/types';
 import { loadData, saveData } from '@/lib/storage';
 
 const EventsPage = () => {

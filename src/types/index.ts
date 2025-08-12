@@ -59,3 +59,9 @@ export type ExpenseCategory = {
     id: string;
     name: string;
 }
+
+export type ThemeSettings = {
+    theme: 'light' | 'dark';
+    font: 'Poppins' | 'PT Sans';
+    primaryColor: string;
+}

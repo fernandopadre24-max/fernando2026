@@ -18,6 +18,7 @@ import {
   Landmark,
   LineChart,
   Wallet,
+  Settings
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -31,6 +32,7 @@ const menuItems = [
   { href: '/banks', label: 'Bancos', icon: Landmark },
   { href: '/finance', label: 'Financeiro', icon: Wallet },
   { href: '/reports', label: 'Relatórios', icon: LineChart },
+  { href: '/settings', label: 'Configurações', icon: Settings },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {

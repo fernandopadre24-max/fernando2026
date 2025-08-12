@@ -15,10 +15,14 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Artist } from '@/types';
+import { useState, useEffect, ChangeEvent } from 'react';
+import Image from 'next/image';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+
 
 const artistSchema = z.object({
   name: z.string().min(1, 'O nome do artista é obrigatório.'),
-  imageUrl: z.string().url().optional().or(z.literal('')),
+  imageUrl: z.string().optional(),
 });
 
 type ArtistFormData = z.infer<typeof artistSchema>;
@@ -31,9 +35,13 @@ interface ArtistFormProps {
 }
 
 export function ArtistForm({ isOpen, onClose, onSave, artist }: ArtistFormProps) {
+    const [previewImage, setPreviewImage] = useState<string | null>(null);
+
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<ArtistFormData>({
     resolver: zodResolver(artistSchema),
@@ -43,9 +51,40 @@ export function ArtistForm({ isOpen, onClose, onSave, artist }: ArtistFormProps)
     },
   });
 
+  const currentImageUrl = watch('imageUrl');
+
+  useEffect(() => {
+    if (artist) {
+        setValue('name', artist.name);
+        setValue('imageUrl', artist.imageUrl);
+        setPreviewImage(artist.imageUrl || null);
+    } else {
+        setValue('name', '');
+        setValue('imageUrl', '');
+        setPreviewImage(null);
+    }
+  }, [artist, setValue]);
+
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setValue('imageUrl', base64String);
+        setPreviewImage(base64String);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const onSubmit = (data: ArtistFormData) => {
     onSave(data);
   };
+  
+  const getInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -61,9 +100,14 @@ export function ArtistForm({ isOpen, onClose, onSave, artist }: ArtistFormProps)
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="imageUrl">URL da Imagem</Label>
-            <Input id="imageUrl" {...register('imageUrl')} placeholder="https://exemplo.com/imagem.png" />
-            {errors.imageUrl && <p className="text-sm text-red-500">{errors.imageUrl.message}</p>}
+            <Label htmlFor="imageUpload">Foto do Artista</Label>
+            <div className="flex items-center gap-4">
+                 <Avatar className="h-20 w-20">
+                    <AvatarImage src={previewImage || undefined} alt={watch('name')} />
+                    <AvatarFallback className="text-2xl">{getInitials(watch('name') || '?')}</AvatarFallback>
+                  </Avatar>
+                <Input id="imageUpload" type="file" accept="image/*" onChange={handleImageChange} className="flex-1" />
+            </div>
           </div>
 
           <DialogFooter>

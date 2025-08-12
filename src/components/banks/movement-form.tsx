@@ -23,6 +23,7 @@ const movementSchema = z.object({
   description: z.string().min(1, 'A descrição é obrigatória.'),
   date: z.string().min(1, 'A data é obrigatória.'),
   paymentMethod: z.nativeEnum(PaymentMethod).nullable(),
+  pixKey: z.string().optional().nullable(),
   paidTo: z.string().optional().nullable(),
   contractorId: z.string().optional().nullable(),
 });
@@ -52,6 +53,7 @@ export function MovementForm({
     register,
     handleSubmit,
     control,
+    watch,
     formState: { errors },
   } = useForm<MovementFormData>({
     resolver: zodResolver(movementSchema),
@@ -60,10 +62,13 @@ export function MovementForm({
       description: '',
       date: new Date().toISOString().split('T')[0],
       paymentMethod: null,
+      pixKey: '',
       paidTo: '',
       contractorId: null,
     },
   });
+
+  const paymentMethod = watch('paymentMethod');
 
   const onSubmit = (data: MovementFormData) => {
     onSave(data);
@@ -113,6 +118,13 @@ export function MovementForm({
                 </Select>
             )} />
         </div>
+
+        {paymentMethod === 'PIX' && (
+          <div className="space-y-2">
+            <Label htmlFor="pixKey">Chave PIX</Label>
+            <Input id="pixKey" {...register('pixKey')} />
+          </div>
+        )}
 
         {type === 'withdrawal' && (
             <div className="space-y-2">

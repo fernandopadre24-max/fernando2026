@@ -18,6 +18,7 @@ export type Event = {
   isDone: boolean;
   isPaid: boolean;
   paymentMethod?: PaymentMethod | null;
+  pixKey?: string | null;
   observations?: string;
   isTransferred: boolean;
   transferredToBankAccountId?: string | null;
@@ -56,6 +57,7 @@ export type Transaction = {
     transferDate?: string;
     bankAccountId?: string | null;
     paymentMethod?: PaymentMethod | null;
+    pixKey?: string | null;
     paidTo?: string | null;
     contractorId?: string | null;
 }

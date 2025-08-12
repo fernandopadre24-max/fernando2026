@@ -30,6 +30,7 @@ const transactionSchema = z.object({
   type: z.enum(['Receita', 'Despesa']),
   categoryId: z.string().optional().nullable(),
   paymentMethod: z.nativeEnum(PaymentMethod).nullable(),
+  pixKey: z.string().optional().nullable(),
   paidTo: z.string().optional().nullable(),
   contractorId: z.string().optional().nullable(),
 });
@@ -70,12 +71,14 @@ export function TransactionForm({
       type: transaction?.type || 'Receita',
       categoryId: transaction?.categoryId || null,
       paymentMethod: transaction?.paymentMethod || null,
+      pixKey: transaction?.pixKey || '',
       paidTo: transaction?.paidTo || '',
       contractorId: transaction?.contractorId || null,
     },
   });
 
   const transactionType = watch('type');
+  const paymentMethod = watch('paymentMethod');
 
   const onSubmit = (data: TransactionFormData) => {
     onSave({
@@ -144,6 +147,13 @@ export function TransactionForm({
                 )} />
             </div>
           </div>
+
+           {paymentMethod === 'PIX' && (
+             <div className="space-y-2">
+              <Label htmlFor="pixKey">Chave PIX</Label>
+              <Input id="pixKey" {...register('pixKey')} />
+            </div>
+           )}
           
           {transactionType === 'Despesa' && (
             <div className="grid grid-cols-2 gap-4">

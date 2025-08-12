@@ -34,6 +34,7 @@ const eventSchema = z.object({
   isDone: z.boolean(),
   isPaid: z.boolean(),
   paymentMethod: z.nativeEnum(PaymentMethod).nullable(),
+  pixKey: z.string().optional().nullable(),
   observations: z.string().optional(),
   paidTo: z.string().optional().nullable(),
 });
@@ -61,6 +62,7 @@ export function EventForm({
     register,
     handleSubmit,
     control,
+    watch,
     formState: { errors },
   } = useForm<EventFormData>({
     resolver: zodResolver(eventSchema),
@@ -73,10 +75,13 @@ export function EventForm({
       isDone: event?.isDone || false,
       isPaid: event?.isPaid || false,
       paymentMethod: event?.paymentMethod || null,
+      pixKey: event?.pixKey || '',
       observations: event?.observations || '',
       paidTo: event?.paidTo || '',
     },
   });
+  
+  const paymentMethod = watch('paymentMethod');
 
   const onSubmit = (data: EventFormData) => {
     const artist = artists.find(a => a.id === data.artistId)?.name || 'Desconhecido';
@@ -160,6 +165,13 @@ export function EventForm({
                 </Select>
               )} />
           </div>
+
+          {paymentMethod === 'PIX' && (
+            <div className="space-y-2">
+              <Label htmlFor="pixKey">Chave PIX</Label>
+              <Input id="pixKey" {...register('pixKey')} />
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="observations">Observações</Label>

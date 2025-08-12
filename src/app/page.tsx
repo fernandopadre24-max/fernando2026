@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+    <div className="flex flex-1 items-center justify-center bg-background p-4">
       <Card className="w-full max-w-2xl text-center">
         <CardHeader>
            <div className="flex justify-center mb-4">

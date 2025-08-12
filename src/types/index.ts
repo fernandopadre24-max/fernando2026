@@ -1,6 +1,10 @@
 
+export enum PaymentMethod {
+  PIX = 'PIX',
+  Dinheiro = 'Dinheiro',
+  Cartão = 'Cartão'
+}
 
-export type PaymentMethod = 'PIX' | 'Dinheiro' | 'Cartão';
 
 export type Event = {
   id: string;

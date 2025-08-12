@@ -109,9 +109,9 @@ export function ArtistForm({ isOpen, onClose, onSave, artist }: ArtistFormProps)
           <div className="space-y-2">
             <Label htmlFor="imageUpload">Foto do Artista</Label>
             <div className="flex items-center gap-4">
-                 <Avatar className="h-20 w-20">
+                 <Avatar className="h-24 w-24">
                     <AvatarImage src={previewImage || undefined} alt={watchedName} />
-                    <AvatarFallback className="text-2xl">{getInitials(watchedName)}</AvatarFallback>
+                    <AvatarFallback className="text-3xl">{getInitials(watchedName)}</AvatarFallback>
                   </Avatar>
                 <Input id="imageUpload" type="file" accept="image/*" onChange={handleImageChange} className="flex-1" />
             </div>

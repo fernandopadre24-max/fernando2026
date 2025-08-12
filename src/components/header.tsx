@@ -2,7 +2,6 @@
 'use client';
 
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 
 const getPageTitle = (pathname: string) => {
@@ -19,24 +18,7 @@ const getPageTitle = (pathname: string) => {
 
 export function Header() {
   const pathname = usePathname();
-  const [appName, setAppName] = useState('Controle Financeiro');
   const pageTitle = getPageTitle(pathname);
-
-  useEffect(() => {
-    try {
-      const theme = localStorage.getItem('app-theme');
-      if (theme) {
-        const { appName: savedAppName } = JSON.parse(theme);
-        if (savedAppName) {
-          setAppName(savedAppName);
-        } else {
-            setAppName('Controle Financeiro');
-        }
-      }
-    } catch (e) {
-      console.error('Failed to load app name from localStorage', e);
-    }
-  }, [pathname]);
 
   return (
     <header className="flex h-14 items-center gap-4 border-b bg-background px-4 sm:h-16 sm:px-6">
@@ -45,7 +27,7 @@ export function Header() {
         <h1 className="text-lg font-semibold sm:text-xl">
             {pageTitle}
         </h1>
-        <p className="text-sm text-muted-foreground">{appName}</p>
+        <p className="text-sm text-muted-foreground">Controle Financeiro</p>
       </div>
     </header>
   );

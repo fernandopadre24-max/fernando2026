@@ -22,7 +22,6 @@ import {
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Header } from './header';
-import { useState, useEffect } from 'react';
 
 const menuItems = [
   { href: '/', label: 'Início', icon: Home },
@@ -36,21 +35,6 @@ const menuItems = [
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [appName, setAppName] = useState('Controle Financeiro');
-
-  useEffect(() => {
-    try {
-      const theme = localStorage.getItem('app-theme');
-      if (theme) {
-        const { appName: savedAppName } = JSON.parse(theme);
-        if (savedAppName) {
-          setAppName(savedAppName);
-        }
-      }
-    } catch (e) {
-      console.error('Failed to load app name from localStorage', e);
-    }
-  }, [pathname]);
 
   return (
     <SidebarProvider>
@@ -60,7 +44,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <div className="p-2 bg-primary/10 rounded-lg">
                 <Banknote className="h-6 w-6 text-primary" />
             </div>
-            <span className="font-bold text-lg">{appName}</span>
+            <span className="font-bold text-lg">Controle Financeiro</span>
           </Link>
         </SidebarHeader>
         <SidebarContent>

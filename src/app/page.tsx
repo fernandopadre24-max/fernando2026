@@ -18,6 +18,7 @@ export default function Home() {
   const [contractors, setContractors] = useState<Contractor[]>([]);
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setEvents(loadData('events', []));
@@ -25,6 +26,7 @@ export default function Home() {
     setContractors(loadData('contractors', []));
     setBankAccounts(loadData('bankAccounts', []));
     setTransactions(loadData('transactions', []));
+    setLoading(false);
   }, []);
 
   const totalIncome = transactions
@@ -41,6 +43,15 @@ export default function Home() {
     { title: 'Contratantes', value: contractors.length, icon: Banknote, href: '/contractors', description: 'Contratantes cadastrados' },
     { title: 'Contas Bancárias', value: bankAccounts.length, icon: Landmark, href: '/banks', description: 'Contas gerenciadas' },
   ];
+
+  if (loading) {
+    return (
+        <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+            <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+            <p>Carregando...</p>
+        </div>
+    );
+  }
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">

@@ -8,8 +8,9 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/components/theme-provider';
-import { ThemeSettings, FontOption } from '@/types';
+import { ThemeSettings, FontOption, FontSize } from '@/types';
 import { useToast } from '@/hooks/use-toast';
+import { Slider } from '@/components/ui/slider';
 
 
 const defaultSettings: ThemeSettings = {
@@ -27,6 +28,13 @@ const fontOptions: { value: FontOption, label: string }[] = [
     { value: 'Lato', label: 'Lato' },
     { value: 'Open Sans', label: 'Open Sans' },
     { value: 'Montserrat', label: 'Montserrat' }
+];
+
+const fontSizeOptions: {value: FontSize, label: string}[] = [
+    { value: 'sm', label: 'Pequeno' },
+    { value: 'base', label: 'Normal' },
+    { value: 'lg', label: 'Grande' },
+    { value: 'xl', label: 'Extra Grande' },
 ];
 
 export default function SettingsPage() {
@@ -53,6 +61,13 @@ export default function SettingsPage() {
     const handleRestoreDefaults = () => {
         setLocalSettings(defaultSettings);
     };
+
+    const handleSliderChange = (value: number[]) => {
+        const selectedSize = fontSizeOptions[value[0]].value;
+        setLocalSettings(prev => ({ ...prev, fontSize: selectedSize }));
+    };
+
+    const currentFontSizeIndex = fontSizeOptions.findIndex(option => option.value === localSettings.fontSize);
 
     return (
         <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
@@ -119,27 +134,22 @@ export default function SettingsPage() {
                         </div>
                     </div>
 
-
                     <div className="space-y-4">
                         <Label className="text-lg font-semibold">Tamanho da Fonte</Label>
-                         <RadioGroup
-                            value={localSettings.fontSize}
-                            onValueChange={(value: 'sm' | 'base' | 'lg') => setLocalSettings({ ...localSettings, fontSize: value })}
-                        >
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="sm" id="sm" />
-                                <Label htmlFor="sm">Pequeno</Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="base" id="base" />
-                                <Label htmlFor="base">Normal</Label>
-                            </div>
-                             <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="lg" id="lg" />
-                                <Label htmlFor="lg">Grande</Label>
-                            </div>
-                        </RadioGroup>
+                        <div className="flex items-center gap-4">
+                            <Slider
+                                value={[currentFontSizeIndex]}
+                                onValueChange={handleSliderChange}
+                                max={fontSizeOptions.length - 1}
+                                step={1}
+                                className="w-[60%]"
+                            />
+                            <span className="text-muted-foreground w-[40%] text-right">
+                                {fontSizeOptions.find(o => o.value === localSettings.fontSize)?.label}
+                            </span>
+                        </div>
                     </div>
+
 
                     <div className="space-y-4">
                         <Label className="text-lg font-semibold">Cor de Destaque</Label>

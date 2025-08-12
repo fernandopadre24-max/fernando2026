@@ -2,7 +2,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { ThemeSettings } from '@/types';
+import { ThemeSettings, FontSize } from '@/types';
 import { loadData, saveData } from '@/lib/storage';
 
 const defaultSettings: ThemeSettings = {
@@ -39,7 +39,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         body.style.setProperty('--font-body', `'${settings.fontBody}', sans-serif`);
         
 
-        body.classList.remove('text-sm', 'text-base', 'text-lg');
+        body.classList.remove('text-sm', 'text-base', 'text-lg', 'text-xl');
         body.classList.add(`text-${settings.fontSize}`);
 
 

@@ -12,20 +12,31 @@ import { Banknote } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function LoginPage() {
+  const [isLoginMode, setIsLoginMode] = useState(true);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const { login } = useAuth();
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const { login, signup } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      login(username, password);
-      router.push('/');
+      if (isLoginMode) {
+        login(username, password);
+        router.push('/');
+      } else {
+        await signup(username, password, confirmPassword);
+        toast({
+            title: "Cadastro realizado com sucesso!",
+            description: "Você foi logado automaticamente.",
+        });
+        router.push('/');
+      }
     } catch (error: any) {
         toast({
-            title: "Erro de Login",
+            title: `Erro de ${isLoginMode ? 'Login' : 'Cadastro'}`,
             description: error.message,
             variant: "destructive",
         })
@@ -41,13 +52,13 @@ export default function LoginPage() {
                     <Banknote className="h-8 w-8 text-primary" />
                 </div>
             </div>
-          <CardTitle className="text-2xl">Bem-vindo de volta!</CardTitle>
+          <CardTitle className="text-2xl">{isLoginMode ? 'Bem-vindo de volta!' : 'Crie sua Conta'}</CardTitle>
           <CardDescription>
-            Faça login para acessar seu painel financeiro.
+            {isLoginMode ? 'Faça login para acessar seu painel financeiro.' : 'Preencha os dados para se cadastrar.'}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="username">Usuário</Label>
               <Input
@@ -67,14 +78,33 @@ export default function LoginPage() {
                 required
               />
             </div>
+            {!isLoginMode && (
+                 <div className="space-y-2">
+                    <Label htmlFor="confirmPassword">Confirmar Senha</Label>
+                    <Input
+                        id="confirmPassword"
+                        type="password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        required
+                    />
+                </div>
+            )}
             <Button type="submit" className="w-full">
-              Entrar
+              {isLoginMode ? 'Entrar' : 'Cadastrar'}
             </Button>
-            <div className="text-center text-xs text-muted-foreground pt-4">
-                <p>Usuários de teste:</p>
-                <p>1. user: <strong>produtor1</strong>, pass: <strong>senha1</strong></p>
-                <p>2. user: <strong>produtor2</strong>, pass: <strong>senha2</strong></p>
+            <div className="text-center text-sm pt-4">
+                 <Button variant="link" type="button" onClick={() => setIsLoginMode(!isLoginMode)}>
+                    {isLoginMode ? 'Não tem uma conta? Cadastre-se' : 'Já tem uma conta? Faça login'}
+                </Button>
             </div>
+            {isLoginMode && (
+                 <div className="text-center text-xs text-muted-foreground pt-4">
+                    <p>Usuários de teste:</p>
+                    <p>1. user: <strong>produtor1</strong>, pass: <strong>senha1</strong></p>
+                    <p>2. user: <strong>produtor2</strong>, pass: <strong>senha2</strong></p>
+                </div>
+            )}
           </form>
         </CardContent>
       </Card>

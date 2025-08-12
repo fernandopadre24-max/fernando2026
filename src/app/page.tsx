@@ -55,7 +55,7 @@ export default function Home() {
       setContractors(getUserData('contractors') || initialContractors);
       setBankAccounts(getUserData('bankAccounts') || []);
     }
-  }, [user, isClient, router, getUserData]);
+  }, [user, isClient, getUserData]);
 
   useEffect(() => {
     if(isClient && user) {
@@ -174,42 +174,38 @@ export default function Home() {
       description: `Valor de ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(eventToTransfer.value)} transferido para a conta ${accountToUpdate.bankName} com sucesso.`
     })
   }
-  
-  if (!isClient || !user) {
-    return null; // The redirect is now handled by AppShell
-  }
 
   return (
     <AppShell>
-      <main className="container mx-auto px-4 pb-16">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start mb-8">
-          <div className="lg:col-span-3 flex flex-col gap-8">
-             <DashboardSummary events={events} />
-             <RecentTransfers events={events} bankAccounts={bankAccounts} />
-          </div>
-          <div className="lg:col-span-2">
-            <EventForm
-              artists={artists}
-              contractors={contractors}
-              onEventAdd={handleEventAdd}
-              isSubmitting={isSubmitting}
+        <main className="container mx-auto px-4 pb-16">
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start mb-8">
+            <div className="lg:col-span-3 flex flex-col gap-8">
+                <DashboardSummary events={events} />
+                <RecentTransfers events={events} bankAccounts={bankAccounts} />
+            </div>
+            <div className="lg:col-span-2">
+                <EventForm
+                artists={artists}
+                contractors={contractors}
+                onEventAdd={handleEventAdd}
+                isSubmitting={isSubmitting}
+                />
+            </div>
+            </div>
+            <div className="flex flex-col gap-8">
+            <EventHistory 
+                events={events} 
+                artists={artists}
+                contractors={contractors}
+                bankAccounts={bankAccounts}
+                onStatusChange={handleEventStatusChange}
+                onPaymentChange={handlePaymentStatusChange}
+                onEventUpdate={handleEventUpdate}
+                onEventDelete={handleEventDelete}
+                onTransfer={handleTransfer}
             />
-          </div>
-        </div>
-        <div className="flex flex-col gap-8">
-          <EventHistory 
-            events={events} 
-            artists={artists}
-            contractors={contractors}
-            bankAccounts={bankAccounts}
-            onStatusChange={handleEventStatusChange}
-            onPaymentChange={handlePaymentStatusChange}
-            onEventUpdate={handleEventUpdate}
-            onEventDelete={handleEventDelete}
-            onTransfer={handleTransfer}
-          />
-        </div>
-      </main>
+            </div>
+        </main>
     </AppShell>
   );
 }

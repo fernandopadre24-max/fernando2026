@@ -25,7 +25,15 @@ const loadUsers = (): Map<string, User> => {
     }
     const storedUsers = localStorage.getItem('users');
     if (storedUsers) {
-        return new Map(JSON.parse(storedUsers));
+        try {
+            // Filter out any null/undefined entries that might have been saved.
+            const parsed = JSON.parse(storedUsers) as [string, User][];
+            const validEntries = parsed.filter(([key, value]) => key && value);
+            return new Map(validEntries);
+        } catch (e) {
+            // If parsing fails, fall back to default.
+            console.error("Failed to parse users from localStorage", e);
+        }
     }
     
     // If no users, create a default admin user
@@ -55,7 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const checkUser = () => {
       const storedUserId = localStorage.getItem('userId');
       if (storedUserId) {
-        const currentUser = Array.from(users.values()).find(u => u.id === storedUserId);
+        const currentUser = Array.from(users.values()).find(u => u && u.id === storedUserId);
         setUser(currentUser || null);
         if(pathname === '/login') {
             router.push('/');

@@ -10,13 +10,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Pen, Trash2 } from 'lucide-react';
+import { Pen, Trash2 } from 'lucide-react';
 import { Artist } from '@/types';
 
 interface ArtistListProps {
@@ -40,24 +34,16 @@ export function ArtistList({ artists, onEdit, onDelete }: ArtistListProps) {
             <TableRow key={artist.id}>
               <TableCell className="font-medium">{artist.name}</TableCell>
               <TableCell className="text-right">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-8 w-8 p-0">
-                      <span className="sr-only">Abrir menu</span>
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => onEdit(artist)}>
-                      <Pen className="mr-2 h-4 w-4" />
-                      Editar
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onDelete(artist.id)} className="text-red-600">
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Excluir
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <div className="flex items-center justify-end gap-2">
+                  <Button variant="ghost" size="icon" onClick={() => onEdit(artist)}>
+                    <Pen className="h-4 w-4" />
+                    <span className="sr-only">Editar</span>
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => onDelete(artist.id)} className="text-red-600 hover:text-red-700">
+                    <Trash2 className="h-4 w-4" />
+                    <span className="sr-only">Excluir</span>
+                  </Button>
+                </div>
               </TableCell>
             </TableRow>
           ))

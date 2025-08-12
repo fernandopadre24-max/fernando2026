@@ -11,14 +11,7 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Pen, Trash2, ArrowRightLeft } from 'lucide-react';
+import { Pen, Trash2, ArrowRightLeft } from 'lucide-react';
 import { Event, Artist, Contractor } from '@/types';
 
 interface EventListProps {
@@ -83,31 +76,22 @@ export function EventList({ events, artists, contractors, onEdit, onDelete, onTr
                 </Badge>
               </TableCell>
               <TableCell className="text-right">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-8 w-8 p-0">
-                      <span className="sr-only">Abrir menu</span>
-                      <MoreHorizontal className="h-4 w-4" />
+                <div className="flex items-center justify-end gap-2">
+                    <Button variant="ghost" size="icon" onClick={() => onEdit(event)}>
+                      <Pen className="h-4 w-4" />
+                       <span className="sr-only">Editar</span>
                     </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => onEdit(event)}>
-                      <Pen className="mr-2 h-4 w-4" />
-                      Editar
-                    </DropdownMenuItem>
                     {event.isPaid && !event.isTransferred && (
-                      <DropdownMenuItem onClick={() => onTransfer(event)}>
-                          <ArrowRightLeft className="mr-2 h-4 w-4" />
-                          Transferir para Conta
-                      </DropdownMenuItem>
+                      <Button variant="ghost" size="icon" onClick={() => onTransfer(event)}>
+                          <ArrowRightLeft className="h-4 w-4" />
+                          <span className="sr-only">Transferir para Conta</span>
+                      </Button>
                     )}
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => onDelete(event.id)} className="text-red-600">
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Excluir
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                    <Button variant="ghost" size="icon" onClick={() => onDelete(event.id)} className="text-red-600 hover:text-red-700">
+                      <Trash2 className="h-4 w-4" />
+                       <span className="sr-only">Excluir</span>
+                    </Button>
+                </div>
               </TableCell>
             </TableRow>
           ))

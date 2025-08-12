@@ -5,9 +5,9 @@ import { useMemo, useRef } from 'react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Transaction, ExpenseCategory } from '@/types';
-import { Tag, FileDown } from 'lucide-react';
+import { Tag, FileDown, Printer } from 'lucide-react';
 import { Button } from '../ui/button';
-import { exportChartToPdf } from '@/lib/pdf-generator';
+import { exportChartToPdf, printChart } from '@/lib/pdf-generator';
 
 interface ExpenseCategoryChartProps {
   transactions: Transaction[];
@@ -60,6 +60,12 @@ export function ExpenseCategoryChart({ transactions, categories }: ExpenseCatego
     }
   }
 
+  const handlePrint = () => {
+    if(chartRef.current) {
+      printChart('Despesas por Categoria', chartRef.current);
+    }
+  }
+
 
   return (
     <Card>
@@ -68,10 +74,16 @@ export function ExpenseCategoryChart({ transactions, categories }: ExpenseCatego
             <Tag className="h-5 w-5" />
             Despesas por Categoria
         </CardTitle>
-        <Button variant="outline" size="sm" onClick={handleExport} disabled={data.length === 0}>
-            <FileDown className="h-4 w-4 mr-2" />
-            Exportar para PDF
-        </Button>
+        <div className='flex gap-2'>
+             <Button variant="outline" size="sm" onClick={handlePrint} disabled={data.length === 0}>
+                <Printer className="h-4 w-4 mr-2" />
+                Imprimir
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleExport} disabled={data.length === 0}>
+                <FileDown className="h-4 w-4 mr-2" />
+                Exportar para PDF
+            </Button>
+        </div>
       </CardHeader>
       <CardContent>
         {data.length > 0 ? (

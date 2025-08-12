@@ -3,9 +3,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import type { Event } from '@/types';
-import { CalendarCheck, CalendarClock, CalendarX, Package, Sigma, FileDown } from 'lucide-react';
+import { CalendarCheck, CalendarClock, CalendarX, Package, Sigma, FileDown, Printer } from 'lucide-react';
 import { Button } from '../ui/button';
-import { exportToPdf } from '@/lib/pdf-generator';
+import { exportToPdf, printReport } from '@/lib/pdf-generator';
 
 interface EventSummaryReportProps {
   events: Event[];
@@ -25,7 +25,7 @@ export function EventSummaryReport({ events }: EventSummaryReportProps) {
     currency: 'BRL',
   }).format(value);
 
-  const handleExport = () => {
+  const generateReportData = () => {
     const headers = [['Métrica', 'Quantidade', 'Valor']];
     const body = [
         ['Eventos Concluídos', concludedEvents, formatCurrency(events.filter(e => e.isDone).reduce((sum, e) => sum + e.value, 0))],
@@ -33,7 +33,24 @@ export function EventSummaryReport({ events }: EventSummaryReportProps) {
         ['A Receber (Concluídos)', '-', formatCurrency(toReceiveValue)],
     ];
     const footer = [['Total Geral', totalEvents, formatCurrency(totalValue)]];
+    return { headers, body, footer };
+  };
+
+  const handleExport = () => {
+    const { headers, body, footer } = generateReportData();
     exportToPdf('Resumo de Eventos', headers, body, footer);
+  }
+
+  const handlePrint = () => {
+      const { headers, body, footer } = generateReportData();
+      const tableHtml = `
+        <table>
+            <thead><tr>${headers[0].map(h => `<th>${h}</th>`).join('')}</tr></thead>
+            <tbody>${body.map(row => `<tr>${row.map(cell => `<td>${cell}</td>`).join('')}</tr>`).join('')}</tbody>
+            <tfoot><tr><td>${footer[0][0]}</td><td>${footer[0][1]}</td><td>${footer[0][2]}</td></tr></tfoot>
+        </table>
+      `;
+      printReport('Resumo de Eventos', tableHtml);
   }
 
   return (
@@ -43,10 +60,16 @@ export function EventSummaryReport({ events }: EventSummaryReportProps) {
             <Package className="h-5 w-5" />
             Resumo de Eventos
         </CardTitle>
-        <Button variant="outline" size="sm" onClick={handleExport} disabled={events.length === 0}>
-            <FileDown className="h-4 w-4 mr-2" />
-            Exportar para PDF
-        </Button>
+        <div className='flex gap-2'>
+            <Button variant="outline" size="sm" onClick={handlePrint} disabled={events.length === 0}>
+                <Printer className="h-4 w-4 mr-2" />
+                Imprimir
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleExport} disabled={events.length === 0}>
+                <FileDown className="h-4 w-4 mr-2" />
+                Exportar para PDF
+            </Button>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="border rounded-md">

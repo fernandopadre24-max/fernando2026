@@ -3,9 +3,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import type { BankAccount } from '@/types';
-import { Landmark, Sigma, FileDown } from 'lucide-react';
+import { Landmark, Sigma, FileDown, Printer } from 'lucide-react';
 import { Button } from '../ui/button';
-import { exportToPdf } from '@/lib/pdf-generator';
+import { exportToPdf, printReport } from '@/lib/pdf-generator';
 
 interface BankAccountsReportProps {
   bankAccounts: BankAccount[];
@@ -20,7 +20,7 @@ export function BankAccountsReport({ bankAccounts }: BankAccountsReportProps) {
     currency: 'BRL',
   }).format(value);
 
-  const handleExport = () => {
+  const generateReportData = () => {
     const headers = [['Banco', 'Agência', 'Conta', 'Saldo']];
     const body = bankAccounts.map(acc => [
         acc.bankName,
@@ -29,7 +29,24 @@ export function BankAccountsReport({ bankAccounts }: BankAccountsReportProps) {
         formatCurrency(acc.balance)
     ]);
     const footer = [['', '', 'Saldo Total', formatCurrency(totalBalance)]];
+    return { headers, body, footer };
+  };
+
+  const handleExport = () => {
+    const { headers, body, footer } = generateReportData();
     exportToPdf('Balanço das Contas Bancárias', headers, body, footer);
+  }
+
+  const handlePrint = () => {
+     const { headers, body, footer } = generateReportData();
+     const table = `
+        <table>
+            <thead><tr>${headers[0].map(h => `<th>${h}</th>`).join('')}</tr></thead>
+            <tbody>${body.map(row => `<tr>${row.map(cell => `<td>${cell}</td>`).join('')}</tr>`).join('')}</tbody>
+            <tfoot><tr><td colspan="3" style="text-align:right; font-weight: bold;">${footer[0][2]}</td><td style="font-weight: bold;">${footer[0][3]}</td></tr></tfoot>
+        </table>
+     `;
+     printReport('Balanço das Contas Bancárias', table);
   }
 
   return (
@@ -39,10 +56,16 @@ export function BankAccountsReport({ bankAccounts }: BankAccountsReportProps) {
             <Landmark className="h-5 w-5" />
             Balanço das Contas Bancárias
         </CardTitle>
-        <Button variant="outline" size="sm" onClick={handleExport} disabled={bankAccounts.length === 0}>
-            <FileDown className="h-4 w-4 mr-2" />
-            Exportar para PDF
-        </Button>
+        <div className='flex gap-2'>
+            <Button variant="outline" size="sm" onClick={handlePrint} disabled={bankAccounts.length === 0}>
+                <Printer className="h-4 w-4 mr-2" />
+                Imprimir
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleExport} disabled={bankAccounts.length === 0}>
+                <FileDown className="h-4 w-4 mr-2" />
+                Exportar para PDF
+            </Button>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="border rounded-md">

@@ -13,9 +13,9 @@ import {
   TableRow,
   TableFooter
 } from '@/components/ui/table';
-import { History, FileDown } from 'lucide-react';
+import { History, FileDown, Printer } from 'lucide-react';
 import { Button } from '../ui/button';
-import { exportToPdf } from '@/lib/pdf-generator';
+import { exportToPdf, printReport } from '@/lib/pdf-generator';
 
 interface Transfer {
     id: string;
@@ -92,8 +92,8 @@ export function TransferHistoryReport({ events, transactions, bankAccounts }: Tr
     });
   }
 
-  const handleExport = () => {
-     const headers = [['Data da Transferência', 'Descrição', 'Conta de Destino', 'Valor']];
+  const generateReportData = () => {
+    const headers = [['Data da Transferência', 'Descrição', 'Conta de Destino', 'Valor']];
      const body = allTransfers.map(t => [
         formatDate(t.transferDate),
         t.description,
@@ -101,17 +101,40 @@ export function TransferHistoryReport({ events, transactions, bankAccounts }: Tr
         formatCurrency(t.value)
      ]);
      const footer = [['', '', 'Total Transferido', formatCurrency(totalTransferred)]];
+     return { headers, body, footer };
+  }
+
+  const handleExport = () => {
+     const { headers, body, footer } = generateReportData();
      exportToPdf('Histórico de Movimentações Bancárias', headers, body, footer);
+  }
+
+  const handlePrint = () => {
+    const { headers, body, footer } = generateReportData();
+    const tableHtml = `
+        <table>
+            <thead><tr>${headers[0].map(h => `<th>${h}</th>`).join('')}</tr></thead>
+            <tbody>${body.map(row => `<tr>${row.map(cell => `<td>${cell}</td>`).join('')}</tr>`).join('')}</tbody>
+            <tfoot><tr><td colspan="3" style="text-align: right; font-weight: bold;">${footer[0][2]}</td><td style="font-weight: bold;">${footer[0][3]}</td></tr></tfoot>
+        </table>
+    `;
+    printReport('Histórico de Movimentações Bancárias', tableHtml);
   }
 
   return (
     <Card className="bg-yellow-100/60 border-yellow-200/80 dark:bg-yellow-950/50 dark:border-yellow-800/60">
       <CardHeader className="flex flex-row justify-between items-center">
         <CardTitle>Histórico de Movimentações Bancárias</CardTitle>
-         <Button variant="outline" size="sm" onClick={handleExport} disabled={allTransfers.length === 0}>
-            <FileDown className="h-4 w-4 mr-2" />
-            Exportar para PDF
-        </Button>
+        <div className='flex gap-2'>
+            <Button variant="outline" size="sm" onClick={handlePrint} disabled={allTransfers.length === 0}>
+                <Printer className="h-4 w-4 mr-2" />
+                Imprimir
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleExport} disabled={allTransfers.length === 0}>
+                <FileDown className="h-4 w-4 mr-2" />
+                Exportar para PDF
+            </Button>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="border rounded-md bg-card">

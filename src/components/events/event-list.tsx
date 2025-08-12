@@ -13,6 +13,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Pen, Trash2, ArrowRightLeft } from 'lucide-react';
 import { Event, Artist, Contractor } from '@/types';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
 interface EventListProps {
   events: Event[];
@@ -21,6 +23,7 @@ interface EventListProps {
   onEdit: (event: Event) => void;
   onDelete: (id: string) => void;
   onTransfer: (event: Event) => void;
+  onStatusChange: (eventId: string, field: 'isDone' | 'isPaid', value: boolean) => void;
 }
 
 const formatDate = (dateString: string) => {
@@ -31,7 +34,7 @@ const formatCurrency = (value: number) => {
   return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 };
 
-export function EventList({ events, artists, contractors, onEdit, onDelete, onTransfer }: EventListProps) {
+export function EventList({ events, artists, contractors, onEdit, onDelete, onTransfer, onStatusChange }: EventListProps) {
 
   return (
     <Table>
@@ -58,16 +61,30 @@ export function EventList({ events, artists, contractors, onEdit, onDelete, onTr
               <TableCell>{event.contractor}</TableCell>
               <TableCell>{formatCurrency(event.value)}</TableCell>
                <TableCell>
-                <Badge variant={event.isDone ? 'default' : 'secondary'} 
-                   className={event.isDone ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
-                  {event.isDone ? 'Realizado' : 'Pendente'}
-                </Badge>
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                        id={`isDone-${event.id}`}
+                        checked={event.isDone}
+                        onCheckedChange={(value) => onStatusChange(event.id, 'isDone', value)}
+                        aria-label="Status do Evento"
+                    />
+                    <Label htmlFor={`isDone-${event.id}`} className={event.isDone ? 'text-green-600' : 'text-yellow-600'}>
+                        {event.isDone ? 'Realizado' : 'Pendente'}
+                    </Label>
+                  </div>
               </TableCell>
                <TableCell>
-                <Badge variant={event.isPaid ? 'default' : 'destructive'} 
-                   className={event.isPaid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
-                  {event.isPaid ? 'Pago' : 'Pendente'}
-                </Badge>
+                 <div className="flex items-center space-x-2">
+                    <Switch
+                        id={`isPaid-${event.id}`}
+                        checked={event.isPaid}
+                        onCheckedChange={(value) => onStatusChange(event.id, 'isPaid', value)}
+                        aria-label="Status do Pagamento"
+                    />
+                     <Label htmlFor={`isPaid-${event.id}`} className={event.isPaid ? 'text-green-600' : 'text-red-600'}>
+                        {event.isPaid ? 'Pago' : 'Pendente'}
+                    </Label>
+                  </div>
               </TableCell>
               <TableCell>
                  <Badge variant={event.isTransferred ? 'default' : 'secondary'}

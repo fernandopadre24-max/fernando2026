@@ -59,6 +59,17 @@ const EventsPage = () => {
     setSelectedEvent(event);
     setIsTransferDialogOpen(true);
   };
+  
+  const handleStatusChange = (eventId: string, field: 'isDone' | 'isPaid', value: boolean) => {
+    const updatedEvents = events.map((event) => {
+      if (event.id === eventId) {
+        return { ...event, [field]: value };
+      }
+      return event;
+    });
+    setEvents(updatedEvents);
+    saveData('events', updatedEvents);
+  };
 
   const handleTransfer = (accountId: string) => {
     if (!selectedEvent) return;
@@ -124,6 +135,7 @@ const EventsPage = () => {
             onEdit={handleEditEvent}
             onDelete={handleDeleteEvent}
             onTransfer={handleOpenTransferDialog}
+            onStatusChange={handleStatusChange}
         />
       </div>
 

@@ -54,10 +54,6 @@ export default function Home() {
       setArtists(getUserData('artists') || initialArtists);
       setContractors(getUserData('contractors') || initialContractors);
       setBankAccounts(getUserData('bankAccounts') || []);
-    } else if (isClient && !user) {
-      // The redirect is now handled by AppShell, but we can still push here as a fallback
-      // Or simply let AppShell handle it by returning null until user is authenticated.
-       router.push('/login');
     }
   }, [user, isClient, router, getUserData]);
 
@@ -180,7 +176,7 @@ export default function Home() {
   }
   
   if (!isClient || !user) {
-    return null; // Or a loading spinner, handled by AppShell redirection
+    return null; // The redirect is now handled by AppShell
   }
 
   return (

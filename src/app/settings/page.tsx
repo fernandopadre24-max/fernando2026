@@ -8,13 +8,24 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/components/theme-provider';
-import { ThemeSettings } from '@/types';
+import { ThemeSettings, FontOption } from '@/types';
 
 const defaultSettings: ThemeSettings = {
     theme: 'light',
-    font: 'PT Sans',
-    primaryColor: '262 52% 50%' // --primary-hsl
+    fontHeadline: 'Poppins',
+    fontBody: 'PT Sans',
+    primaryColor: '262 52% 50%', // --primary-hsl
+    fontSize: 'base'
 };
+
+const fontOptions: { value: FontOption, label: string }[] = [
+    { value: 'Poppins', label: 'Poppins' },
+    { value: 'PT Sans', label: 'PT Sans' },
+    { value: 'Roboto', label: 'Roboto' },
+    { value: 'Lato', label: 'Lato' },
+    { value: 'Open Sans', label: 'Open Sans' },
+    { value: 'Montserrat', label: 'Montserrat' }
+];
 
 export default function SettingsPage() {
     const { settings, setSettings } = useTheme();
@@ -52,20 +63,62 @@ export default function SettingsPage() {
                         </RadioGroup>
                     </div>
 
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-4">
+                            <Label className="text-lg font-semibold" htmlFor="font-headline-select">Fonte dos Títulos</Label>
+                            <Select
+                                value={settings.fontHeadline}
+                                onValueChange={(value: FontOption) => setSettings({ ...settings, fontHeadline: value })}
+                            >
+                                <SelectTrigger id="font-headline-select" className="w-full">
+                                    <SelectValue placeholder="Selecione uma fonte" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {fontOptions.map(font => (
+                                        <SelectItem key={font.value} value={font.value}>{font.label}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="space-y-4">
+                            <Label className="text-lg font-semibold" htmlFor="font-body-select">Fonte do Corpo</Label>
+                            <Select
+                                value={settings.fontBody}
+                                onValueChange={(value: FontOption) => setSettings({ ...settings, fontBody: value })}
+                            >
+                                <SelectTrigger id="font-body-select" className="w-full">
+                                    <SelectValue placeholder="Selecione uma fonte" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {fontOptions.map(font => (
+                                        <SelectItem key={font.value} value={font.value}>{font.label}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+
+
                     <div className="space-y-4">
-                        <Label className="text-lg font-semibold" htmlFor="font-select">Fonte</Label>
-                        <Select
-                            value={settings.font}
-                            onValueChange={(value: 'Poppins' | 'PT Sans') => setSettings({ ...settings, font: value })}
+                        <Label className="text-lg font-semibold">Tamanho da Fonte</Label>
+                         <RadioGroup
+                            value={settings.fontSize}
+                            onValueChange={(value: 'sm' | 'base' | 'lg') => setSettings({ ...settings, fontSize: value })}
                         >
-                            <SelectTrigger id="font-select" className="w-[280px]">
-                                <SelectValue placeholder="Selecione uma fonte" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="Poppins">Poppins (Títulos)</SelectItem>
-                                <SelectItem value="PT Sans">PT Sans (Corpo)</SelectItem>
-                            </SelectContent>
-                        </Select>
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="sm" id="sm" />
+                                <Label htmlFor="sm">Pequeno</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="base" id="base" />
+                                <Label htmlFor="base">Normal</Label>
+                            </div>
+                             <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="lg" id="lg" />
+                                <Label htmlFor="lg">Grande</Label>
+                            </div>
+                        </RadioGroup>
                     </div>
 
                     <div className="space-y-4">

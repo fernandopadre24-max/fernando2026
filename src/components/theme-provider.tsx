@@ -7,8 +7,10 @@ import { loadData, saveData } from '@/lib/storage';
 
 const defaultSettings: ThemeSettings = {
     theme: 'light',
-    font: 'PT Sans',
-    primaryColor: '262 52% 50%'
+    fontHeadline: 'Poppins',
+    fontBody: 'PT Sans',
+    primaryColor: '262 52% 50%',
+    fontSize: 'base'
 };
 
 interface ThemeProviderState {
@@ -33,13 +35,13 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         root.style.setProperty('--primary-hsl', settings.primaryColor);
 
         const body = window.document.body;
-        if (settings.font === 'Poppins') {
-            body.style.setProperty('--font-body', "'Poppins', sans-serif");
-            body.style.setProperty('--font-headline', "'Poppins', sans-serif");
-        } else {
-             body.style.setProperty('--font-body', "'PT Sans', sans-serif");
-             body.style.setProperty('--font-headline', "'Poppins', sans-serif");
-        }
+        body.style.setProperty('--font-headline', `'${settings.fontHeadline}', sans-serif`);
+        body.style.setProperty('--font-body', `'${settings.fontBody}', sans-serif`);
+        
+
+        body.classList.remove('text-sm', 'text-base', 'text-lg');
+        body.classList.add(`text-${settings.fontSize}`);
+
 
         saveData('themeSettings', settings);
     }, [settings]);

@@ -10,6 +10,7 @@ const getPageTitle = (pathname: string) => {
     if (pathname.startsWith('/artists')) return 'Artistas';
     if (pathname.startsWith('/contractors')) return 'Contratantes';
     if (pathname.startsWith('/banks')) return 'Bancos';
+    if (pathname.startsWith('/finance')) return 'Financeiro';
     if (pathname.startsWith('/reports')) return 'Relatórios';
     return 'Controle Financeiro';
 };

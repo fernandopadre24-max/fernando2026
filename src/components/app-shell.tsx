@@ -17,6 +17,7 @@ import {
   Banknote,
   Landmark,
   LineChart,
+  Wallet,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -28,6 +29,7 @@ const menuItems = [
   { href: '/artists', label: 'Artistas', icon: Users },
   { href: '/contractors', label: 'Contratantes', icon: Banknote },
   { href: '/banks', label: 'Bancos', icon: Landmark },
+  { href: '/finance', label: 'Financeiro', icon: Wallet },
   { href: '/reports', label: 'Relatórios', icon: LineChart },
 ];
 

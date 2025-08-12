@@ -31,7 +31,7 @@ const ArtistsPage = () => {
     } else {
       const newArtist: Artist = {
         ...artistData,
-        id: new Date().toISOString(),
+        id: `artist-${Date.now()}`,
       };
       updatedArtists = [...artists, newArtist];
     }

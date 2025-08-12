@@ -32,7 +32,7 @@ const FinancePage = () => {
   useEffect(() => {
     if (user) {
         setTransactions(loadData('transactions', []));
-        setCategories(loadData('expenseCategories', [{ id: '1', name: 'Alimentação' }, { id: '2', name: 'Transporte' }]));
+        setCategories(loadData('expenseCategories', [{ id: 'cat-1', name: 'Alimentação' }, { id: 'cat-2', name: 'Transporte' }]));
         setArtists(loadData('artists', []));
         setContractors(loadData('contractors', []));
     }
@@ -43,7 +43,7 @@ const FinancePage = () => {
     if (transaction.id) {
       updatedTransactions = transactions.map((t) => (t.id === transaction.id ? transaction : t));
     } else {
-      updatedTransactions = [...transactions, { ...transaction, id: new Date().toISOString() }];
+      updatedTransactions = [...transactions, { ...transaction, id: `trans-${Date.now()}` }];
     }
     setTransactions(updatedTransactions);
     saveData('transactions', updatedTransactions);

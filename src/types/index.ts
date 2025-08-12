@@ -80,3 +80,12 @@ export type ThemeSettings = {
     colorTheme: ColorTheme;
     pageBackgroundColor: string;
 }
+
+export type UserRole = 'admin' | 'user';
+
+export type User = {
+  id: string;
+  username: string;
+  pass: string;
+  role: UserRole;
+}

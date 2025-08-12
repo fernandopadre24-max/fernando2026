@@ -34,8 +34,8 @@ const EventsPage = () => {
   useEffect(() => {
     if (user) {
         setEvents(loadData('events', []));
-        setArtists(loadData('artists', [{ id: '1', name: 'Artista Padrão' }]));
-        setContractors(loadData('contractors', [{ id: '1', name: 'Contratante Padrão' }]));
+        setArtists(loadData('artists', []));
+        setContractors(loadData('contractors', []));
         setBankAccounts(loadData('bankAccounts', []));
     }
   }, [user]);
@@ -45,7 +45,7 @@ const EventsPage = () => {
     if (event.id) {
       updatedEvents = events.map((e) => (e.id === event.id ? event : e));
     } else {
-      updatedEvents = [...events, { ...event, id: new Date().toISOString(), isTransferred: false }];
+      updatedEvents = [...events, { ...event, id: `event-${Date.now()}`, isTransferred: false }];
     }
     setEvents(updatedEvents);
     saveData('events', updatedEvents);
@@ -112,7 +112,7 @@ const EventsPage = () => {
     // Create a new transaction
     const transactions = loadData('transactions', []);
     const newTransaction: Transaction = {
-      id: new Date().toISOString(),
+      id: `trans-${Date.now()}`,
       description: `Transferência do evento: ${selectedEvent.artist} - ${new Date(selectedEvent.date).toLocaleDateString('pt-BR')}`,
       value: selectedEvent.value,
       date: new Date().toISOString().split('T')[0],

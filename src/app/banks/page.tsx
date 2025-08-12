@@ -37,16 +37,16 @@ const BanksPage = () => {
     }
   }, [user]);
 
-  const handleSaveAccount = (accountData: Omit<BankAccount, 'id'>) => {
+  const handleSaveAccount = (accountData: Omit<BankAccount, 'id' | 'balance'> & { balance?: number }) => {
     let updatedAccounts;
     if (selectedAccount) {
       updatedAccounts = accounts.map((acc) =>
-        acc.id === selectedAccount.id ? { ...selectedAccount, ...accountData } : acc
+        acc.id === selectedAccount.id ? { ...selectedAccount, ...accountData, balance: accountData.balance ?? selectedAccount.balance } : acc
       );
     } else {
       const newAccount: BankAccount = {
         ...accountData,
-        id: new Date().toISOString(),
+        id: `bank-${Date.now()}`,
         balance: accountData.balance || 0,
       };
       updatedAccounts = [...accounts, newAccount];
@@ -69,7 +69,7 @@ const BanksPage = () => {
     saveData('bankAccounts', updatedAccounts);
 
     const newTransaction: Transaction = {
-      id: new Date().toISOString(),
+      id: `trans-${Date.now()}`,
       description: data.description,
       value: data.value,
       date: data.date,

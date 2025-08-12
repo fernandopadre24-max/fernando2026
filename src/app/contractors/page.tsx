@@ -31,7 +31,7 @@ const ContractorsPage = () => {
     } else {
       const newContractor: Contractor = {
         ...contractorData,
-        id: new Date().toISOString(),
+        id: `contractor-${Date.now()}`,
       };
       updatedContractors = [...contractors, newContractor];
     }

@@ -16,6 +16,7 @@ const getPageTitle = (pathname: string) => {
     if (pathname.startsWith('/finance')) return 'Financeiro';
     if (pathname.startsWith('/reports')) return 'Relatórios';
     if (pathname.startsWith('/settings')) return 'Configurações';
+    if (pathname.startsWith('/users')) return 'Usuários';
     return 'Controle Financeiro';
 };
 

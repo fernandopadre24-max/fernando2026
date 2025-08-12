@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Pen, Trash2, ArrowUpCircle, ArrowDownCircle, ChevronDown } from 'lucide-react';
-import { BankAccount, Transaction } from '@/types';
+import { BankAccount, Transaction, Artist, Contractor } from '@/types';
 import {
   Collapsible,
   CollapsibleContent,
@@ -29,6 +29,8 @@ import {
 interface BankListProps {
   accounts: BankAccount[];
   transactions: Transaction[];
+  artists: Artist[];
+  contractors: Contractor[];
   onEdit: (account: BankAccount) => void;
   onDelete: (id: string) => void;
   onDeposit: (account: BankAccount) => void;
@@ -43,8 +45,19 @@ const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
 };
 
-export function BankList({ accounts, transactions, onEdit, onDelete, onDeposit, onWithdraw }: BankListProps) {
+export function BankList({ accounts, transactions, artists, contractors, onEdit, onDelete, onDeposit, onWithdraw }: BankListProps) {
     const [openAccountId, setOpenAccountId] = React.useState<string | null>(null);
+
+    const getAssociatedName = (transaction: Transaction) => {
+        if (transaction.type === 'Despesa' && transaction.artistId) {
+            return artists.find(a => a.id === transaction.artistId)?.name || '-';
+        }
+        if (transaction.type === 'Receita' && transaction.contractorId) {
+            return contractors.find(c => c.id === transaction.contractorId)?.name || '-';
+        }
+        return '-';
+    }
+
 
   return (
     <div className="bg-notebook">
@@ -137,6 +150,8 @@ export function BankList({ accounts, transactions, onEdit, onDelete, onDeposit, 
                                                      <TableRow>
                                                          <TableHead>Data</TableHead>
                                                          <TableHead>Descrição</TableHead>
+                                                         <TableHead>Forma Pgto.</TableHead>
+                                                         <TableHead>Associado a</TableHead>
                                                          <TableHead className="text-right">Valor</TableHead>
                                                      </TableRow>
                                                  </TableHeader>
@@ -145,6 +160,8 @@ export function BankList({ accounts, transactions, onEdit, onDelete, onDeposit, 
                                                          <TableRow key={t.id}>
                                                              <TableCell>{formatDate(t.date)}</TableCell>
                                                              <TableCell>{t.description}</TableCell>
+                                                             <TableCell>{t.paymentMethod || '-'}</TableCell>
+                                                             <TableCell>{getAssociatedName(t)}</TableCell>
                                                              <TableCell className={`text-right ${t.type === 'Receita' ? 'text-green-600' : 'text-red-600'}`}>
                                                                 {t.type === 'Receita' ? '+' : '-'} {formatCurrency(t.value)}
                                                             </TableCell>

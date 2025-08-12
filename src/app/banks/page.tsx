@@ -121,6 +121,8 @@ const BanksPage = () => {
         <BankList 
             accounts={accounts} 
             transactions={transactions}
+            artists={artists}
+            contractors={contractors}
             onEdit={handleEditAccount}
             onDelete={handleDeleteAccount}
             onDeposit={(account) => handleOpenMovementForm(account, 'deposit')}

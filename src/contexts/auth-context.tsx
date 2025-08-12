@@ -98,7 +98,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     const newUserId = `user-${Date.now()}`;
-    const role: UserRole = users.size === 0 ? 'admin' : 'user';
+    const role: UserRole = username.toLowerCase() === 'admin' && users.size === 0 ? 'admin' : 'user';
 
     const newUser: User = {
         id: newUserId,
@@ -153,18 +153,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error("Você não pode excluir sua própria conta.");
     }
 
-    let userToDelete: User | undefined;
-    for (const u of users.values()) {
-        if (u.id === userId) {
-            userToDelete = u;
-            break;
-        }
-    }
+    const userToDelete = Array.from(users.values()).find(u => u.id === userId);
 
     if (userToDelete) {
         // Delete user data. The key format is `${userId}_${key}`
         Object.keys(localStorage).forEach(key => {
-            if (key.startsWith(`${userToDelete?.id}_`)) {
+            if (key.startsWith(`${userToDelete.id}_`)) {
                 localStorage.removeItem(key);
             }
         });

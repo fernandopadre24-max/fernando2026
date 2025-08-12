@@ -44,9 +44,8 @@ import type { Contractor } from '@/types';
 import { useAuth } from '@/hooks/use-auth';
 
 export default function ContractorsPage() {
-  const { user, getUserData, saveUserData } = useAuth();
+  const { user, getUserData, saveUserData, isLoading } = useAuth();
   const [contractors, setContractors] = useState<Contractor[]>([]);
-  const [isClient, setIsClient] = useState(false);
 
   const [isAddEditDialogOpen, setIsAddEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -54,20 +53,19 @@ export default function ContractorsPage() {
   const [contractorName, setContractorName] = useState('');
 
   useEffect(() => {
-    setIsClient(true);
-    if (user) {
+    if (!isLoading && user) {
       const storedContractors = getUserData('contractors');
       if (storedContractors) {
         setContractors(storedContractors);
       }
     }
-  }, [user, getUserData]);
+  }, [user, isLoading, getUserData]);
 
   useEffect(() => {
-    if (isClient && user) {
+    if (user) {
       saveUserData('contractors', contractors);
     }
-  }, [contractors, isClient, user, saveUserData]);
+  }, [contractors, user, saveUserData]);
 
   const handleSave = () => {
     if (selectedContractor) {
@@ -123,7 +121,7 @@ export default function ContractorsPage() {
     setSelectedContractor(null);
   };
 
-  if (!isClient || !user) {
+  if (isLoading || !user) {
     return null; // or a loading spinner
   }
 

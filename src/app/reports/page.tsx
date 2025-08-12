@@ -13,24 +13,22 @@ import { TransferHistoryReport } from '@/components/reports/transfer-history-rep
 import { useAuth } from '@/hooks/use-auth';
 
 export default function ReportsPage() {
-  const { user, getUserData } = useAuth();
+  const { user, getUserData, isLoading } = useAuth();
   const [events, setEvents] = useState<Event[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<ExpenseCategory[]>([]);
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
-  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    setIsClient(true);
-    if (user) {
+    if (!isLoading && user) {
       setEvents(getUserData('events') || []);
       setTransactions(getUserData('transactions') || []);
       setCategories(getUserData('expenseCategories') || []);
       setBankAccounts(getUserData('bankAccounts') || []);
     }
-  }, [user, getUserData]);
+  }, [user, isLoading, getUserData]);
 
-  if (!isClient || !user) {
+  if (isLoading || !user) {
     return null; // or a loading spinner
   }
 

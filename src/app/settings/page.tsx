@@ -76,9 +76,8 @@ function hexToHsl(hex: string): string {
 
 
 export default function SettingsPage() {
-    const { user, getUserData, saveUserData } = useAuth();
+    const { user, getUserData, saveUserData, isLoading } = useAuth();
     const { toast } = useToast();
-    const [isClient, setIsClient] = useState(false);
     
     const [appName, setAppName] = useState('Controle Financeiro');
     const [headlineFont, setHeadlineFont] = useState('Poppins, sans-serif');
@@ -90,8 +89,7 @@ export default function SettingsPage() {
     const [moduleIcons, setModuleIcons] = useState<{ [key: string]: string }>({});
 
     useEffect(() => {
-        setIsClient(true);
-        if (user) {
+        if (!isLoading && user) {
             const savedTheme = getUserData('app-theme');
             if (savedTheme) {
                 const { fonts, colors, fontSize: savedFontSize, icons, appName: savedAppName } = savedTheme;
@@ -115,7 +113,7 @@ export default function SettingsPage() {
                 }
             }
         }
-    }, [user, getUserData]);
+    }, [user, isLoading, getUserData]);
 
     const applyTheme = (theme: any) => {
         const root = document.documentElement;
@@ -215,7 +213,7 @@ export default function SettingsPage() {
         }
     };
     
-    if (!isClient || !user) {
+    if (isLoading || !user) {
         return null;
     }
     

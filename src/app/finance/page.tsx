@@ -73,12 +73,11 @@ const transactionSchema = z.object({
 type TransactionFormValues = z.infer<typeof transactionSchema>;
 
 export default function FinancePage() {
-  const { user, getUserData, saveUserData } = useAuth();
+  const { user, getUserData, saveUserData, isLoading } = useAuth();
   const [events, setEvents] = useState<Event[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<ExpenseCategory[]>([]);
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
-  const [isClient, setIsClient] = useState(false);
   
   const { toast } = useToast();
 
@@ -104,22 +103,21 @@ export default function FinancePage() {
   const transactionType = form.watch('type');
 
   useEffect(() => {
-    setIsClient(true);
-    if (user) {
+    if (!isLoading && user) {
       setEvents(getUserData('events') || []);
       const storedTransactions = getUserData('transactions') || [];
       setTransactions(storedTransactions.map((t: Transaction) => ({...t, isTransferred: t.isTransferred || false})));
       setCategories(getUserData('expenseCategories') || []);
       setBankAccounts(getUserData('bankAccounts') || []);
     }
-  }, [user, getUserData]);
+  }, [user, isLoading, getUserData]);
 
   useEffect(() => {
-    if (isClient && user) {
+    if (user) {
       saveUserData('transactions', transactions);
       saveUserData('bankAccounts', bankAccounts);
     }
-  }, [transactions, bankAccounts, isClient, user, saveUserData]);
+  }, [transactions, bankAccounts, user, saveUserData]);
 
   const handleSaveTransaction = (data: TransactionFormValues) => {
     const transactionData = {
@@ -249,7 +247,7 @@ export default function FinancePage() {
   const totalExpenses = transactions.filter(t => t.type === 'Despesa').reduce((sum, t) => sum + t.value, 0);
   const netProfit = totalRevenue - totalExpenses;
 
-  if (!isClient || !user) {
+  if (isLoading || !user) {
     return null; // or a loading spinner
   }
 

@@ -44,9 +44,8 @@ import type { Artist } from '@/types';
 import { useAuth } from '@/hooks/use-auth';
 
 export default function ArtistsPage() {
-  const { user, getUserData, saveUserData } = useAuth();
+  const { user, getUserData, saveUserData, isLoading } = useAuth();
   const [artists, setArtists] = useState<Artist[]>([]);
-  const [isClient, setIsClient] = useState(false);
   
   const [isAddEditDialogOpen, setIsAddEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -54,20 +53,19 @@ export default function ArtistsPage() {
   const [artistName, setArtistName] = useState('');
 
   useEffect(() => {
-    setIsClient(true);
-    if (user) {
+    if (!isLoading && user) {
       const storedArtists = getUserData('artists');
       if (storedArtists) {
         setArtists(storedArtists);
       }
     }
-  }, [user, getUserData]);
+  }, [user, isLoading, getUserData]);
 
   useEffect(() => {
-    if (isClient && user) {
+    if (user) {
       saveUserData('artists', artists);
     }
-  }, [artists, isClient, user, saveUserData]);
+  }, [artists, user, saveUserData]);
 
   const handleSave = () => {
     if (selectedArtist) {
@@ -124,7 +122,7 @@ export default function ArtistsPage() {
   };
 
 
-  if (!isClient || !user) {
+  if (isLoading || !user) {
     return null; // or a loading spinner
   }
 

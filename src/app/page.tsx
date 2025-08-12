@@ -25,7 +25,7 @@ const initialContractors: Contractor[] = [
 ];
 
 export default function Home() {
-  const { user, getUserData, saveUserData } = useAuth();
+  const { user, getUserData, saveUserData, isLoading } = useAuth();
   const router = useRouter();
 
   const [events, setEvents] = useState<Event[]>([]);
@@ -39,7 +39,10 @@ export default function Home() {
 
   useEffect(() => {
     setIsClient(true);
-    if (user) {
+  }, []);
+  
+  useEffect(() => {
+    if (!isLoading && user) {
       const storedEvents = getUserData('events') || [];
       const parsedEvents = storedEvents.map((event: Event) => ({
         ...event,
@@ -55,7 +58,7 @@ export default function Home() {
       setContractors(getUserData('contractors') || initialContractors);
       setBankAccounts(getUserData('bankAccounts') || []);
     }
-  }, [user, isClient, getUserData]);
+  }, [user, isLoading, getUserData]);
 
   useEffect(() => {
     if(isClient && user) {

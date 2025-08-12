@@ -7,6 +7,7 @@ import type { User } from '@/types';
 
 interface AuthContextType {
   user: User | null;
+  isLoading: boolean;
   login: (username: string, password_provided: string) => boolean;
   logout: () => void;
   register: (username: string, password_provided: string) => boolean;
@@ -18,12 +19,19 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('currentUser');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    try {
+      const storedUser = localStorage.getItem('currentUser');
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
+    } catch (error) {
+      console.error("Failed to parse user from localStorage", error);
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
@@ -79,7 +87,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [user]);
 
 
-  const value = { user, login, logout, register, getUserData, saveUserData };
+  const value = { user, isLoading, login, logout, register, getUserData, saveUserData };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

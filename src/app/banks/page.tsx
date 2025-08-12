@@ -45,11 +45,10 @@ import { TransferHistoryReport } from '@/components/reports/transfer-history-rep
 import { useAuth } from '@/hooks/use-auth';
 
 export default function BanksPage() {
-  const { user, getUserData, saveUserData } = useAuth();
+  const { user, getUserData, saveUserData, isLoading } = useAuth();
   const [accounts, setAccounts] = useState<BankAccount[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [isClient, setIsClient] = useState(false);
 
   const [isAddEditDialogOpen, setIsAddEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -61,19 +60,18 @@ export default function BanksPage() {
   const [balance, setBalance] = useState(0);
 
   useEffect(() => {
-    setIsClient(true);
-    if (user) {
+    if (!isLoading && user) {
       setAccounts(getUserData('bankAccounts') || []);
       setEvents(getUserData('events') || []);
       setTransactions(getUserData('transactions') || []);
     }
-  }, [user, getUserData]);
+  }, [user, isLoading, getUserData]);
 
   useEffect(() => {
-    if (isClient && user) {
+    if (user) {
       saveUserData('bankAccounts', accounts);
     }
-  }, [accounts, isClient, user, saveUserData]);
+  }, [accounts, user, saveUserData]);
   
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat('pt-BR', {
@@ -149,7 +147,7 @@ export default function BanksPage() {
     setSelectedAccount(null);
   };
 
-  if (!isClient || !user) {
+  if (isLoading || !user) {
     return null;
   }
 

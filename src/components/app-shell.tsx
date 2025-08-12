@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/sidebar';
 import { Header } from '@/components/header';
 import { cn } from '@/lib/utils';
-import { Calendar, Mic, UserSquare, LogOut, Landmark, DollarSign, Tag, PieChart, Cog } from 'lucide-react';
+import { Calendar, Mic, UserSquare, LogOut, Landmark, DollarSign, Tag, PieChart, Cog, Loader } from 'lucide-react';
 import { Button } from './ui/button';
 import Image from 'next/image';
 import { useAuth } from '@/hooks/use-auth';
@@ -35,15 +35,10 @@ const menuItems = [
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, logout, getUserData } = useAuth();
+  const { user, logout, getUserData, isLoading } = useAuth();
 
   const [customIcons, setCustomIcons] = React.useState<{ [key: string]: string }>({});
   const [appName, setAppName] = React.useState('Controle Financeiro');
-  const [isClient, setIsClient] = React.useState(false);
-
-  React.useEffect(() => {
-    setIsClient(true);
-  }, []);
   
   const isActive = (path: string) => {
     return pathname === path;
@@ -72,10 +67,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, [user, getUserData]);
 
   React.useEffect(() => {
-    if (isClient && !user && pathname !== '/login' && pathname !== '/signup') {
+    if (!isLoading) {
+      if (!user && pathname !== '/login' && pathname !== '/signup') {
         router.push('/login');
+      }
     }
-  }, [isClient, user, pathname, router]);
+  }, [isLoading, user, pathname, router]);
 
   React.useEffect(() => {
     updateTheme();
@@ -91,6 +88,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       window.removeEventListener('message', handleThemeUpdate);
     };
   }, [updateTheme]);
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <Loader className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
   if (!user && (pathname === '/login' || pathname === '/signup')) {
     return <>{children}</>;

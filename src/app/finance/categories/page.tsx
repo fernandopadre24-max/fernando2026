@@ -45,9 +45,8 @@ import Link from 'next/link';
 import { useAuth } from '@/hooks/use-auth';
 
 export default function ExpenseCategoriesPage() {
-  const { user, getUserData, saveUserData } = useAuth();
+  const { user, getUserData, saveUserData, isLoading } = useAuth();
   const [categories, setCategories] = useState<ExpenseCategory[]>([]);
-  const [isClient, setIsClient] = useState(false);
 
   const [isAddEditDialogOpen, setIsAddEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -55,20 +54,19 @@ export default function ExpenseCategoriesPage() {
   const [categoryName, setCategoryName] = useState('');
 
   useEffect(() => {
-    setIsClient(true);
-    if (user) {
+    if (!isLoading && user) {
       const storedCategories = getUserData('expenseCategories');
       if (storedCategories) {
         setCategories(storedCategories);
       }
     }
-  }, [user, getUserData]);
+  }, [user, isLoading, getUserData]);
 
   useEffect(() => {
-    if (isClient && user) {
+    if (user) {
       saveUserData('expenseCategories', categories);
     }
-  }, [categories, isClient, user, saveUserData]);
+  }, [categories, user, saveUserData]);
 
   const handleSave = () => {
     if (selectedCategory) {
@@ -124,7 +122,7 @@ export default function ExpenseCategoriesPage() {
     setSelectedCategory(null);
   };
 
-  if (!isClient || !user) {
+  if (isLoading || !user) {
     return null; // or a loading spinner
   }
 

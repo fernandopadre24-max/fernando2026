@@ -67,7 +67,7 @@ export default function Home() {
             <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-1">
             <FinancialSummary transactions={transactions} />
             <EventsSummary events={events} />
         </div>

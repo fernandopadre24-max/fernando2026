@@ -13,6 +13,12 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Pen, Trash2 } from 'lucide-react';
 import { Artist } from '@/types';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+
 
 interface ArtistListProps {
   artists: Artist[];
@@ -41,10 +47,19 @@ export function ArtistList({ artists, onEdit, onDelete }: ArtistListProps) {
             artists.map((artist) => (
               <TableRow key={artist.id}>
                 <TableCell>
-                  <Avatar>
-                    <AvatarImage src={artist.imageUrl} alt={artist.name} />
-                    <AvatarFallback>{getInitials(artist.name)}</AvatarFallback>
-                  </Avatar>
+                   <Popover>
+                    <PopoverTrigger asChild>
+                       <Avatar className="cursor-pointer">
+                        <AvatarImage src={artist.imageUrl} alt={artist.name} />
+                        <AvatarFallback>{getInitials(artist.name)}</AvatarFallback>
+                      </Avatar>
+                    </PopoverTrigger>
+                    {artist.imageUrl && (
+                         <PopoverContent className="w-auto p-0">
+                            <img src={artist.imageUrl} alt={artist.name} className="rounded-md" />
+                        </PopoverContent>
+                    )}
+                  </Popover>
                 </TableCell>
                 <TableCell className="font-medium">{artist.name}</TableCell>
                 <TableCell className="text-right">

@@ -26,11 +26,11 @@ import { Header } from './header';
 
 const menuItems = [
   { href: '/', label: 'Início', icon: Home },
+  { href: '/finance', label: 'Financeiro', icon: Wallet },
   { href: '/events', label: 'Eventos', icon: Calendar },
   { href: '/artists', label: 'Artistas', icon: Users },
   { href: '/contractors', label: 'Contratantes', icon: Banknote },
   { href: '/banks', label: 'Bancos', icon: Landmark },
-  { href: '/finance', label: 'Financeiro', icon: Wallet },
   { href: '/reports', label: 'Relatórios', icon: LineChart },
   { href: '/settings', label: 'Configurações', icon: Settings },
 ];

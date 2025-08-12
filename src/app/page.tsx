@@ -9,6 +9,7 @@ import { Calendar } from 'lucide-react';
 import Link from 'next/link';
 import { MonthlyRevenueChart } from '@/components/dashboard/monthly-revenue-chart';
 import { ExpensesByCategoryChart } from '@/components/dashboard/expenses-by-category-chart';
+import { FinancialSummary } from '@/components/finance/financial-summary';
 
 
 const formatCurrency = (value: number) => {
@@ -60,6 +61,8 @@ export default function Home() {
         <div className="flex items-center justify-between space-y-2">
             <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
         </div>
+
+        <FinancialSummary transactions={transactions} />
 
         <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
              <MonthlyRevenueChart transactions={transactions} />

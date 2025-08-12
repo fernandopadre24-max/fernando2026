@@ -11,6 +11,7 @@ import {
   SidebarMenuButton,
   SidebarFooter,
   SidebarInset,
+  SidebarTrigger,
 } from '@/components/ui/sidebar';
 import {
   Home,
@@ -20,11 +21,15 @@ import {
   Landmark,
   LineChart,
   Settings,
+  LogOut,
+  Loader,
 } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Header } from './header';
 import { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/auth-context';
+import { Button } from './ui/button';
 
 const menuItems = [
   { href: '/', label: 'Início', icon: Home },
@@ -38,7 +43,17 @@ const menuItems = [
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, isLoading, logout } = useAuth();
   const [appName, setAppName] = useState('Controle Financeiro');
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      if (pathname !== '/login' && pathname !== '/signup') {
+        router.push('/login');
+      }
+    }
+  }, [isLoading, user, pathname, router]);
 
   useEffect(() => {
     try {
@@ -53,6 +68,22 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       console.error('Failed to load app name from localStorage', e);
     }
   }, [pathname]);
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <Loader className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user && (pathname === '/login' || pathname === '/signup')) {
+    return <main className="flex-1 flex flex-col">{children}</main>;
+  }
+
+  if (!user) {
+     return null;
+  }
 
   return (
     <SidebarProvider>
@@ -81,7 +112,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             ))}
           </SidebarMenu>
         </SidebarContent>
-        <SidebarFooter></SidebarFooter>
+        <SidebarFooter>
+          <div className="p-2">
+            <Button variant="ghost" className="w-full justify-start gap-3" onClick={logout}>
+              <LogOut />
+              <span>Sair</span>
+            </Button>
+          </div>
+        </SidebarFooter>
       </Sidebar>
       <SidebarInset>
         <Header />

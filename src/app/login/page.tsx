@@ -36,10 +36,15 @@ export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [userList, setUserList] = useState<string[]>(loadUsernames());
+  const [userList, setUserList] = useState<string[]>([]);
   const { login, signup } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Load users on the client side to avoid hydration errors
+    setUserList(loadUsernames());
+  }, []);
 
   const handleModeChange = () => {
     setIsLoginMode(!isLoginMode);

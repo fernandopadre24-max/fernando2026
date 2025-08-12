@@ -20,6 +20,7 @@ const accountSchema = z.object({
   bankName: z.string().min(1, 'O nome do banco é obrigatório.'),
   agency: z.string().min(1, 'A agência é obrigatória.'),
   accountNumber: z.string().min(1, 'O número da conta é obrigatório.'),
+  balance: z.coerce.number().optional(),
 });
 
 type AccountFormData = z.infer<typeof accountSchema>;
@@ -27,7 +28,7 @@ type AccountFormData = z.infer<typeof accountSchema>;
 interface BankFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (account: Omit<BankAccount, 'id' | 'balance'>) => void;
+  onSave: (account: Omit<BankAccount, 'id'>) => void;
   account: BankAccount | null;
 }
 
@@ -42,11 +43,18 @@ export function BankForm({ isOpen, onClose, onSave, account }: BankFormProps) {
       bankName: account?.bankName || '',
       agency: account?.agency || '',
       accountNumber: account?.accountNumber || '',
+      balance: account?.balance || 0,
     },
   });
 
   const onSubmit = (data: AccountFormData) => {
-    onSave(data);
+    const saveData: Omit<BankAccount, 'id'> = {
+        bankName: data.bankName,
+        agency: data.agency,
+        accountNumber: data.accountNumber,
+        balance: account ? data.balance! : 0, // Only set balance if editing
+    };
+    onSave(saveData);
   };
 
   return (
@@ -71,6 +79,14 @@ export function BankForm({ isOpen, onClose, onSave, account }: BankFormProps) {
             <Input id="accountNumber" {...register('accountNumber')} />
             {errors.accountNumber && <p className="text-sm text-red-500">{errors.accountNumber.message}</p>}
           </div>
+
+          {account && (
+            <div className="space-y-2">
+                <Label htmlFor="balance">Saldo</Label>
+                <Input id="balance" type="number" step="0.01" {...register('balance')} />
+                {errors.balance && <p className="text-sm text-red-500">{errors.balance.message}</p>}
+            </div>
+          )}
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>

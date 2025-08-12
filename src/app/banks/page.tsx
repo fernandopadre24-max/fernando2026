@@ -33,15 +33,15 @@ const BanksPage = () => {
     setCategories(loadData('expenseCategories', []));
   }, []);
 
-  const handleSaveAccount = (account: Omit<BankAccount, 'id' | 'balance'>) => {
+  const handleSaveAccount = (accountData: Omit<BankAccount, 'id'>) => {
     let updatedAccounts;
     if (selectedAccount) {
       updatedAccounts = accounts.map((acc) =>
-        acc.id === selectedAccount.id ? { ...selectedAccount, ...account } : acc
+        acc.id === selectedAccount.id ? { ...selectedAccount, ...accountData } : acc
       );
     } else {
       const newAccount: BankAccount = {
-        ...account,
+        ...accountData,
         id: new Date().toISOString(),
         balance: 0, 
       };

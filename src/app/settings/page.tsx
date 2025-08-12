@@ -8,9 +8,10 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Paintbrush, Type, Palette, TextQuote, Image as ImageIcon } from 'lucide-react';
+import { Paintbrush, Type, Palette, TextQuote, Image as ImageIcon, Pencil } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import Image from 'next/image';
+import { Input } from '@/components/ui/input';
 
 const fonts = [
   { name: 'Poppins', family: 'Poppins, sans-serif' },
@@ -76,7 +77,8 @@ function hexToHsl(hex: string): string {
 export default function SettingsPage() {
     const { toast } = useToast();
     const [isClient, setIsClient] = useState(false);
-
+    
+    const [appName, setAppName] = useState('Controle Financeiro');
     const [headlineFont, setHeadlineFont] = useState('Poppins, sans-serif');
     const [bodyFont, setBodyFont] = useState('PT Sans, sans-serif');
     const [fontSize, setFontSize] = useState(16);
@@ -89,7 +91,10 @@ export default function SettingsPage() {
         setIsClient(true);
         const savedTheme = localStorage.getItem('app-theme');
         if (savedTheme) {
-            const { fonts, colors, fontSize: savedFontSize, icons } = JSON.parse(savedTheme);
+            const { fonts, colors, fontSize: savedFontSize, icons, appName: savedAppName } = JSON.parse(savedTheme);
+            if (savedAppName) {
+                setAppName(savedAppName);
+            }
             if (fonts) {
                 setHeadlineFont(fonts.headline?.family || 'Poppins, sans-serif');
                 setBodyFont(fonts.body?.family || 'PT Sans, sans-serif');
@@ -111,6 +116,7 @@ export default function SettingsPage() {
     const applyTheme = () => {
         const root = document.documentElement;
         
+        document.title = appName;
         root.style.fontSize = `${fontSize}px`;
         root.style.setProperty('--font-headline', headlineFont);
         root.style.setProperty('--font-body', bodyFont);
@@ -137,6 +143,7 @@ export default function SettingsPage() {
         applyTheme();
         window.postMessage({ type: 'theme-updated' }, '*');
         const theme = {
+            appName: appName,
             fonts: {
                 headline: { family: headlineFont },
                 body: { family: bodyFont },
@@ -158,6 +165,7 @@ export default function SettingsPage() {
     
     const handleReset = () => {
       const defaultSettings = {
+        name: 'Controle Financeiro',
         headline: 'Poppins, sans-serif',
         body: 'PT Sans, sans-serif',
         fontSize: 16,
@@ -166,6 +174,7 @@ export default function SettingsPage() {
         accent: '45 95% 55%',
       };
 
+      setAppName(defaultSettings.name);
       setHeadlineFont(defaultSettings.headline);
       setBodyFont(defaultSettings.body);
       setFontSize(defaultSettings.fontSize);
@@ -175,6 +184,7 @@ export default function SettingsPage() {
       setModuleIcons({});
       
       const root = document.documentElement;
+      document.title = defaultSettings.name;
       root.style.fontSize = `${defaultSettings.fontSize}px`;
       root.style.setProperty('--font-headline', defaultSettings.headline);
       root.style.setProperty('--font-body', defaultSettings.body);
@@ -224,6 +234,19 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="flex flex-col gap-8">
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2"><Pencil /> Título do Aplicativo</CardTitle>
+                            <CardDescription>Defina um novo título para o seu aplicativo.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-2">
+                             <Label htmlFor="app-name">Título</Label>
+                             <Input id="app-name" value={appName} onChange={(e) => setAppName(e.target.value)} />
+                        </CardContent>
+                    </Card>
+
+
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2"><Type /> Tipografia</CardTitle>
@@ -337,3 +360,5 @@ export default function SettingsPage() {
         </AppShell>
     );
 }
+
+    

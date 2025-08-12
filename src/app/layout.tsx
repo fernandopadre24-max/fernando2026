@@ -15,9 +15,13 @@ const applyThemeScript = `
     try {
       const theme = localStorage.getItem('app-theme');
       if (theme) {
-        const { fonts, colors, fontSize } = JSON.parse(theme);
+        const { fonts, colors, fontSize, appName } = JSON.parse(theme);
         const root = document.documentElement;
         
+        if (appName) {
+            document.title = appName;
+        }
+
         if (fonts) {
           if (fonts.body) {
             root.style.setProperty('--font-body', fonts.body.family);

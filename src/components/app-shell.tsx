@@ -34,31 +34,38 @@ const menuItems = [
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [customIcons, setCustomIcons] = React.useState<{ [key: string]: string }>({});
+  const [appName, setAppName] = React.useState('Controle Financeiro');
 
   const isActive = (path: string) => {
     return pathname === path;
   };
 
-  const updateIcons = React.useCallback(() => {
+  const updateTheme = React.useCallback(() => {
     const savedTheme = localStorage.getItem('app-theme');
     if (savedTheme) {
-        const { icons } = JSON.parse(savedTheme);
+        const { icons, appName: savedAppName } = JSON.parse(savedTheme);
         if (icons) {
             setCustomIcons(icons);
         } else {
              setCustomIcons({});
         }
+        if (savedAppName) {
+          setAppName(savedAppName);
+        } else {
+          setAppName('Controle Financeiro');
+        }
     } else {
         setCustomIcons({});
+        setAppName('Controle Financeiro');
     }
   }, []);
 
   React.useEffect(() => {
-    updateIcons();
+    updateTheme();
 
     const handleThemeUpdate = (event: MessageEvent) => {
       if (event.data?.type === 'theme-updated') {
-        updateIcons();
+        updateTheme();
       }
     };
 
@@ -66,7 +73,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     return () => {
       window.removeEventListener('message', handleThemeUpdate);
     };
-  }, [updateIcons]);
+  }, [updateTheme]);
 
   return (
     <SidebarProvider>
@@ -78,7 +85,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     <DollarSign className="h-6 w-6 text-primary" />
                 </div>
                 <h1 className="text-xl font-semibold text-primary font-headline">
-                    Controle Financeiro
+                    {appName}
                 </h1>
             </div>
           </SidebarHeader>

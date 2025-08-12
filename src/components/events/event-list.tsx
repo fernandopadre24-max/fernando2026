@@ -40,7 +40,7 @@ export function EventList({ events, artists, contractors, onEdit, onDelete, onTr
     <div className="bg-notebook">
       <Table>
         <TableHeader>
-          <TableRow>
+          <TableRow className="bg-primary/5 border-b-primary/20">
             <TableHead>Data</TableHead>
             <TableHead>Artista</TableHead>
             <TableHead>Contratante</TableHead>

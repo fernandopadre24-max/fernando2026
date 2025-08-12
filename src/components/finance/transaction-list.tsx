@@ -38,7 +38,7 @@ export function TransactionList({ transactions, categories, onEdit, onDelete }: 
     <div className="bg-notebook">
       <Table>
         <TableHeader>
-          <TableRow>
+          <TableRow className="bg-primary/5 border-b-primary/20">
             <TableHead>Descrição</TableHead>
             <TableHead>Valor</TableHead>
             <TableHead>Data</TableHead>

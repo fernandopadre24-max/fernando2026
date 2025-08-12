@@ -28,7 +28,7 @@ export function BankList({ accounts, onEdit, onDelete }: BankListProps) {
     <div className="bg-notebook">
       <Table>
         <TableHeader>
-          <TableRow>
+          <TableRow className="bg-primary/5 border-b-primary/20">
             <TableHead>Banco</TableHead>
             <TableHead>Agência</TableHead>
             <TableHead>Conta</TableHead>

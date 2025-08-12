@@ -24,7 +24,7 @@ export function ContractorList({ contractors, onEdit, onDelete }: ContractorList
     <div className="bg-notebook">
       <Table>
         <TableHeader>
-          <TableRow>
+          <TableRow className="bg-primary/5 border-b-primary/20">
             <TableHead>Nome</TableHead>
             <TableHead className="text-right">Ações</TableHead>
           </TableRow>

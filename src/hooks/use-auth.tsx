@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const logout = () => {
     localStorage.removeItem('currentUser');
     setUser(null);
-    router.push('/login');
+    router.push('/');
   };
 
   const register = (username: string, password_provided: string): boolean => {
@@ -73,6 +73,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return true;
   };
 
+  // These functions are kept for potential future use but are not used in the simplified app.
   const getUserData = useCallback((key: string) => {
     if (!user) return null;
     const dataKey = `${key}_${user.username}`;

@@ -1,207 +1,122 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
-import type { Artist, Contractor, Event, PaymentMethod, BankAccount } from '@/types';
-import { EventForm, type EventFormValues } from '@/components/event-form';
-import { EventHistory } from '@/components/event-history';
-import { RecentTransfers } from '@/components/recent-transfers';
-import { useToast } from '@/hooks/use-toast';
-import { AppShell } from '@/components/app-shell';
-import { DashboardSummary } from '@/components/dashboard-summary';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { useAuth } from '@/hooks/use-auth';
+import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import Link from 'next/link';
+import { DollarSign } from 'lucide-react';
 
-const initialArtists: Artist[] = [
-    { id: '1', name: 'Os Futuristas' },
-    { id: '2', name: 'Sintetizadores Sonoros' },
-    { id: '3', name: 'A Banda de Ontem' },
-];
+const loginSchema = z.object({
+  username: z.string().min(1, 'Nome de usuário é obrigatório.'),
+  password: z.string().min(1, 'Senha é obrigatória.'),
+});
 
-const initialContractors: Contractor[] = [
-  { id: '1', name: 'Palco Principal Produções' },
-  { id: '2', name: 'Luz e Som Eventos' },
-  { id: '3', name: 'Festas & Cia' },
-];
+type LoginFormValues = z.infer<typeof loginSchema>;
 
-export default function Home() {
-  const { user, getUserData, saveUserData, isLoading } = useAuth();
-  
-  const [events, setEvents] = useState<Event[]>([]);
+export default function LoginPage() {
+  const router = useRouter();
+  const { login } = useAuth();
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const [artists, setArtists] = useState<Artist[]>([]);
-  const [contractors, setContractors] = useState<Contractor[]>([]);
-  const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const form = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      username: '',
+      password: '',
+    },
+  });
 
-  useEffect(() => {
-    if (!isLoading && user) {
-      const storedEvents = getUserData('events') || [];
-      const parsedEvents = storedEvents.map((event: Event) => ({
-        ...event,
-        paymentMethod: event.paymentMethod || null,
-        observations: event.observations || '',
-        isTransferred: event.isTransferred || false,
-        transferredToBankAccountId: event.transferredToBankAccountId || null,
-        transferDate: event.transferDate || undefined,
-      }));
-      setEvents(parsedEvents);
-
-      setArtists(getUserData('artists') || initialArtists);
-      setContractors(getUserData('contractors') || initialContractors);
-      setBankAccounts(getUserData('bankAccounts') || []);
-    }
-  }, [user, isLoading, getUserData]);
-
-  useEffect(() => {
-    if(user) {
-      saveUserData('events', events);
-      saveUserData('artists', artists);
-      saveUserData('contractors', contractors);
-      saveUserData('bankAccounts', bankAccounts);
-    }
-  }, [events, artists, contractors, bankAccounts, user, saveUserData]);
-
-
-  const handleEventAdd = async (data: EventFormValues) => {
-    setIsSubmitting(true);
+  const onSubmit = (data: LoginFormValues) => {
+    setIsLoading(true);
     try {
-      const artistName = artists.find(a => a.id === data.artistId)?.name || 'N/A';
-      const contractorName = contractors.find(c => c.id === data.contractorId)?.name || 'N/A';
-
-      if(artistName === 'N/A' || contractorName === 'N/A') {
-        throw new Error("Artista ou Contratante não encontrado.");
+      const loggedIn = login(data.username, data.password);
+      if (loggedIn) {
+        toast({ title: 'Login bem-sucedido!', description: 'Bem-vindo de volta.' });
+        // NOTE: In a real app, you would redirect to a dashboard page.
+        // For now, we can just show a success message as there's no "inside" to the app.
+        alert(`Bem-vindo, ${data.username}! Você está logado.`);
+        form.reset();
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Falha no login',
+          description: 'Nome de usuário ou senha incorretos.',
+        });
       }
-
-      const newEvent: Event = {
-        id: crypto.randomUUID(),
-        ...data,
-        artist: artistName,
-        contractor: contractorName,
-        isDone: false,
-        isPaid: false,
-        paymentMethod: null,
-        isTransferred: false,
-      };
-      setEvents((prevEvents) => [newEvent, ...prevEvents]);
-       toast({
-        title: "Evento Adicionado",
-        description: `O evento de ${artistName} foi adicionado com sucesso.`,
-      });
-
     } catch (error) {
-      console.error("Falha ao adicionar evento:", error);
       toast({
-        variant: "destructive",
-        title: "Ocorreu um Erro",
-        description: "Não foi possível adicionar o evento. Por favor, tente novamente.",
+        variant: 'destructive',
+        title: 'Erro',
+        description: 'Ocorreu um erro inesperado.',
       });
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
-  
-  const handleEventUpdate = (updatedEvent: Event) => {
-    const artistName = artists.find(a => a.id === updatedEvent.artistId)?.name || 'N/A';
-    const contractorName = contractors.find(c => c.id === updatedEvent.contractorId)?.name || 'N/A';
-
-    setEvents(events.map(event => event.id === updatedEvent.id ? {...updatedEvent, artist: artistName, contractor: contractorName} : event));
-    toast({
-      title: "Evento Atualizado",
-      description: "O evento foi atualizado com sucesso.",
-    });
-  }
-
-  const handleEventDelete = (eventId: string) => {
-    setEvents(events.filter(event => event.id !== eventId));
-     toast({
-      title: "Evento Excluído",
-      description: "O evento foi excluído com sucesso.",
-      variant: "destructive"
-    });
-  }
-
-
-  const handleEventStatusChange = (eventId: string, type: 'isDone', value: boolean) => {
-    setEvents(prevEvents =>
-      prevEvents.map(event =>
-        event.id === eventId ? { ...event, [type]: value } : event
-      )
-    );
-  };
-
-  const handlePaymentStatusChange = (eventId: string, isPaid: boolean, paymentMethod: PaymentMethod | null) => {
-    setEvents(prevEvents =>
-      prevEvents.map(event =>
-        event.id === eventId ? { ...event, isPaid, paymentMethod: isPaid ? paymentMethod : null } : event
-      )
-    );
-     if(isPaid) {
-        toast({
-            title: "Status de Pagamento Atualizado",
-            description: "O status de pagamento do evento foi atualizado.",
-        });
-     }
-  }
-
-  const handleTransfer = (eventId: string, bankAccountId: string) => {
-    const eventToTransfer = events.find(e => e.id === eventId);
-    const accountToUpdate = bankAccounts.find(acc => acc.id === bankAccountId);
-    if (!eventToTransfer || !accountToUpdate) return;
-
-    setBankAccounts(prevAccounts => 
-      prevAccounts.map(account => 
-        account.id === bankAccountId 
-          ? { ...account, balance: account.balance + eventToTransfer.value }
-          : account
-      )
-    );
-
-    setEvents(prevEvents => 
-      prevEvents.map(event => 
-        event.id === eventId 
-          ? { ...event, isTransferred: true, transferredToBankAccountId: bankAccountId, transferDate: new Date().toISOString() }
-          : event
-      )
-    );
-
-    toast({
-      title: "Transferência Realizada",
-      description: `Valor de ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(eventToTransfer.value)} transferido para a conta ${accountToUpdate.bankName} com sucesso.`
-    })
-  }
 
   return (
-    <AppShell>
-        <main className="container mx-auto px-4 pb-16">
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start mb-8">
-            <div className="lg:col-span-3 flex flex-col gap-8">
-                <DashboardSummary events={events} />
-                <RecentTransfers events={events} bankAccounts={bankAccounts} />
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <div className="w-full max-w-md">
+         <div className="flex justify-center mb-6">
+            <div className="flex items-center gap-3 text-primary">
+                 <div className="p-3 bg-primary/10 rounded-lg">
+                    <DollarSign className="h-8 w-8" />
+                </div>
+                <h1 className="text-3xl font-bold font-headline">
+                    Controle Financeiro
+                </h1>
             </div>
-            <div className="lg:col-span-2">
-                <EventForm
-                artists={artists}
-                contractors={contractors}
-                onEventAdd={handleEventAdd}
-                isSubmitting={isSubmitting}
+        </div>
+        <Card>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <CardHeader className="space-y-1 text-center">
+              <CardTitle className="text-2xl">Acessar sua Conta</CardTitle>
+              <CardDescription>
+                Digite seu nome de usuário e senha para entrar.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="username">Usuário</Label>
+                <Input
+                  id="username"
+                  type="text"
+                  placeholder="seu-usuario"
+                  {...form.register('username')}
+                  disabled={isLoading}
                 />
-            </div>
-            </div>
-            <div className="flex flex-col gap-8">
-            <EventHistory 
-                events={events} 
-                artists={artists}
-                contractors={contractors}
-                bankAccounts={bankAccounts}
-                onStatusChange={handleEventStatusChange}
-                onPaymentChange={handlePaymentStatusChange}
-                onEventUpdate={handleEventUpdate}
-                onEventDelete={handleEventDelete}
-                onTransfer={handleTransfer}
-            />
-            </div>
-        </main>
-    </AppShell>
+                 {form.formState.errors.username && <p className="text-sm text-destructive">{form.formState.errors.username.message}</p>}
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="password">Senha</Label>
+                <Input id="password" type="password" {...form.register('password')} disabled={isLoading}/>
+                 {form.formState.errors.password && <p className="text-sm text-destructive">{form.formState.errors.password.message}</p>}
+              </div>
+            </CardContent>
+            <CardFooter className="flex flex-col gap-4">
+              <Button className="w-full" type="submit" disabled={isLoading}>
+                {isLoading ? 'Entrando...' : 'Entrar'}
+              </Button>
+               <p className="text-sm text-center text-muted-foreground">
+                    Não tem uma conta?{' '}
+                    <Link href="/signup" className="font-semibold text-primary hover:underline">
+                        Cadastre-se aqui
+                    </Link>
+                </p>
+            </CardFooter>
+          </form>
+        </Card>
+      </div>
+    </div>
   );
 }

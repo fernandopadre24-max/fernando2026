@@ -16,7 +16,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Artist } from '@/types';
 import { useState, useEffect, ChangeEvent } from 'react';
-import Image from 'next/image';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 
@@ -42,28 +41,35 @@ export function ArtistForm({ isOpen, onClose, onSave, artist }: ArtistFormProps)
     handleSubmit,
     setValue,
     watch,
+    reset,
     formState: { errors },
   } = useForm<ArtistFormData>({
     resolver: zodResolver(artistSchema),
     defaultValues: {
-      name: artist?.name || '',
-      imageUrl: artist?.imageUrl || '',
+      name: '',
+      imageUrl: '',
     },
   });
-
-  const currentImageUrl = watch('imageUrl');
+  
+  const watchedName = watch('name');
 
   useEffect(() => {
-    if (artist) {
-        setValue('name', artist.name);
-        setValue('imageUrl', artist.imageUrl);
-        setPreviewImage(artist.imageUrl || null);
-    } else {
-        setValue('name', '');
-        setValue('imageUrl', '');
-        setPreviewImage(null);
+    if (isOpen) {
+        if (artist) {
+            reset({
+                name: artist.name,
+                imageUrl: artist.imageUrl,
+            });
+            setPreviewImage(artist.imageUrl || null);
+        } else {
+            reset({
+                name: '',
+                imageUrl: '',
+            });
+            setPreviewImage(null);
+        }
     }
-  }, [artist, setValue]);
+  }, [artist, isOpen, reset]);
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -82,7 +88,8 @@ export function ArtistForm({ isOpen, onClose, onSave, artist }: ArtistFormProps)
     onSave(data);
   };
   
-  const getInitials = (name: string) => {
+  const getInitials = (name?: string) => {
+    if (!name) return '?';
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   }
 
@@ -103,8 +110,8 @@ export function ArtistForm({ isOpen, onClose, onSave, artist }: ArtistFormProps)
             <Label htmlFor="imageUpload">Foto do Artista</Label>
             <div className="flex items-center gap-4">
                  <Avatar className="h-20 w-20">
-                    <AvatarImage src={previewImage || undefined} alt={watch('name')} />
-                    <AvatarFallback className="text-2xl">{getInitials(watch('name') || '?')}</AvatarFallback>
+                    <AvatarImage src={previewImage || undefined} alt={watchedName} />
+                    <AvatarFallback className="text-2xl">{getInitials(watchedName)}</AvatarFallback>
                   </Avatar>
                 <Input id="imageUpload" type="file" accept="image/*" onChange={handleImageChange} className="flex-1" />
             </div>

@@ -1,7 +1,6 @@
 
 'use client';
 
-import Image from 'next/image';
 import {
   Table,
   TableBody,
@@ -23,6 +22,7 @@ interface ArtistListProps {
 
 export function ArtistList({ artists, onEdit, onDelete }: ArtistListProps) {
   const getInitials = (name: string) => {
+    if (!name) return '?';
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   }
 

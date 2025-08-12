@@ -71,4 +71,5 @@ export type ThemeSettings = {
     primaryColor: string;
     fontSize: FontSize;
     colorTheme: ColorTheme;
+    pageBackgroundColor: string;
 }

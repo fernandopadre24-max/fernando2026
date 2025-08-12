@@ -12,6 +12,7 @@ const defaultSettings: ThemeSettings = {
     primaryColor: '222.2 47.4% 11.2%',
     fontSize: 'base',
     colorTheme: 'slate',
+    pageBackgroundColor: '0 0% 98%',
 };
 
 interface ThemeProviderState {
@@ -25,7 +26,11 @@ const ThemeProviderContext = createContext<ThemeProviderState>({
 });
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-    const [settings, setSettings] = useState<ThemeSettings>(() => loadData('themeSettings', defaultSettings));
+    const [settings, setSettings] = useState<ThemeSettings>(() => {
+        const savedSettings = loadData('themeSettings', defaultSettings);
+        // Ensure pageBackgroundColor exists
+        return { ...defaultSettings, ...savedSettings };
+    });
 
     useEffect(() => {
         const root = window.document.documentElement;
@@ -40,8 +45,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
             root.classList.add(`theme-${settings.colorTheme}`);
         }
 
-
         root.style.setProperty('--primary', settings.primaryColor);
+        root.style.setProperty('--page-background', settings.pageBackgroundColor);
+
 
         const body = window.document.body;
         body.style.setProperty('--font-headline', `'${settings.fontHeadline}', sans-serif`);

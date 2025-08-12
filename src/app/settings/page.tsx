@@ -18,6 +18,7 @@ const defaultSettings: ThemeSettings = {
     primaryColor: '222.2 47.4% 11.2%',
     fontSize: 'base',
     colorTheme: 'slate',
+    pageBackgroundColor: '0 0% 98%',
 };
 
 const fontOptions: { value: FontOption, label: string }[] = [
@@ -39,6 +40,15 @@ const primaryColorOptions = [
     { value: '217.2 91.2% 59.8%', label: 'Blue' },
     { value: '262 52% 50%', label: 'Violet' },
 ];
+
+const backgroundColorOptions = [
+    { value: '0 0% 98%', label: 'Branco Neve', theme: 'light'},
+    { value: '60 90% 95%', label: 'Creme', theme: 'light'},
+    { value: '210 40% 98%', label: 'Azul Claro', theme: 'light'},
+    { value: '222.2 84% 4.9%', label: 'Quase Preto', theme: 'dark'},
+    { value: '240 4% 12%', label: 'Cinza Escuro', theme: 'dark'},
+    { value: '200 15% 20%', label: 'Azul Escuro', theme: 'dark'}
+]
 
 
 export default function SettingsPage() {
@@ -82,7 +92,10 @@ export default function SettingsPage() {
                         <Label className="text-lg font-semibold">Modo de Cor</Label>
                         <RadioGroup
                             value={localSettings.theme}
-                            onValueChange={(value: 'light' | 'dark') => setLocalSettings({ ...localSettings, theme: value })}
+                            onValueChange={(value: 'light' | 'dark') => {
+                                const newBgColor = value === 'light' ? defaultSettings.pageBackgroundColor : '222.2 84% 4.9%';
+                                setLocalSettings({ ...localSettings, theme: value, pageBackgroundColor: newBgColor })
+                            }}
                         >
                             <div className="flex items-center space-x-2">
                                 <RadioGroupItem value="light" id="light" />
@@ -96,7 +109,7 @@ export default function SettingsPage() {
                     </div>
 
                     <div className="space-y-4">
-                        <Label className="text-lg font-semibold">Tema</Label>
+                        <Label className="text-lg font-semibold">Tema dos Componentes</Label>
                         <RadioGroup
                             value={localSettings.colorTheme}
                             onValueChange={(value: ColorTheme) => setLocalSettings({ ...localSettings, colorTheme: value })}
@@ -174,9 +187,24 @@ export default function SettingsPage() {
                             </div>
                         </RadioGroup>
                     </div>
+                    
+                    <div className="space-y-4">
+                        <Label className="text-lg font-semibold">Cor de Fundo da Tela</Label>
+                        <div className="flex flex-wrap gap-2">
+                            {backgroundColorOptions.filter(c => c.theme === localSettings.theme).map(color => (
+                                <button
+                                    key={color.value}
+                                    onClick={() => setLocalSettings({ ...localSettings, pageBackgroundColor: color.value })}
+                                    className={`h-10 w-10 rounded-full border-2 ${localSettings.pageBackgroundColor === color.value ? 'border-primary' : 'border-transparent'}`}
+                                    style={{ backgroundColor: `hsl(${color.value})` }}
+                                    aria-label={`Select color ${color.label}`}
+                                />
+                            ))}
+                        </div>
+                    </div>
 
                     <div className="space-y-4">
-                        <Label className="text-lg font-semibold">Cor de Destaque</Label>
+                        <Label className="text-lg font-semibold">Cor de Destaque dos Componentes</Label>
                         <div className="flex flex-wrap gap-2">
                             {primaryColorOptions.map(color => (
                                 <button

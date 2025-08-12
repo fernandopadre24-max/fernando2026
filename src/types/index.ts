@@ -54,6 +54,9 @@ export type Transaction = {
     transferredToBankAccountId?: string | null;
     transferDate?: string;
     bankAccountId?: string | null;
+    paymentMethod?: PaymentMethod | null;
+    artistId?: string | null;
+    contractorId?: string | null;
 }
 
 export type ExpenseCategory = {

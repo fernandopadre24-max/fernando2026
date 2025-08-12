@@ -21,14 +21,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Transaction, ExpenseCategory } from '@/types';
+import { Transaction, ExpenseCategory, PaymentMethod, Artist, Contractor } from '@/types';
 
 const transactionSchema = z.object({
   description: z.string().min(1, 'A descrição é obrigatória.'),
   value: z.coerce.number().positive('O valor deve ser positivo.'),
   date: z.string().min(1, 'A data é obrigatória.'),
   type: z.enum(['Receita', 'Despesa']),
-  categoryId: z.string().optional(),
+  categoryId: z.string().optional().nullable(),
+  paymentMethod: z.nativeEnum(PaymentMethod).nullable(),
+  artistId: z.string().optional().nullable(),
+  contractorId: z.string().optional().nullable(),
 });
 
 type TransactionFormData = z.infer<typeof transactionSchema>;
@@ -39,6 +42,8 @@ interface TransactionFormProps {
   onSave: (transaction: Transaction) => void;
   transaction: Transaction | null;
   categories: ExpenseCategory[];
+  artists: Artist[];
+  contractors: Contractor[];
 }
 
 export function TransactionForm({
@@ -47,6 +52,8 @@ export function TransactionForm({
   onSave,
   transaction,
   categories,
+  artists,
+  contractors
 }: TransactionFormProps) {
   const {
     register,
@@ -61,7 +68,10 @@ export function TransactionForm({
       value: transaction?.value || 0,
       date: transaction?.date || new Date().toISOString().split('T')[0],
       type: transaction?.type || 'Receita',
-      categoryId: transaction?.categoryId || undefined,
+      categoryId: transaction?.categoryId || null,
+      paymentMethod: transaction?.paymentMethod || null,
+      artistId: transaction?.artistId || null,
+      contractorId: transaction?.contractorId || null,
     },
   });
 
@@ -77,7 +87,7 @@ export function TransactionForm({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>{transaction ? 'Editar Transação' : 'Nova Transação'}</DialogTitle>
         </DialogHeader>
@@ -101,47 +111,95 @@ export function TransactionForm({
               {errors.date && <p className="text-sm text-red-500">{errors.date.message}</p>}
             </div>
           </div>
-          <div className="space-y-2">
-            <Label>Tipo</Label>
-            <Controller
-              name="type"
-              control={control}
-              render={({ field }) => (
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o tipo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Receita">Receita</SelectItem>
-                    <SelectItem value="Despesa">Despesa</SelectItem>
-                  </SelectContent>
-                </Select>
-              )}
-            />
-          </div>
-          {transactionType === 'Despesa' && (
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Categoria</Label>
-              <Controller
-                name="categoryId"
+                <Label>Tipo</Label>
+                <Controller
+                name="type"
                 control={control}
                 render={({ field }) => (
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecione uma categoria" />
+                        <SelectValue placeholder="Selecione o tipo" />
                     </SelectTrigger>
                     <SelectContent>
-                      {categories.map((cat) => (
-                        <SelectItem key={cat.id} value={cat.id}>
-                          {cat.name}
-                        </SelectItem>
-                      ))}
+                        <SelectItem value="Receita">Receita</SelectItem>
+                        <SelectItem value="Despesa">Despesa</SelectItem>
                     </SelectContent>
-                  </Select>
+                    </Select>
                 )}
-              />
+                />
+            </div>
+             <div className="space-y-2">
+                <Label>Forma de Pagamento</Label>
+                <Controller name="paymentMethod" control={control} render={({ field }) => (
+                    <Select onValueChange={field.onChange} defaultValue={field.value || ''}>
+                    <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="PIX">PIX</SelectItem>
+                        <SelectItem value="Dinheiro">Dinheiro</SelectItem>
+                        <SelectItem value="Cartão">Cartão</SelectItem>
+                    </SelectContent>
+                    </Select>
+                )} />
+            </div>
+          </div>
+          
+          {transactionType === 'Despesa' && (
+            <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                <Label>Categoria</Label>
+                <Controller
+                    name="categoryId"
+                    control={control}
+                    render={({ field }) => (
+                    <Select onValueChange={field.onChange} defaultValue={field.value || ''}>
+                        <SelectTrigger>
+                        <SelectValue placeholder="Selecione uma categoria" />
+                        </SelectTrigger>
+                        <SelectContent>
+                        {categories.map((cat) => (
+                            <SelectItem key={cat.id} value={cat.id}>
+                            {cat.name}
+                            </SelectItem>
+                        ))}
+                        </SelectContent>
+                    </Select>
+                    )}
+                />
+                </div>
+                 <div className="space-y-2">
+                    <Label>Pago para (Artista)</Label>
+                    <Controller name="artistId" control={control} render={({ field }) => (
+                        <Select onValueChange={field.onChange} defaultValue={field.value || ''}>
+                        <SelectTrigger><SelectValue placeholder="Selecione o artista" /></SelectTrigger>
+                        <SelectContent>
+                            {artists.map((artist) => (
+                            <SelectItem key={artist.id} value={artist.id}>{artist.name}</SelectItem>
+                            ))}
+                        </SelectContent>
+                        </Select>
+                    )} />
+                </div>
             </div>
           )}
+
+           {transactionType === 'Receita' && (
+             <div className="space-y-2">
+                <Label>Recebido de (Contratante)</Label>
+                <Controller name="contractorId" control={control} render={({ field }) => (
+                    <Select onValueChange={field.onChange} defaultValue={field.value || ''}>
+                    <SelectTrigger><SelectValue placeholder="Selecione o contratante" /></SelectTrigger>
+                    <SelectContent>
+                        {contractors.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                        ))}
+                    </SelectContent>
+                    </Select>
+                )} />
+            </div>
+          )}
+
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>
               Cancelar

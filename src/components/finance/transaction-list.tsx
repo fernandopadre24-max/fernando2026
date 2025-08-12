@@ -12,11 +12,13 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Pen, Trash2 } from 'lucide-react';
-import { Transaction, ExpenseCategory } from '@/types';
+import { Transaction, ExpenseCategory, Artist, Contractor } from '@/types';
 
 interface TransactionListProps {
   transactions: Transaction[];
   categories: ExpenseCategory[];
+  artists: Artist[];
+  contractors: Contractor[];
   onEdit: (transaction: Transaction) => void;
   onDelete: (id: string) => void;
 }
@@ -29,10 +31,20 @@ const formatCurrency = (value: number) => {
   return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 };
 
-export function TransactionList({ transactions, categories, onEdit, onDelete }: TransactionListProps) {
+export function TransactionList({ transactions, categories, artists, contractors, onEdit, onDelete }: TransactionListProps) {
   const getCategoryName = (categoryId?: string | null) => {
     return categories.find((c) => c.id === categoryId)?.name || 'N/A';
   };
+
+  const getAssociatedName = (transaction: Transaction) => {
+    if (transaction.type === 'Despesa' && transaction.artistId) {
+        return artists.find(a => a.id === transaction.artistId)?.name || '-';
+    }
+    if (transaction.type === 'Receita' && transaction.contractorId) {
+        return contractors.find(c => c.id === transaction.contractorId)?.name || '-';
+    }
+    return '-';
+  }
 
   return (
     <div className="bg-notebook">
@@ -44,6 +56,7 @@ export function TransactionList({ transactions, categories, onEdit, onDelete }: 
             <TableHead>Data</TableHead>
             <TableHead>Tipo</TableHead>
             <TableHead>Categoria</TableHead>
+            <TableHead>Associado a</TableHead>
             <TableHead className="text-right">Ações</TableHead>
           </TableRow>
         </TableHeader>
@@ -69,6 +82,7 @@ export function TransactionList({ transactions, categories, onEdit, onDelete }: 
                 <TableCell>
                   {transaction.type === 'Despesa' ? getCategoryName(transaction.categoryId) : '-'}
                 </TableCell>
+                <TableCell>{getAssociatedName(transaction)}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-2">
                       <Button variant="ghost" size="icon" onClick={() => onEdit(transaction)}>
@@ -85,7 +99,7 @@ export function TransactionList({ transactions, categories, onEdit, onDelete }: 
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={6} className="h-24 text-center">
+              <TableCell colSpan={7} className="h-24 text-center">
                 Nenhuma transação encontrada.
               </TableCell>
             </TableRow>

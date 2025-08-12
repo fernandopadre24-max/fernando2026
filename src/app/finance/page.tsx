@@ -8,13 +8,15 @@ import { FinancialSummary } from '@/components/finance/financial-summary';
 import { TransactionList } from '@/components/finance/transaction-list';
 import { TransactionForm } from '@/components/finance/transaction-form';
 import { TransactionFilters } from '@/components/finance/transaction-filters';
-import { Transaction, ExpenseCategory } from '@/types';
+import { Transaction, ExpenseCategory, Artist, Contractor } from '@/types';
 import { loadData, saveData } from '@/lib/storage';
 import { DateRange } from 'react-day-picker';
 
 const FinancePage = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<ExpenseCategory[]>([]);
+  const [artists, setArtists] = useState<Artist[]>([]);
+  const [contractors, setContractors] = useState<Contractor[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
 
@@ -28,6 +30,8 @@ const FinancePage = () => {
   useEffect(() => {
     setTransactions(loadData('transactions', []));
     setCategories(loadData('expenseCategories', [{ id: '1', name: 'Alimentação' }, { id: '2', name: 'Transporte' }]));
+    setArtists(loadData('artists', []));
+    setContractors(loadData('contractors', []));
   }, []);
 
   const handleSaveTransaction = (transaction: Transaction) => {
@@ -124,6 +128,8 @@ const FinancePage = () => {
         <TransactionList 
             transactions={filteredTransactions} 
             categories={categories}
+            artists={artists}
+            contractors={contractors}
             onEdit={handleEditTransaction}
             onDelete={handleDeleteTransaction}
         />
@@ -139,6 +145,8 @@ const FinancePage = () => {
           onSave={handleSaveTransaction}
           transaction={selectedTransaction}
           categories={categories}
+          artists={artists}
+          contractors={contractors}
         />
       )}
     </div>

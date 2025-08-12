@@ -7,12 +7,14 @@ import { PlusCircle } from 'lucide-react';
 import { BankList } from '@/components/banks/bank-list';
 import { BankForm } from '@/components/banks/bank-form';
 import { MovementForm, MovementFormData } from '@/components/banks/movement-form';
-import { BankAccount, Transaction } from '@/types';
+import { BankAccount, Transaction, Artist, Contractor } from '@/types';
 import { loadData, saveData } from '@/lib/storage';
 
 const BanksPage = () => {
   const [accounts, setAccounts] = useState<BankAccount[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [artists, setArtists] = useState<Artist[]>([]);
+  const [contractors, setContractors] = useState<Contractor[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isMovementFormOpen, setIsMovementFormOpen] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<BankAccount | null>(null);
@@ -22,6 +24,8 @@ const BanksPage = () => {
   useEffect(() => {
     setAccounts(loadData('bankAccounts', []));
     setTransactions(loadData('transactions', []));
+    setArtists(loadData('artists', []));
+    setContractors(loadData('contractors', []));
   }, []);
 
   const handleSaveAccount = (account: Omit<BankAccount, 'id' | 'balance'>) => {
@@ -65,6 +69,9 @@ const BanksPage = () => {
       type: movementType === 'deposit' ? 'Receita' : 'Despesa',
       isTransferred: true, // Direct bank movement
       bankAccountId: selectedAccount.id,
+      paymentMethod: data.paymentMethod,
+      artistId: data.artistId,
+      contractorId: data.contractorId,
     };
     const updatedTransactions = [...transactions, newTransaction];
     setTransactions(updatedTransactions);
@@ -143,6 +150,8 @@ const BanksPage = () => {
           onSave={handleSaveMovement}
           account={selectedAccount}
           type={movementType}
+          artists={artists}
+          contractors={contractors}
         />
       )}
     </div>

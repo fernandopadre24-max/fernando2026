@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
@@ -15,12 +15,16 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { BankAccount } from '@/types';
+import { BankAccount, PaymentMethod, Artist, Contractor } from '@/types';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const movementSchema = z.object({
   value: z.coerce.number().positive('O valor deve ser positivo.'),
   description: z.string().min(1, 'A descrição é obrigatória.'),
   date: z.string().min(1, 'A data é obrigatória.'),
+  paymentMethod: z.nativeEnum(PaymentMethod).nullable(),
+  artistId: z.string().optional().nullable(),
+  contractorId: z.string().optional().nullable(),
 });
 
 export type MovementFormData = z.infer<typeof movementSchema>;
@@ -31,12 +35,23 @@ interface MovementFormProps {
   onSave: (data: MovementFormData) => void;
   account: BankAccount;
   type: 'deposit' | 'withdrawal';
+  artists: Artist[];
+  contractors: Contractor[];
 }
 
-export function MovementForm({ isOpen, onClose, onSave, account, type }: MovementFormProps) {
+export function MovementForm({ 
+    isOpen, 
+    onClose, 
+    onSave, 
+    account, 
+    type,
+    artists,
+    contractors 
+}: MovementFormProps) {
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<MovementFormData>({
     resolver: zodResolver(movementSchema),
@@ -44,6 +59,9 @@ export function MovementForm({ isOpen, onClose, onSave, account, type }: Movemen
       value: 0,
       description: '',
       date: new Date().toISOString().split('T')[0],
+      paymentMethod: null,
+      artistId: null,
+      contractorId: null,
     },
   });
 
@@ -57,29 +75,77 @@ export function MovementForm({ isOpen, onClose, onSave, account, type }: Movemen
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="value">Valor</Label>
-            <Input id="value" type="number" step="0.01" {...register('value')} />
-            {errors.value && <p className="text-sm text-red-500">{errors.value.message}</p>}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+                <Label htmlFor="value">Valor</Label>
+                <Input id="value" type="number" step="0.01" {...register('value')} />
+                {errors.value && <p className="text-sm text-red-500">{errors.value.message}</p>}
+            </div>
+             <div className="space-y-2">
+                <Label htmlFor="date">Data</Label>
+                <Input id="date" type="date" {...register('date')} />
+                {errors.date && <p className="text-sm text-red-500">{errors.date.message}</p>}
+            </div>
           </div>
-
+          
           <div className="space-y-2">
             <Label htmlFor="description">Descrição</Label>
             <Input id="description" {...register('description')} />
             {errors.description && <p className="text-sm text-red-500">{errors.description.message}</p>}
           </div>
+
+          <div className="space-y-2">
+            <Label>Forma de Pagamento</Label>
+            <Controller name="paymentMethod" control={control} render={({ field }) => (
+                <Select onValueChange={field.onChange} defaultValue={field.value || ''}>
+                <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="PIX">PIX</SelectItem>
+                    <SelectItem value="Dinheiro">Dinheiro</SelectItem>
+                    <SelectItem value="Cartão">Cartão</SelectItem>
+                </SelectContent>
+                </Select>
+            )} />
+        </div>
+
+        {type === 'withdrawal' && (
+            <div className="space-y-2">
+                <Label>Pago para (Artista)</Label>
+                <Controller name="artistId" control={control} render={({ field }) => (
+                    <Select onValueChange={field.onChange} defaultValue={field.value || ''}>
+                    <SelectTrigger><SelectValue placeholder="Selecione o artista" /></SelectTrigger>
+                    <SelectContent>
+                        {artists.map((artist) => (
+                        <SelectItem key={artist.id} value={artist.id}>{artist.name}</SelectItem>
+                        ))}
+                    </SelectContent>
+                    </Select>
+                )} />
+            </div>
+        )}
+
+        {type === 'deposit' && (
+            <div className="space-y-2">
+                <Label>Recebido de (Contratante)</Label>
+                <Controller name="contractorId" control={control} render={({ field }) => (
+                    <Select onValueChange={field.onChange} defaultValue={field.value || ''}>
+                    <SelectTrigger><SelectValue placeholder="Selecione o contratante" /></SelectTrigger>
+                    <SelectContent>
+                        {contractors.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                        ))}
+                    </SelectContent>
+                    </Select>
+                )} />
+            </div>
+        )}
           
-           <div className="space-y-2">
-            <Label htmlFor="date">Data</Label>
-            <Input id="date" type="date" {...register('date')} />
-            {errors.date && <p className="text-sm text-red-500">{errors.date.message}</p>}
-          </div>
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>

@@ -13,7 +13,9 @@ import {
   TableRow,
   TableFooter
 } from '@/components/ui/table';
-import { History } from 'lucide-react';
+import { History, FileDown } from 'lucide-react';
+import { Button } from '../ui/button';
+import { exportToPdf } from '@/lib/pdf-generator';
 
 interface Transfer {
     id: string;
@@ -90,10 +92,26 @@ export function TransferHistoryReport({ events, transactions, bankAccounts }: Tr
     });
   }
 
+  const handleExport = () => {
+     const headers = [['Data da Transferência', 'Descrição', 'Conta de Destino', 'Valor']];
+     const body = allTransfers.map(t => [
+        formatDate(t.transferDate),
+        t.description,
+        t.accountName,
+        formatCurrency(t.value)
+     ]);
+     const footer = [['', '', 'Total Transferido', formatCurrency(totalTransferred)]];
+     exportToPdf('Histórico de Movimentações Bancárias', headers, body, footer);
+  }
+
   return (
     <Card className="bg-yellow-100/60 border-yellow-200/80 dark:bg-yellow-950/50 dark:border-yellow-800/60">
-      <CardHeader>
+      <CardHeader className="flex flex-row justify-between items-center">
         <CardTitle>Histórico de Movimentações Bancárias</CardTitle>
+         <Button variant="outline" size="sm" onClick={handleExport} disabled={allTransfers.length === 0}>
+            <FileDown className="h-4 w-4 mr-2" />
+            Exportar para PDF
+        </Button>
       </CardHeader>
       <CardContent>
         <div className="border rounded-md bg-card">

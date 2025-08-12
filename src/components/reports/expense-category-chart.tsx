@@ -1,11 +1,13 @@
 
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Transaction, ExpenseCategory } from '@/types';
-import { Tag } from 'lucide-react';
+import { Tag, FileDown } from 'lucide-react';
+import { Button } from '../ui/button';
+import { exportChartToPdf } from '@/lib/pdf-generator';
 
 interface ExpenseCategoryChartProps {
   transactions: Transaction[];
@@ -18,6 +20,8 @@ const COLORS = [
 ];
 
 export function ExpenseCategoryChart({ transactions, categories }: ExpenseCategoryChartProps) {
+  const chartRef = useRef<HTMLDivElement>(null);
+  
   const data = useMemo(() => {
     const expenses = transactions.filter((t) => t.type === 'Despesa');
     const categoryTotals: { [key: string]: number } = {};
@@ -50,41 +54,53 @@ export function ExpenseCategoryChart({ transactions, categories }: ExpenseCatego
     return null;
   };
 
+  const handleExport = () => {
+    if (chartRef.current) {
+      exportChartToPdf('Despesas por Categoria', chartRef.current);
+    }
+  }
+
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row justify-between items-center">
         <CardTitle className="font-headline text-xl flex items-center gap-2">
             <Tag className="h-5 w-5" />
             Despesas por Categoria
         </CardTitle>
+        <Button variant="outline" size="sm" onClick={handleExport} disabled={data.length === 0}>
+            <FileDown className="h-4 w-4 mr-2" />
+            Exportar para PDF
+        </Button>
       </CardHeader>
       <CardContent>
         {data.length > 0 ? (
-        <ResponsiveContainer width="100%" height={300}>
-          <PieChart>
-            <Pie
-              data={data}
-              cx="50%"
-              cy="50%"
-              labelLine={false}
-              outerRadius={80}
-              fill="#8884d8"
-              dataKey="value"
-            >
-              {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-              ))}
-            </Pie>
-            <Tooltip content={<CustomTooltip />} />
-            <Legend
-                wrapperStyle={{
-                    fontSize: '12px',
-                    wordWrap: 'break-word',
-                }}
-            />
-          </PieChart>
-        </ResponsiveContainer>
+        <div ref={chartRef}>
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={data}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                outerRadius={80}
+                fill="#8884d8"
+                dataKey="value"
+              >
+                {data.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip content={<CustomTooltip />} />
+              <Legend
+                  wrapperStyle={{
+                      fontSize: '12px',
+                      wordWrap: 'break-word',
+                  }}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
          ) : (
             <div className="h-[300px] flex items-center justify-center text-muted-foreground">
                 Nenhuma despesa para exibir.

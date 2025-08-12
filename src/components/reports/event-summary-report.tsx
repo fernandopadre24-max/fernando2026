@@ -3,7 +3,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import type { Event } from '@/types';
-import { CalendarCheck, CalendarClock, CalendarX, Package, Sigma } from 'lucide-react';
+import { CalendarCheck, CalendarClock, CalendarX, Package, Sigma, FileDown } from 'lucide-react';
+import { Button } from '../ui/button';
+import { exportToPdf } from '@/lib/pdf-generator';
 
 interface EventSummaryReportProps {
   events: Event[];
@@ -23,13 +25,28 @@ export function EventSummaryReport({ events }: EventSummaryReportProps) {
     currency: 'BRL',
   }).format(value);
 
+  const handleExport = () => {
+    const headers = [['Métrica', 'Quantidade', 'Valor']];
+    const body = [
+        ['Eventos Concluídos', concludedEvents, formatCurrency(events.filter(e => e.isDone).reduce((sum, e) => sum + e.value, 0))],
+        ['Eventos Pendentes', pendingEvents, formatCurrency(events.filter(e => !e.isDone).reduce((sum, e) => sum + e.value, 0))],
+        ['A Receber (Concluídos)', '-', formatCurrency(toReceiveValue)],
+    ];
+    const footer = [['Total Geral', totalEvents, formatCurrency(totalValue)]];
+    exportToPdf('Resumo de Eventos', headers, body, footer);
+  }
+
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row justify-between items-center">
         <CardTitle className="font-headline text-xl flex items-center gap-2">
             <Package className="h-5 w-5" />
             Resumo de Eventos
         </CardTitle>
+        <Button variant="outline" size="sm" onClick={handleExport} disabled={events.length === 0}>
+            <FileDown className="h-4 w-4 mr-2" />
+            Exportar para PDF
+        </Button>
       </CardHeader>
       <CardContent>
         <div className="border rounded-md">

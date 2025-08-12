@@ -3,7 +3,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import type { BankAccount } from '@/types';
-import { Landmark, Sigma } from 'lucide-react';
+import { Landmark, Sigma, FileDown } from 'lucide-react';
+import { Button } from '../ui/button';
+import { exportToPdf } from '@/lib/pdf-generator';
 
 interface BankAccountsReportProps {
   bankAccounts: BankAccount[];
@@ -18,13 +20,29 @@ export function BankAccountsReport({ bankAccounts }: BankAccountsReportProps) {
     currency: 'BRL',
   }).format(value);
 
+  const handleExport = () => {
+    const headers = [['Banco', 'Agência', 'Conta', 'Saldo']];
+    const body = bankAccounts.map(acc => [
+        acc.bankName,
+        acc.agency,
+        acc.accountNumber,
+        formatCurrency(acc.balance)
+    ]);
+    const footer = [['', '', 'Saldo Total', formatCurrency(totalBalance)]];
+    exportToPdf('Balanço das Contas Bancárias', headers, body, footer);
+  }
+
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row justify-between items-center">
         <CardTitle className="font-headline text-xl flex items-center gap-2">
             <Landmark className="h-5 w-5" />
             Balanço das Contas Bancárias
         </CardTitle>
+        <Button variant="outline" size="sm" onClick={handleExport} disabled={bankAccounts.length === 0}>
+            <FileDown className="h-4 w-4 mr-2" />
+            Exportar para PDF
+        </Button>
       </CardHeader>
       <CardContent>
         <div className="border rounded-md">

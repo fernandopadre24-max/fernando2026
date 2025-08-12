@@ -229,3 +229,12 @@ h1, h2, h3, h4, h5, h6, .font-headline {
   }
 
 }
+
+@layer components {
+  .bg-notebook {
+    @apply bg-[#FDF5E6] border border-gray-200 p-4 rounded-lg shadow-sm;
+  }
+  .dark .bg-notebook {
+     @apply bg-[#4a4130] border border-gray-700;
+  }
+}

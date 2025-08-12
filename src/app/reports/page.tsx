@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ReportView } from '@/components/reports/report-view';
-import { Event, Transaction, ExpenseCategory } from '@/types';
+import { Event, Transaction, ExpenseCategory, BankAccount } from '@/types';
 import { loadData } from '@/lib/storage';
 import { EventsByStatusChart } from '@/components/reports/events-by-status-chart';
 import { FinancialSummaryChart } from '@/components/reports/financial-summary-chart';
@@ -18,16 +18,24 @@ export default function ReportsPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<ExpenseCategory[]>([]);
+  const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
 
   useEffect(() => {
     setEvents(loadData('events', []));
     setTransactions(loadData('transactions', []));
     setCategories(loadData('expenseCategories', []));
+    setBankAccounts(loadData('bankAccounts', []));
   }, []);
 
   const getCategoryName = (categoryId?: string | null) => {
     return categories.find((c) => c.id === categoryId)?.name || 'N/A';
   };
+
+  const getBankAccountName = (accountId?: string | null) => {
+    if (!accountId) return '-';
+    const account = bankAccounts.find(acc => acc.id === accountId);
+    return account ? `${account.bankName} (C/C: ${account.accountNumber})` : 'N/A';
+  }
 
   const eventColumns = [
     { header: 'Data', dataKey: 'date' },
@@ -36,6 +44,8 @@ export default function ReportsPage() {
     { header: 'Valor', dataKey: 'value' },
     { header: 'Status', dataKey: 'status' },
     { header: 'Pagamento', dataKey: 'paymentStatus' },
+    { header: 'Transferência', dataKey: 'transferStatus' },
+    { header: 'Conta de Destino', dataKey: 'destinationAccount' },
   ];
 
   const eventData = events.map(event => ({
@@ -44,6 +54,8 @@ export default function ReportsPage() {
     value: formatCurrency(event.value),
     status: event.isDone ? 'Realizado' : 'Pendente',
     paymentStatus: event.isPaid ? 'Pago' : 'Pendente',
+    transferStatus: event.isTransferred ? 'Transferido' : 'Pendente',
+    destinationAccount: getBankAccountName(event.transferredToBankAccountId),
   }));
 
   const financialColumns = [

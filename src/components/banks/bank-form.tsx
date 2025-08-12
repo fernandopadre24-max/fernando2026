@@ -52,7 +52,7 @@ export function BankForm({ isOpen, onClose, onSave, account }: BankFormProps) {
         bankName: data.bankName,
         agency: data.agency,
         accountNumber: data.accountNumber,
-        balance: account ? data.balance! : 0, // Only set balance if editing
+        balance: data.balance || 0,
     };
     onSave(saveData);
   };
@@ -80,13 +80,11 @@ export function BankForm({ isOpen, onClose, onSave, account }: BankFormProps) {
             {errors.accountNumber && <p className="text-sm text-red-500">{errors.accountNumber.message}</p>}
           </div>
 
-          {account && (
-            <div className="space-y-2">
-                <Label htmlFor="balance">Saldo</Label>
-                <Input id="balance" type="number" step="0.01" {...register('balance')} />
-                {errors.balance && <p className="text-sm text-red-500">{errors.balance.message}</p>}
-            </div>
-          )}
+          <div className="space-y-2">
+              <Label htmlFor="balance">{account ? 'Saldo' : 'Saldo Inicial'}</Label>
+              <Input id="balance" type="number" step="0.01" {...register('balance')} />
+              {errors.balance && <p className="text-sm text-red-500">{errors.balance.message}</p>}
+          </div>
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>

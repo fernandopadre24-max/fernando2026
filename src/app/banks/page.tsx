@@ -43,7 +43,7 @@ const BanksPage = () => {
       const newAccount: BankAccount = {
         ...accountData,
         id: new Date().toISOString(),
-        balance: 0, 
+        balance: accountData.balance || 0,
       };
       updatedAccounts = [...accounts, newAccount];
     }

@@ -8,15 +8,16 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/components/theme-provider';
-import { ThemeSettings, FontOption, FontSize } from '@/types';
+import { ThemeSettings, FontOption, FontSize, ColorTheme } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 
 const defaultSettings: ThemeSettings = {
     theme: 'light',
     fontHeadline: 'Poppins',
     fontBody: 'PT Sans',
-    primaryColor: '262 52% 50%', // --primary-hsl
-    fontSize: 'base'
+    primaryColor: '222.2 47.4% 11.2%',
+    fontSize: 'base',
+    colorTheme: 'slate',
 };
 
 const fontOptions: { value: FontOption, label: string }[] = [
@@ -27,6 +28,18 @@ const fontOptions: { value: FontOption, label: string }[] = [
     { value: 'Open Sans', label: 'Open Sans' },
     { value: 'Montserrat', label: 'Montserrat' }
 ];
+
+const primaryColorOptions = [
+    { value: '222.2 47.4% 11.2%', label: 'Slate' },
+    { value: '240 5.9% 10%', label: 'Zinc' },
+    { value: '0 0% 9%', label: 'Stone' },
+    { value: '346.8 77.2% 49.8%', label: 'Rose' },
+    { value: '24.6 95% 53.1%', label: 'Orange' },
+    { value: '142.1 76.2% 36.3%', label: 'Green' },
+    { value: '217.2 91.2% 59.8%', label: 'Blue' },
+    { value: '262 52% 50%', label: 'Violet' },
+];
+
 
 export default function SettingsPage() {
     const { settings, setSettings } = useTheme();
@@ -66,7 +79,7 @@ export default function SettingsPage() {
                 </CardHeader>
                 <CardContent className="space-y-8">
                     <div className="space-y-4">
-                        <Label className="text-lg font-semibold">Tema</Label>
+                        <Label className="text-lg font-semibold">Modo de Cor</Label>
                         <RadioGroup
                             value={localSettings.theme}
                             onValueChange={(value: 'light' | 'dark') => setLocalSettings({ ...localSettings, theme: value })}
@@ -78,6 +91,28 @@ export default function SettingsPage() {
                             <div className="flex items-center space-x-2">
                                 <RadioGroupItem value="dark" id="dark" />
                                 <Label htmlFor="dark">Escuro</Label>
+                            </div>
+                        </RadioGroup>
+                    </div>
+
+                    <div className="space-y-4">
+                        <Label className="text-lg font-semibold">Tema</Label>
+                        <RadioGroup
+                            value={localSettings.colorTheme}
+                            onValueChange={(value: ColorTheme) => setLocalSettings({ ...localSettings, colorTheme: value })}
+                            className="flex flex-wrap gap-4"
+                        >
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="slate" id="slate" />
+                                <Label htmlFor="slate">Padrão</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="zinc" id="zinc" />
+                                <Label htmlFor="zinc">Zinco</Label>
+                            </div>
+                             <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="stone" id="stone" />
+                                <Label htmlFor="stone">Pedra</Label>
                             </div>
                         </RadioGroup>
                     </div>
@@ -143,13 +178,13 @@ export default function SettingsPage() {
                     <div className="space-y-4">
                         <Label className="text-lg font-semibold">Cor de Destaque</Label>
                         <div className="flex flex-wrap gap-2">
-                            {['262 52% 50%', '346.8 77.2% 49.8%', '24.6 95% 53.1%', '142.1 76.2% 36.3%', '217.2 91.2% 59.8%'].map(color => (
+                            {primaryColorOptions.map(color => (
                                 <button
-                                    key={color}
-                                    onClick={() => setLocalSettings({ ...localSettings, primaryColor: color })}
-                                    className={`h-10 w-10 rounded-full border-2 ${localSettings.primaryColor === color ? 'border-primary' : 'border-transparent'}`}
-                                    style={{ backgroundColor: `hsl(${color})` }}
-                                    aria-label={`Select color ${color}`}
+                                    key={color.value}
+                                    onClick={() => setLocalSettings({ ...localSettings, primaryColor: color.value })}
+                                    className={`h-10 w-10 rounded-full border-2 ${localSettings.primaryColor === color.value ? 'border-primary' : 'border-transparent'}`}
+                                    style={{ backgroundColor: `hsl(${color.value})` }}
+                                    aria-label={`Select color ${color.label}`}
                                 />
                             ))}
                         </div>

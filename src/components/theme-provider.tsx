@@ -2,15 +2,16 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { ThemeSettings, FontSize } from '@/types';
+import { ThemeSettings, FontSize, ColorTheme } from '@/types';
 import { loadData, saveData } from '@/lib/storage';
 
 const defaultSettings: ThemeSettings = {
     theme: 'light',
     fontHeadline: 'Poppins',
     fontBody: 'PT Sans',
-    primaryColor: '262 52% 50%',
-    fontSize: 'base'
+    primaryColor: '222.2 47.4% 11.2%',
+    fontSize: 'base',
+    colorTheme: 'slate',
 };
 
 interface ThemeProviderState {
@@ -32,7 +33,15 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         root.classList.remove('light', 'dark');
         root.classList.add(settings.theme);
 
-        root.style.setProperty('--primary-hsl', settings.primaryColor);
+        // Remove old theme classes
+        root.classList.remove('theme-slate', 'theme-zinc', 'theme-stone');
+        // Add new theme class
+        if (settings.colorTheme) {
+            root.classList.add(`theme-${settings.colorTheme}`);
+        }
+
+
+        root.style.setProperty('--primary', settings.primaryColor);
 
         const body = window.document.body;
         body.style.setProperty('--font-headline', `'${settings.fontHeadline}', sans-serif`);

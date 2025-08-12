@@ -98,7 +98,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     const newUserId = `user-${Date.now()}`;
-    const role: UserRole = 'user'; // Only admin can create other admins now.
+    const role: UserRole = users.size === 0 ? 'admin' : 'user';
 
     const newUser: User = {
         id: newUserId,
@@ -162,6 +162,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     if (userToDelete) {
+        // Delete user data. The key format is `${userId}_${key}`
+        Object.keys(localStorage).forEach(key => {
+            if (key.startsWith(`${userToDelete?.id}_`)) {
+                localStorage.removeItem(key);
+            }
+        });
         users.delete(userToDelete.username);
         saveUsers(users);
     } else {

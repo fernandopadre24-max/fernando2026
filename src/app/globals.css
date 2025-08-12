@@ -246,4 +246,10 @@ h1, h2, h3, h4, h5, h6, .font-headline {
   .dark .bg-notebook {
      @apply bg-[#4a4130] border border-gray-700;
   }
+  .bg-login-gradient {
+    @apply bg-gradient-to-br from-background to-secondary;
+  }
+  .dark .bg-login-gradient {
+     @apply bg-gradient-to-br from-background to-secondary;
+  }
 }

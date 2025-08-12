@@ -75,11 +75,11 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-sm">
+    <div className="flex min-h-screen items-center justify-center bg-login-gradient p-4">
+      <Card className="w-full max-w-sm bg-background/80 backdrop-blur-sm">
         <CardHeader className="text-center">
             <div className="flex justify-center mb-4">
-               <div className="p-3 bg-primary/10 rounded-lg">
+               <div className="p-3 bg-primary/20 rounded-lg border border-primary/30">
                     <Banknote className="h-8 w-8 text-primary" />
                 </div>
             </div>
@@ -135,7 +135,7 @@ export default function LoginPage() {
                     />
                 </div>
             )}
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full font-bold">
               {isLoginMode ? 'Entrar' : 'Cadastrar'}
             </Button>
             <div className="text-center text-sm pt-4">

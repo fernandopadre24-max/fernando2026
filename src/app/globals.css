@@ -8,6 +8,11 @@ body {
 
 h1, h2, h3, h4, h5, h6, .font-headline {
     font-family: var(--font-headline, 'Poppins', sans-serif);
+    color: hsl(40, 90%, 35%);
+}
+
+.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6, .dark .font-headline {
+    color: hsl(40, 80%, 65%);
 }
 
 @layer base {

@@ -25,7 +25,7 @@ const docHeader = (doc: jsPDF, title: string) => {
     doc.text(`Relatório gerado em: ${formatDate(new Date())}`, 14, 30);
 }
 
-export const exportToPdf = (title: string, headers: string[][], body: any[][], footer?: string[][]) => {
+export const exportToPdf = (title: string, headers: string[][], body: any[][], footer?: any[][]) => {
     const doc = new jsPDF() as jsPDFWithAutoTable;
     
     docHeader(doc, title);
@@ -76,6 +76,7 @@ export const printReport = (title: string, tableHtml: string) => {
                     table { width: 100%; border-collapse: collapse; }
                     th, td { border: 1px solid #dddddd; text-align: left; padding: 8px; }
                     th { background-color: #f2f2f2; }
+                    tfoot { font-weight: bold; }
                     h1 { font-size: 18px; }
                     p { font-size: 10px; }
                 </style>

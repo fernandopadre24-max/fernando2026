@@ -2,7 +2,7 @@
 'use client';
 
 import React from 'react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { FileDown, Printer } from 'lucide-react';
 import { exportToPdf, printReport } from '@/lib/pdf-generator';
@@ -11,7 +11,7 @@ interface ReportViewProps {
   title: string;
   data: any[];
   columns: { header: string; dataKey: string }[];
-  footer?: any[][];
+  footer?: { content: string; colSpan?: number; styles?: any }[][];
 }
 
 export function ReportView({ title, data, columns, footer }: ReportViewProps) {
@@ -63,6 +63,19 @@ export function ReportView({ title, data, columns, footer }: ReportViewProps) {
               </TableRow>
             )}
           </TableBody>
+          {footer && (
+            <TableFooter>
+                {footer.map((footerRow, rowIndex) => (
+                    <TableRow key={`footer-${rowIndex}`}>
+                        {footerRow.map((cell, cellIndex) => (
+                             <TableCell key={`footer-cell-${cellIndex}`} colSpan={cell.colSpan} className={cell.styles?.halign === 'right' ? 'text-right' : ''}>
+                                {cell.content}
+                            </TableCell>
+                        ))}
+                    </TableRow>
+                ))}
+            </TableFooter>
+          )}
         </Table>
       </div>
     </div>

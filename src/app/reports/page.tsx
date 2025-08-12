@@ -106,25 +106,16 @@ export default function ReportsPage() {
                 columns={financialColumns}
                 footer={[
                     [
-                        { content: 'Receitas:', styles: { fontStyle: 'bold' } },
-                        { content: formatCurrency(financialSummary.totalIncome) },
-                        { content: '' },
-                        { content: '' },
-                        { content: '' },
+                        { content: 'Receitas:', colSpan: 4, styles: { fontStyle: 'bold', halign: 'right' } },
+                        { content: formatCurrency(financialSummary.totalIncome), styles: { halign: 'left' } },
                     ],
                     [
-                        { content: 'Despesas:', styles: { fontStyle: 'bold' } },
-                        { content: formatCurrency(financialSummary.totalExpenses) },
-                        { content: '' },
-                        { content: '' },
-                        { content: '' },
+                        { content: 'Despesas:', colSpan: 4, styles: { fontStyle: 'bold', halign: 'right' } },
+                        { content: formatCurrency(financialSummary.totalExpenses), styles: { halign: 'left' } },
                     ],
                     [
-                        { content: 'Saldo:', styles: { fontStyle: 'bold' } },
-                        { content: formatCurrency(financialSummary.balance) },
-                        { content: '' },
-                        { content: '' },
-                        { content: '' },
+                        { content: 'Saldo:', colSpan: 4, styles: { fontStyle: 'bold', halign: 'right' } },
+                        { content: formatCurrency(financialSummary.balance), styles: { halign: 'left' } },
                     ],
                 ]}
               />

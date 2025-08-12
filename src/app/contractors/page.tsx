@@ -41,8 +41,10 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { Contractor } from '@/types';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function ContractorsPage() {
+  const { user, getUserData, saveUserData } = useAuth();
   const [contractors, setContractors] = useState<Contractor[]>([]);
   const [isClient, setIsClient] = useState(false);
 
@@ -53,17 +55,19 @@ export default function ContractorsPage() {
 
   useEffect(() => {
     setIsClient(true);
-    const storedContractors = localStorage.getItem('contractors');
-    if (storedContractors) {
-      setContractors(JSON.parse(storedContractors));
+    if (user) {
+      const storedContractors = getUserData('contractors');
+      if (storedContractors) {
+        setContractors(storedContractors);
+      }
     }
-  }, []);
+  }, [user, getUserData]);
 
   useEffect(() => {
-    if (isClient) {
-      localStorage.setItem('contractors', JSON.stringify(contractors));
+    if (isClient && user) {
+      saveUserData('contractors', contractors);
     }
-  }, [contractors, isClient]);
+  }, [contractors, isClient, user, saveUserData]);
 
   const handleSave = () => {
     if (selectedContractor) {
@@ -119,7 +123,7 @@ export default function ContractorsPage() {
     setSelectedContractor(null);
   };
 
-  if (!isClient) {
+  if (!isClient || !user) {
     return null; // or a loading spinner
   }
 

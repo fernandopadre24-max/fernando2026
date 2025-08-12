@@ -9,6 +9,8 @@ import { RecentTransfers } from '@/components/recent-transfers';
 import { useToast } from '@/hooks/use-toast';
 import { AppShell } from '@/components/app-shell';
 import { DashboardSummary } from '@/components/dashboard-summary';
+import { useAuth } from '@/hooks/use-auth';
+import { useRouter } from 'next/navigation';
 
 const initialArtists: Artist[] = [
     { id: '1', name: 'Os Futuristas' },
@@ -23,6 +25,9 @@ const initialContractors: Contractor[] = [
 ];
 
 export default function Home() {
+  const { user, getUserData, saveUserData } = useAuth();
+  const router = useRouter();
+
   const [events, setEvents] = useState<Event[]>([]);
   const { toast } = useToast();
   const [isClient, setIsClient] = useState(false);
@@ -34,11 +39,9 @@ export default function Home() {
 
   useEffect(() => {
     setIsClient(true);
-    
-    // Load events from localStorage
-    const storedEvents = localStorage.getItem('events');
-    if (storedEvents) {
-      const parsedEvents = JSON.parse(storedEvents).map((event: Event) => ({
+    if (user) {
+      const storedEvents = getUserData('events') || [];
+      const parsedEvents = storedEvents.map((event: Event) => ({
         ...event,
         paymentMethod: event.paymentMethod || null,
         observations: event.observations || '',
@@ -47,40 +50,23 @@ export default function Home() {
         transferDate: event.transferDate || undefined,
       }));
       setEvents(parsedEvents);
-    }
 
-    // Load artists from localStorage or use initial data
-    const storedArtists = localStorage.getItem('artists');
-    if (storedArtists) {
-      setArtists(JSON.parse(storedArtists));
-    } else {
-      setArtists(initialArtists);
+      setArtists(getUserData('artists') || initialArtists);
+      setContractors(getUserData('contractors') || initialContractors);
+      setBankAccounts(getUserData('bankAccounts') || []);
+    } else if (isClient) {
+      router.push('/login');
     }
-    
-    // Load contractors from localStorage or use initial data
-    const storedContractors = localStorage.getItem('contractors');
-    if (storedContractors) {
-      setContractors(JSON.parse(storedContractors));
-    } else {
-      setContractors(initialContractors);
-    }
-
-    // Load bank accounts from localStorage
-    const storedBankAccounts = localStorage.getItem('bankAccounts');
-    if (storedBankAccounts) {
-      setBankAccounts(JSON.parse(storedBankAccounts));
-    }
-
-  }, []);
+  }, [user, isClient, router, getUserData]);
 
   useEffect(() => {
-    if(isClient) {
-      localStorage.setItem('events', JSON.stringify(events));
-      localStorage.setItem('artists', JSON.stringify(artists));
-      localStorage.setItem('contractors', JSON.stringify(contractors));
-      localStorage.setItem('bankAccounts', JSON.stringify(bankAccounts));
+    if(isClient && user) {
+      saveUserData('events', events);
+      saveUserData('artists', artists);
+      saveUserData('contractors', contractors);
+      saveUserData('bankAccounts', bankAccounts);
     }
-  }, [events, artists, contractors, bankAccounts, isClient]);
+  }, [events, artists, contractors, bankAccounts, isClient, user, saveUserData]);
 
 
   const handleEventAdd = async (data: EventFormValues) => {
@@ -191,7 +177,7 @@ export default function Home() {
     })
   }
   
-  if (!isClient) {
+  if (!isClient || !user) {
     return null; // Or a loading spinner
   }
 

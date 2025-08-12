@@ -51,6 +51,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useAuth } from '@/hooks/use-auth';
 
 const transactionSchema = z.object({
   description: z.string().min(1, 'Descrição é obrigatória.'),
@@ -72,6 +73,7 @@ const transactionSchema = z.object({
 type TransactionFormValues = z.infer<typeof transactionSchema>;
 
 export default function FinancePage() {
+  const { user, getUserData, saveUserData } = useAuth();
   const [events, setEvents] = useState<Event[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<ExpenseCategory[]>([]);
@@ -103,30 +105,21 @@ export default function FinancePage() {
 
   useEffect(() => {
     setIsClient(true);
-    const storedEvents = localStorage.getItem('events');
-    if (storedEvents) {
-      setEvents(JSON.parse(storedEvents));
+    if (user) {
+      setEvents(getUserData('events') || []);
+      const storedTransactions = getUserData('transactions') || [];
+      setTransactions(storedTransactions.map((t: Transaction) => ({...t, isTransferred: t.isTransferred || false})));
+      setCategories(getUserData('expenseCategories') || []);
+      setBankAccounts(getUserData('bankAccounts') || []);
     }
-    const storedTransactions = localStorage.getItem('transactions');
-    if (storedTransactions) {
-        setTransactions(JSON.parse(storedTransactions).map((t: Transaction) => ({...t, isTransferred: t.isTransferred || false})));
-    }
-     const storedCategories = localStorage.getItem('expenseCategories');
-    if (storedCategories) {
-      setCategories(JSON.parse(storedCategories));
-    }
-    const storedBankAccounts = localStorage.getItem('bankAccounts');
-    if (storedBankAccounts) {
-      setBankAccounts(JSON.parse(storedBankAccounts));
-    }
-  }, []);
+  }, [user, getUserData]);
 
   useEffect(() => {
-    if (isClient) {
-      localStorage.setItem('transactions', JSON.stringify(transactions));
-      localStorage.setItem('bankAccounts', JSON.stringify(bankAccounts));
+    if (isClient && user) {
+      saveUserData('transactions', transactions);
+      saveUserData('bankAccounts', bankAccounts);
     }
-  }, [transactions, bankAccounts, isClient]);
+  }, [transactions, bankAccounts, isClient, user, saveUserData]);
 
   const handleSaveTransaction = (data: TransactionFormValues) => {
     const transactionData = {
@@ -256,7 +249,7 @@ export default function FinancePage() {
   const totalExpenses = transactions.filter(t => t.type === 'Despesa').reduce((sum, t) => sum + t.value, 0);
   const netProfit = totalRevenue - totalExpenses;
 
-  if (!isClient) {
+  if (!isClient || !user) {
     return null; // or a loading spinner
   }
 

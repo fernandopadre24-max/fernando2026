@@ -42,8 +42,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { ExpenseCategory } from '@/types';
 import Link from 'next/link';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function ExpenseCategoriesPage() {
+  const { user, getUserData, saveUserData } = useAuth();
   const [categories, setCategories] = useState<ExpenseCategory[]>([]);
   const [isClient, setIsClient] = useState(false);
 
@@ -54,17 +56,19 @@ export default function ExpenseCategoriesPage() {
 
   useEffect(() => {
     setIsClient(true);
-    const storedCategories = localStorage.getItem('expenseCategories');
-    if (storedCategories) {
-      setCategories(JSON.parse(storedCategories));
+    if (user) {
+      const storedCategories = getUserData('expenseCategories');
+      if (storedCategories) {
+        setCategories(storedCategories);
+      }
     }
-  }, []);
+  }, [user, getUserData]);
 
   useEffect(() => {
-    if (isClient) {
-      localStorage.setItem('expenseCategories', JSON.stringify(categories));
+    if (isClient && user) {
+      saveUserData('expenseCategories', categories);
     }
-  }, [categories, isClient]);
+  }, [categories, isClient, user, saveUserData]);
 
   const handleSave = () => {
     if (selectedCategory) {
@@ -120,7 +124,7 @@ export default function ExpenseCategoriesPage() {
     setSelectedCategory(null);
   };
 
-  if (!isClient) {
+  if (!isClient || !user) {
     return null; // or a loading spinner
   }
 

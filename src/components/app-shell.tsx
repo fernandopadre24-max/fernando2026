@@ -2,7 +2,7 @@
 'use client';
 import * as React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   Sidebar,
   SidebarContent,
@@ -16,9 +16,10 @@ import {
 } from '@/components/ui/sidebar';
 import { Header } from '@/components/header';
 import { cn } from '@/lib/utils';
-import { Calendar, Mic, Music4, UserSquare, LogOut, Landmark, DollarSign, Tag, PieChart, Cog } from 'lucide-react';
+import { Calendar, Mic, UserSquare, LogOut, Landmark, DollarSign, Tag, PieChart, Cog } from 'lucide-react';
 import { Button } from './ui/button';
 import Image from 'next/image';
+import { useAuth } from '@/hooks/use-auth';
 
 const menuItems = [
     { path: '/finance', icon: DollarSign, name: 'Financeiro' },
@@ -33,32 +34,48 @@ const menuItems = [
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, logout, getUserData } = useAuth();
+
   const [customIcons, setCustomIcons] = React.useState<{ [key: string]: string }>({});
   const [appName, setAppName] = React.useState('Controle Financeiro');
+  const [isClient, setIsClient] = React.useState(false);
 
+  React.useEffect(() => {
+    setIsClient(true);
+  }, []);
+  
   const isActive = (path: string) => {
     return pathname === path;
   };
 
   const updateTheme = React.useCallback(() => {
-    const savedTheme = localStorage.getItem('app-theme');
-    if (savedTheme) {
-        const { icons, appName: savedAppName } = JSON.parse(savedTheme);
-        if (icons) {
-            setCustomIcons(icons);
+      if (user) {
+        const savedTheme = getUserData('app-theme');
+        if (savedTheme) {
+            const { icons, appName: savedAppName } = savedTheme;
+            if (icons) {
+                setCustomIcons(icons);
+            } else {
+                 setCustomIcons({});
+            }
+            if (savedAppName) {
+              setAppName(savedAppName);
+            } else {
+              setAppName('Controle Financeiro');
+            }
         } else {
-             setCustomIcons({});
+            setCustomIcons({});
+            setAppName('Controle Financeiro');
         }
-        if (savedAppName) {
-          setAppName(savedAppName);
-        } else {
-          setAppName('Controle Financeiro');
-        }
-    } else {
-        setCustomIcons({});
-        setAppName('Controle Financeiro');
+      }
+  }, [user, getUserData]);
+
+  React.useEffect(() => {
+    if (isClient && !user && pathname !== '/login' && pathname !== '/signup') {
+        router.push('/login');
     }
-  }, []);
+  }, [isClient, user, pathname, router]);
 
   React.useEffect(() => {
     updateTheme();
@@ -74,6 +91,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       window.removeEventListener('message', handleThemeUpdate);
     };
   }, [updateTheme]);
+
+  if (!user && (pathname === '/login' || pathname === '/signup')) {
+    return <>{children}</>;
+  }
+  
+  if (!user) {
+      return null;
+  }
 
   return (
     <SidebarProvider>
@@ -119,7 +144,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 </div>
                  <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton tooltip="Sair">
+                        <SidebarMenuButton tooltip="Sair" onClick={logout}>
                             <LogOut />
                             Sair
                         </SidebarMenuButton>

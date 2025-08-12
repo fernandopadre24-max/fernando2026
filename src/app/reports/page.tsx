@@ -10,8 +10,10 @@ import { BankAccountsReport } from '@/components/reports/bank-accounts-report';
 import { ExpenseCategoryChart } from '@/components/reports/expense-category-chart';
 import { BalanceSheetReport } from '@/components/reports/balance-sheet-report';
 import { TransferHistoryReport } from '@/components/reports/transfer-history-report';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function ReportsPage() {
+  const { user, getUserData } = useAuth();
   const [events, setEvents] = useState<Event[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<ExpenseCategory[]>([]);
@@ -20,20 +22,15 @@ export default function ReportsPage() {
 
   useEffect(() => {
     setIsClient(true);
-    const storedEvents = localStorage.getItem('events');
-    if (storedEvents) setEvents(JSON.parse(storedEvents));
-    
-    const storedTransactions = localStorage.getItem('transactions');
-    if (storedTransactions) setTransactions(JSON.parse(storedTransactions));
+    if (user) {
+      setEvents(getUserData('events') || []);
+      setTransactions(getUserData('transactions') || []);
+      setCategories(getUserData('expenseCategories') || []);
+      setBankAccounts(getUserData('bankAccounts') || []);
+    }
+  }, [user, getUserData]);
 
-    const storedCategories = localStorage.getItem('expenseCategories');
-    if (storedCategories) setCategories(JSON.parse(storedCategories));
-
-    const storedBankAccounts = localStorage.getItem('bankAccounts');
-    if (storedBankAccounts) setBankAccounts(JSON.parse(storedBankAccounts));
-  }, []);
-
-  if (!isClient) {
+  if (!isClient || !user) {
     return null; // or a loading spinner
   }
 

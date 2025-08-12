@@ -41,8 +41,10 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { Artist } from '@/types';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function ArtistsPage() {
+  const { user, getUserData, saveUserData } = useAuth();
   const [artists, setArtists] = useState<Artist[]>([]);
   const [isClient, setIsClient] = useState(false);
   
@@ -53,17 +55,19 @@ export default function ArtistsPage() {
 
   useEffect(() => {
     setIsClient(true);
-    const storedArtists = localStorage.getItem('artists');
-    if (storedArtists) {
-      setArtists(JSON.parse(storedArtists));
+    if (user) {
+      const storedArtists = getUserData('artists');
+      if (storedArtists) {
+        setArtists(storedArtists);
+      }
     }
-  }, []);
+  }, [user, getUserData]);
 
   useEffect(() => {
-    if (isClient) {
-      localStorage.setItem('artists', JSON.stringify(artists));
+    if (isClient && user) {
+      saveUserData('artists', artists);
     }
-  }, [artists, isClient]);
+  }, [artists, isClient, user, saveUserData]);
 
   const handleSave = () => {
     if (selectedArtist) {
@@ -120,7 +124,7 @@ export default function ArtistsPage() {
   };
 
 
-  if (!isClient) {
+  if (!isClient || !user) {
     return null; // or a loading spinner
   }
 

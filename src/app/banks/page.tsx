@@ -42,8 +42,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { BankAccount, Event, Transaction } from '@/types';
 import { TransferHistoryReport } from '@/components/reports/transfer-history-report';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function BanksPage() {
+  const { user, getUserData, saveUserData } = useAuth();
   const [accounts, setAccounts] = useState<BankAccount[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -60,25 +62,18 @@ export default function BanksPage() {
 
   useEffect(() => {
     setIsClient(true);
-    const storedAccounts = localStorage.getItem('bankAccounts');
-    if (storedAccounts) {
-      setAccounts(JSON.parse(storedAccounts));
+    if (user) {
+      setAccounts(getUserData('bankAccounts') || []);
+      setEvents(getUserData('events') || []);
+      setTransactions(getUserData('transactions') || []);
     }
-    const storedEvents = localStorage.getItem('events');
-    if (storedEvents) {
-      setEvents(JSON.parse(storedEvents));
-    }
-     const storedTransactions = localStorage.getItem('transactions');
-    if (storedTransactions) {
-      setTransactions(JSON.parse(storedTransactions));
-    }
-  }, []);
+  }, [user, getUserData]);
 
   useEffect(() => {
-    if (isClient) {
-      localStorage.setItem('bankAccounts', JSON.stringify(accounts));
+    if (isClient && user) {
+      saveUserData('bankAccounts', accounts);
     }
-  }, [accounts, isClient]);
+  }, [accounts, isClient, user, saveUserData]);
   
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat('pt-BR', {
@@ -154,7 +149,7 @@ export default function BanksPage() {
     setSelectedAccount(null);
   };
 
-  if (!isClient) {
+  if (!isClient || !user) {
     return null;
   }
 

@@ -12,6 +12,7 @@ import { Paintbrush, Type, Palette, TextQuote, Image as ImageIcon, Pencil } from
 import { Slider } from '@/components/ui/slider';
 import Image from 'next/image';
 import { Input } from '@/components/ui/input';
+import { useAuth } from '@/hooks/use-auth';
 
 const fonts = [
   { name: 'Poppins', family: 'Poppins, sans-serif' },
@@ -75,6 +76,7 @@ function hexToHsl(hex: string): string {
 
 
 export default function SettingsPage() {
+    const { user, getUserData, saveUserData } = useAuth();
     const { toast } = useToast();
     const [isClient, setIsClient] = useState(false);
     
@@ -89,39 +91,41 @@ export default function SettingsPage() {
 
     useEffect(() => {
         setIsClient(true);
-        const savedTheme = localStorage.getItem('app-theme');
-        if (savedTheme) {
-            const { fonts, colors, fontSize: savedFontSize, icons, appName: savedAppName } = JSON.parse(savedTheme);
-            if (savedAppName) {
-                setAppName(savedAppName);
-            }
-            if (fonts) {
-                setHeadlineFont(fonts.headline?.family || 'Poppins, sans-serif');
-                setBodyFont(fonts.body?.family || 'PT Sans, sans-serif');
-            }
-             if (colors) {
-                setBackgroundColor(colors.background || '220 20% 96%');
-                setPrimaryColor(colors.primary || '262 52% 50%');
-                setAccentColor(colors.accent || '45 95% 55%');
-            }
-            if (savedFontSize) {
-                setFontSize(savedFontSize);
-            }
-            if (icons) {
-                setModuleIcons(icons);
+        if (user) {
+            const savedTheme = getUserData('app-theme');
+            if (savedTheme) {
+                const { fonts, colors, fontSize: savedFontSize, icons, appName: savedAppName } = savedTheme;
+                if (savedAppName) {
+                    setAppName(savedAppName);
+                }
+                if (fonts) {
+                    setHeadlineFont(fonts.headline?.family || 'Poppins, sans-serif');
+                    setBodyFont(fonts.body?.family || 'PT Sans, sans-serif');
+                }
+                 if (colors) {
+                    setBackgroundColor(colors.background || '220 20% 96%');
+                    setPrimaryColor(colors.primary || '262 52% 50%');
+                    setAccentColor(colors.accent || '45 95% 55%');
+                }
+                if (savedFontSize) {
+                    setFontSize(savedFontSize);
+                }
+                if (icons) {
+                    setModuleIcons(icons);
+                }
             }
         }
-    }, []);
+    }, [user, getUserData]);
 
-    const applyTheme = () => {
+    const applyTheme = (theme: any) => {
         const root = document.documentElement;
         
-        document.title = appName;
-        root.style.fontSize = `${fontSize}px`;
-        root.style.setProperty('--font-headline', headlineFont);
-        root.style.setProperty('--font-body', bodyFont);
+        document.title = theme.appName;
+        root.style.fontSize = `${theme.fontSize}px`;
+        root.style.setProperty('--font-headline', theme.fonts.headline.family);
+        root.style.setProperty('--font-body', theme.fonts.body.family);
         
-        const fontFamilies = [bodyFont, headlineFont].filter(Boolean).join(':wght@400;700&family=');
+        const fontFamilies = [theme.fonts.body.family, theme.fonts.headline.family].filter(Boolean).join(':wght@400;700&family=');
         if (fontFamilies) {
           const linkId = 'dynamic-google-font';
           let link = document.getElementById(linkId) as HTMLLinkElement;
@@ -134,14 +138,12 @@ export default function SettingsPage() {
           link.href = `https://fonts.googleapis.com/css2?family=${fontFamilies.replace(/ /g, '+')}:wght@400;500;600;700&display=swap`;
         }
 
-        root.style.setProperty('--background-hsl', backgroundColor);
-        root.style.setProperty('--primary-hsl', primaryColor);
-        root.style.setProperty('--accent-hsl', accentColor);
+        root.style.setProperty('--background-hsl', theme.colors.background);
+        root.style.setProperty('--primary-hsl', theme.colors.primary);
+        root.style.setProperty('--accent-hsl', theme.colors.accent);
     };
 
     const handleSave = () => {
-        applyTheme();
-        window.postMessage({ type: 'theme-updated' }, '*');
         const theme = {
             appName: appName,
             fonts: {
@@ -156,7 +158,9 @@ export default function SettingsPage() {
             fontSize: fontSize,
             icons: moduleIcons,
         };
-        localStorage.setItem('app-theme', JSON.stringify(theme));
+        applyTheme(theme);
+        saveUserData('app-theme', theme);
+        window.postMessage({ type: 'theme-updated' }, '*');
         toast({
             title: 'Tema Salvo!',
             description: 'Suas configurações de aparência foram salvas com sucesso.',
@@ -165,34 +169,32 @@ export default function SettingsPage() {
     
     const handleReset = () => {
       const defaultSettings = {
-        name: 'Controle Financeiro',
-        headline: 'Poppins, sans-serif',
-        body: 'PT Sans, sans-serif',
+        appName: 'Controle Financeiro',
+        fonts: {
+            headline: { family: 'Poppins, sans-serif' },
+            body: { family: 'PT Sans, sans-serif' },
+        },
+        colors: {
+            background: '220 20% 96%',
+            primary: '262 52% 50%',
+            accent: '45 95% 55%',
+        },
         fontSize: 16,
-        background: '220 20% 96%',
-        primary: '262 52% 50%',
-        accent: '45 95% 55%',
+        icons: {},
       };
 
-      setAppName(defaultSettings.name);
-      setHeadlineFont(defaultSettings.headline);
-      setBodyFont(defaultSettings.body);
+      setAppName(defaultSettings.appName);
+      setHeadlineFont(defaultSettings.fonts.headline.family);
+      setBodyFont(defaultSettings.fonts.body.family);
       setFontSize(defaultSettings.fontSize);
-      setBackgroundColor(defaultSettings.background);
-      setPrimaryColor(defaultSettings.primary);
-      setAccentColor(defaultSettings.accent);
+      setBackgroundColor(defaultSettings.colors.background);
+      setPrimaryColor(defaultSettings.colors.primary);
+      setAccentColor(defaultSettings.colors.accent);
       setModuleIcons({});
       
-      const root = document.documentElement;
-      document.title = defaultSettings.name;
-      root.style.fontSize = `${defaultSettings.fontSize}px`;
-      root.style.setProperty('--font-headline', defaultSettings.headline);
-      root.style.setProperty('--font-body', defaultSettings.body);
-      root.style.setProperty('--background-hsl', defaultSettings.background);
-      root.style.setProperty('--primary-hsl', defaultSettings.primary);
-      root.style.setProperty('--accent-hsl', defaultSettings.accent);
+      applyTheme(defaultSettings);
       
-      localStorage.removeItem('app-theme');
+      saveUserData('app-theme', defaultSettings);
       window.postMessage({ type: 'theme-updated' }, '*');
       toast({
           title: 'Tema Restaurado',
@@ -213,7 +215,7 @@ export default function SettingsPage() {
         }
     };
     
-    if (!isClient) {
+    if (!isClient || !user) {
         return null;
     }
     
@@ -360,4 +362,4 @@ export default function SettingsPage() {
         </AppShell>
     );
 
-    
+}

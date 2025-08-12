@@ -1,4 +1,5 @@
 
+
 export type PaymentMethod = 'PIX' | 'Dinheiro' | 'Cartão';
 
 export type Event = {
@@ -53,4 +54,10 @@ export type Transaction = {
 export type ExpenseCategory = {
     id: string;
     name: string;
+}
+
+export type User = {
+    id: string;
+    username: string;
+    password?: string; // Should be handled securely in a real app
 }

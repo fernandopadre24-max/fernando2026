@@ -23,7 +23,7 @@ const movementSchema = z.object({
   description: z.string().min(1, 'A descrição é obrigatória.'),
   date: z.string().min(1, 'A data é obrigatória.'),
   paymentMethod: z.nativeEnum(PaymentMethod).nullable(),
-  artistId: z.string().optional().nullable(),
+  paidTo: z.string().optional().nullable(),
   contractorId: z.string().optional().nullable(),
 });
 
@@ -60,7 +60,7 @@ export function MovementForm({
       description: '',
       date: new Date().toISOString().split('T')[0],
       paymentMethod: null,
-      artistId: null,
+      paidTo: '',
       contractorId: null,
     },
   });
@@ -116,17 +116,8 @@ export function MovementForm({
 
         {type === 'withdrawal' && (
             <div className="space-y-2">
-                <Label>Pago para (Artista)</Label>
-                <Controller name="artistId" control={control} render={({ field }) => (
-                    <Select onValueChange={field.onChange} defaultValue={field.value || ''}>
-                    <SelectTrigger><SelectValue placeholder="Selecione o artista" /></SelectTrigger>
-                    <SelectContent>
-                        {artists.map((artist) => (
-                        <SelectItem key={artist.id} value={artist.id}>{artist.name}</SelectItem>
-                        ))}
-                    </SelectContent>
-                    </Select>
-                )} />
+                <Label htmlFor="paidTo">Pago para (opcional)</Label>
+                <Input id="paidTo" {...register('paidTo')} />
             </div>
         )}
 

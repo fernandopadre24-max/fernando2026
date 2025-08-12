@@ -70,7 +70,7 @@ const BanksPage = () => {
       isTransferred: true, // Direct bank movement
       bankAccountId: selectedAccount.id,
       paymentMethod: data.paymentMethod,
-      artistId: data.artistId,
+      paidTo: data.paidTo,
       contractorId: data.contractorId,
     };
     const updatedTransactions = [...transactions, newTransaction];

@@ -37,8 +37,8 @@ export function TransactionList({ transactions, categories, artists, contractors
   };
 
   const getAssociatedName = (transaction: Transaction) => {
-    if (transaction.type === 'Despesa' && transaction.artistId) {
-        return artists.find(a => a.id === transaction.artistId)?.name || '-';
+    if (transaction.type === 'Despesa') {
+        return transaction.paidTo || '-';
     }
     if (transaction.type === 'Receita' && transaction.contractorId) {
         return contractors.find(c => c.id === transaction.contractorId)?.name || '-';

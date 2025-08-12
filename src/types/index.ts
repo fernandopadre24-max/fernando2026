@@ -22,6 +22,7 @@ export type Event = {
   isTransferred: boolean;
   transferredToBankAccountId?: string | null;
   transferDate?: string | null;
+  paidTo?: string | null;
 };
 
 export type Artist = {
@@ -55,7 +56,7 @@ export type Transaction = {
     transferDate?: string;
     bankAccountId?: string | null;
     paymentMethod?: PaymentMethod | null;
-    artistId?: string | null;
+    paidTo?: string | null;
     contractorId?: string | null;
 }
 

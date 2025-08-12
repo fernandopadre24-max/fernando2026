@@ -35,6 +35,7 @@ const eventSchema = z.object({
   isPaid: z.boolean(),
   paymentMethod: z.nativeEnum(PaymentMethod).nullable(),
   observations: z.string().optional(),
+  paidTo: z.string().optional().nullable(),
 });
 
 type EventFormData = z.infer<typeof eventSchema>;
@@ -73,6 +74,7 @@ export function EventForm({
       isPaid: event?.isPaid || false,
       paymentMethod: event?.paymentMethod || null,
       observations: event?.observations || '',
+      paidTo: event?.paidTo || '',
     },
   });
 

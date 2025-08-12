@@ -30,7 +30,7 @@ const transactionSchema = z.object({
   type: z.enum(['Receita', 'Despesa']),
   categoryId: z.string().optional().nullable(),
   paymentMethod: z.nativeEnum(PaymentMethod).nullable(),
-  artistId: z.string().optional().nullable(),
+  paidTo: z.string().optional().nullable(),
   contractorId: z.string().optional().nullable(),
 });
 
@@ -70,7 +70,7 @@ export function TransactionForm({
       type: transaction?.type || 'Receita',
       categoryId: transaction?.categoryId || null,
       paymentMethod: transaction?.paymentMethod || null,
-      artistId: transaction?.artistId || null,
+      paidTo: transaction?.paidTo || '',
       contractorId: transaction?.contractorId || null,
     },
   });
@@ -169,17 +169,8 @@ export function TransactionForm({
                 />
                 </div>
                  <div className="space-y-2">
-                    <Label>Pago para (Artista)</Label>
-                    <Controller name="artistId" control={control} render={({ field }) => (
-                        <Select onValueChange={field.onChange} defaultValue={field.value || ''}>
-                        <SelectTrigger><SelectValue placeholder="Selecione o artista" /></SelectTrigger>
-                        <SelectContent>
-                            {artists.map((artist) => (
-                            <SelectItem key={artist.id} value={artist.id}>{artist.name}</SelectItem>
-                            ))}
-                        </SelectContent>
-                        </Select>
-                    )} />
+                    <Label htmlFor="paidTo">Pago para (opcional)</Label>
+                    <Input id="paidTo" {...register('paidTo')} />
                 </div>
             </div>
           )}

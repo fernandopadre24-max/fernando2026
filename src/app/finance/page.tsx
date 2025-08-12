@@ -17,7 +17,7 @@ const FinancePage = () => {
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
 
   useEffect(() => {
-    setTransactions(loadData('transactions'));
+    setTransactions(loadData('transactions', []));
     setCategories(loadData('expenseCategories', [{ id: '1', name: 'Alimentação' }, { id: '2', name: 'Transporte' }]));
   }, []);
 

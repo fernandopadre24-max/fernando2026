@@ -111,9 +111,9 @@ export function BankForm({ isOpen, onClose, onSave, account }: BankFormProps) {
            <div className="space-y-2">
             <Label htmlFor="imageUpload">Imagem do Banco</Label>
             <div className="flex items-center gap-4">
-                 <Avatar className="h-24 w-24">
-                    <AvatarImage src={previewImage || undefined} />
-                    <AvatarFallback className="text-3xl"><Banknote className="h-8 w-8 text-muted-foreground" /></AvatarFallback>
+                 <Avatar className="h-24 w-24 rounded-md">
+                    <AvatarImage src={previewImage || undefined} className="rounded-md" />
+                    <AvatarFallback className="text-3xl rounded-md"><Banknote className="h-8 w-8 text-muted-foreground" /></AvatarFallback>
                   </Avatar>
                 <Input id="imageUpload" type="file" accept="image/*" onChange={handleImageChange} className="flex-1" />
             </div>

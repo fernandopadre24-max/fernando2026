@@ -42,10 +42,7 @@ export default function LoginPage() {
       const loggedIn = login(data.username, data.password);
       if (loggedIn) {
         toast({ title: 'Login bem-sucedido!', description: 'Bem-vindo de volta.' });
-        // NOTE: In a real app, you would redirect to a dashboard page.
-        // For now, we can just show a success message as there's no "inside" to the app.
-        alert(`Bem-vindo, ${data.username}! Você está logado.`);
-        form.reset();
+        router.push('/dashboard');
       } else {
         toast({
           variant: 'destructive',

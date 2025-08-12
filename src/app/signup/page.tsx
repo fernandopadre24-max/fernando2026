@@ -42,7 +42,7 @@ export default function SignupPage() {
       const success = register(data.username, data.password);
       if (success) {
         toast({ title: 'Cadastro realizado!', description: 'Você já pode fazer o login.' });
-        router.push('/login');
+        router.push('/');
       } else {
         toast({
           variant: 'destructive',
@@ -106,7 +106,7 @@ export default function SignupPage() {
               </Button>
                <p className="text-sm text-center text-muted-foreground">
                     Já tem uma conta?{' '}
-                    <Link href="/login" className="font-semibold text-primary hover:underline">
+                    <Link href="/" className="font-semibold text-primary hover:underline">
                         Faça o login
                     </Link>
                 </p>

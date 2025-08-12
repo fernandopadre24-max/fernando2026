@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { loadData } from '@/lib/storage';
 import { Event, Artist, Contractor, BankAccount, Transaction } from '@/types';
-import { Calendar, Users, Banknote, Landmark, Wallet, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
+import { Calendar, Users, Banknote, Landmark, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
 import Link from 'next/link';
 
 const formatCurrency = (value: number) => {

@@ -1,8 +1,8 @@
 
 'use client';
 
-import { useMemo } from 'react';
-import { Pie, PieChart, ResponsiveContainer } from "recharts"
+import { useMemo, useState } from 'react';
+import { Pie, PieChart, ResponsiveContainer, Bar, BarChart, XAxis, YAxis, CartesianGrid } from "recharts"
 
 import {
   Card,
@@ -18,6 +18,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Transaction, ExpenseCategory } from '@/types';
 
 interface ExpensesByCategoryChartProps {
@@ -45,6 +46,7 @@ const formatCurrency = (value: number) => {
 
 
 export function ExpensesByCategoryChart({ transactions, categories }: ExpensesByCategoryChartProps) {
+    const [chartType, setChartType] = useState('pie');
     
     const expensesByCategory = useMemo(() => {
         const categoryMap: { [key: string]: { name: string, value: number, fill: string } } = {};
@@ -84,9 +86,17 @@ export function ExpensesByCategoryChart({ transactions, categories }: ExpensesBy
 
     return (
         <Card>
-            <CardHeader>
-                <CardTitle>Despesas por Categoria</CardTitle>
-                <CardDescription>Distribuição de despesas no período</CardDescription>
+            <CardHeader className="flex-row items-center justify-between">
+                <div>
+                    <CardTitle>Despesas por Categoria</CardTitle>
+                    <CardDescription>Distribuição de despesas no período</CardDescription>
+                </div>
+                 <Tabs value={chartType} onValueChange={setChartType} className="self-end">
+                    <TabsList>
+                        <TabsTrigger value="pie">Pizza</TabsTrigger>
+                        <TabsTrigger value="bar">Barra</TabsTrigger>
+                    </TabsList>
+                </Tabs>
             </CardHeader>
             <CardContent className="flex-1 pb-0">
                  <ChartContainer
@@ -94,22 +104,41 @@ export function ExpensesByCategoryChart({ transactions, categories }: ExpensesBy
                     className="mx-auto aspect-square max-h-[300px]"
                     >
                      {expensesByCategory.length > 0 ? (
-                        <ResponsiveContainer width="100%" height={300}>
-                            <PieChart>
-                                <ChartTooltip
+                        <>
+                           {chartType === 'pie' && (
+                            <ResponsiveContainer width="100%" height={300}>
+                                <PieChart>
+                                    <ChartTooltip
+                                        cursor={false}
+                                        content={<ChartTooltipContent hideLabel formatter={(value) => formatCurrency(value as number)} />}
+                                    />
+                                    <Pie
+                                        data={chartData}
+                                        dataKey="value"
+                                        nameKey="name"
+                                        innerRadius={60}
+                                        strokeWidth={5}
+                                    >
+                                    </Pie>
+                                </PieChart>
+                            </ResponsiveContainer>
+                           )}
+                            {chartType === 'bar' && (
+                               <ResponsiveContainer width="100%" height={300}>
+                                <BarChart data={chartData} layout="vertical" margin={{ left: 20 }}>
+                                  <CartesianGrid horizontal={false} />
+                                  <XAxis type="number" dataKey="value" tickFormatter={(value) => formatCurrency(value as number)} />
+                                  <YAxis type="category" dataKey="name" tickLine={false} axisLine={false} width={80} />
+                                  <ChartTooltip
                                     cursor={false}
                                     content={<ChartTooltipContent hideLabel formatter={(value) => formatCurrency(value as number)} />}
-                                />
-                                <Pie
-                                    data={chartData}
-                                    dataKey="value"
-                                    nameKey="name"
-                                    innerRadius={60}
-                                    strokeWidth={5}
-                                >
-                                </Pie>
-                            </PieChart>
-                         </ResponsiveContainer>
+                                  />
+                                  <Bar dataKey="value" radius={4}>
+                                  </Bar>
+                                </BarChart>
+                              </ResponsiveContainer>
+                           )}
+                        </>
                      ) : (
                         <div className="flex items-center justify-center h-full text-muted-foreground">
                             Nenhuma despesa registrada no período.

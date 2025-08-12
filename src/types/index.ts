@@ -21,7 +21,7 @@ export type Event = {
   observations?: string;
   isTransferred: boolean;
   transferredToBankAccountId?: string | null;
-  transferDate?: string;
+  transferDate?: string | null;
 };
 
 export type Artist = {

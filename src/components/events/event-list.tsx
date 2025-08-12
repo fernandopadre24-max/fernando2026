@@ -16,8 +16,9 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Pen, Trash2 } from 'lucide-react';
+import { MoreHorizontal, Pen, Trash2, ArrowRightLeft } from 'lucide-react';
 import { Event, Artist, Contractor } from '@/types';
 
 interface EventListProps {
@@ -26,6 +27,7 @@ interface EventListProps {
   contractors: Contractor[];
   onEdit: (event: Event) => void;
   onDelete: (id: string) => void;
+  onTransfer: (event: Event) => void;
 }
 
 const formatDate = (dateString: string) => {
@@ -36,7 +38,7 @@ const formatCurrency = (value: number) => {
   return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 };
 
-export function EventList({ events, artists, contractors, onEdit, onDelete }: EventListProps) {
+export function EventList({ events, artists, contractors, onEdit, onDelete, onTransfer }: EventListProps) {
 
   return (
     <Table>
@@ -48,6 +50,7 @@ export function EventList({ events, artists, contractors, onEdit, onDelete }: Ev
           <TableHead>Valor</TableHead>
           <TableHead>Status</TableHead>
           <TableHead>Pagamento</TableHead>
+          <TableHead>Transferência</TableHead>
           <TableHead className="text-right">Ações</TableHead>
         </TableRow>
       </TableHeader>
@@ -73,6 +76,12 @@ export function EventList({ events, artists, contractors, onEdit, onDelete }: Ev
                   {event.isPaid ? 'Pago' : 'Pendente'}
                 </Badge>
               </TableCell>
+              <TableCell>
+                 <Badge variant={event.isTransferred ? 'default' : 'secondary'}
+                    className={event.isTransferred ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}>
+                    {event.isTransferred ? 'Transferido' : 'Pendente'}
+                </Badge>
+              </TableCell>
               <TableCell className="text-right">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -86,6 +95,13 @@ export function EventList({ events, artists, contractors, onEdit, onDelete }: Ev
                       <Pen className="mr-2 h-4 w-4" />
                       Editar
                     </DropdownMenuItem>
+                    {event.isPaid && !event.isTransferred && (
+                      <DropdownMenuItem onClick={() => onTransfer(event)}>
+                          <ArrowRightLeft className="mr-2 h-4 w-4" />
+                          Transferir para Conta
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => onDelete(event.id)} className="text-red-600">
                       <Trash2 className="mr-2 h-4 w-4" />
                       Excluir
@@ -97,7 +113,7 @@ export function EventList({ events, artists, contractors, onEdit, onDelete }: Ev
           ))
         ) : (
           <TableRow>
-            <TableCell colSpan={7} className="h-24 text-center">
+            <TableCell colSpan={8} className="h-24 text-center">
               Nenhum evento encontrado.
             </TableCell>
           </TableRow>

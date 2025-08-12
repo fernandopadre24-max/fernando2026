@@ -13,6 +13,7 @@ interface AuthContextType {
   getAllUsers: () => User[];
   updateUserPassword: (userId: string, newPass: string) => Promise<void>;
   deleteUser: (userId: string) => Promise<void>;
+  deleteCurrentUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -168,9 +169,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  const deleteCurrentUser = async (): Promise<void> => {
+    if (!user) {
+        throw new Error("Nenhum usuário logado.");
+    }
+    
+    // Check if the user is the only admin
+    const adminUsers = Array.from(users.values()).filter(u => u.role === 'admin');
+    if (user.role === 'admin' && adminUsers.length === 1) {
+      throw new Error("Não é possível excluir o único administrador do sistema.");
+    }
+
+    // Delete user data. The key format is `${userId}_${key}`
+     Object.keys(localStorage).forEach(key => {
+        if (key.startsWith(`${user.id}_`)) {
+            localStorage.removeItem(key);
+        }
+     });
+
+    // Delete user from user list
+    users.delete(user.username);
+    saveUsers(users);
+
+    // Logout
+    logout();
+  }
+
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, signup, getAllUsers, updateUserPassword, deleteUser }}>
+    <AuthContext.Provider value={{ user, login, logout, signup, getAllUsers, updateUserPassword, deleteUser, deleteCurrentUser }}>
       {children}
     </AuthContext.Provider>
   );

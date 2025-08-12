@@ -11,6 +11,17 @@ import { useTheme } from '@/components/theme-provider';
 import { ThemeSettings, FontOption, FontSize, ColorTheme } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/auth-context';
+import { Separator } from '@/components/ui/separator';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 const defaultSettings: ThemeSettings = {
     theme: 'light',
@@ -64,7 +75,8 @@ export default function SettingsPage() {
     const { settings, setSettings } = useTheme();
     const [localSettings, setLocalSettings] = useState<ThemeSettings>(settings);
     const { toast } = useToast();
-    const { user } = useAuth();
+    const { user, deleteCurrentUser } = useAuth();
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
     useEffect(() => {
         if (user) {
@@ -87,6 +99,26 @@ export default function SettingsPage() {
     const handleRestoreDefaults = () => {
         setLocalSettings(defaultSettings);
     };
+
+    const handleDeleteAccount = async () => {
+        try {
+            await deleteCurrentUser();
+            toast({
+                title: "Conta Excluída",
+                description: "Sua conta e todos os seus dados foram excluídos com sucesso.",
+            });
+            // The auth context will handle the redirect.
+        } catch (error: any) {
+             toast({
+                title: "Erro ao Excluir Conta",
+                description: error.message,
+                variant: "destructive",
+            });
+        } finally {
+            setIsDeleteDialogOpen(false);
+        }
+    }
+
 
     if (!user) {
         return <p>Carregando...</p>;
@@ -248,6 +280,36 @@ export default function SettingsPage() {
                     </div>
                 </CardContent>
             </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Excluir Conta</CardTitle>
+                    <CardDescription>
+                        Esta ação é permanente e removerá todos os seus dados.
+                    </CardDescription>
+                </CardHeader>
+                 <CardContent>
+                    <Button variant="destructive" onClick={() => setIsDeleteDialogOpen(true)}>Excluir Minha Conta</Button>
+                </CardContent>
+            </Card>
+
+             <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                    <AlertDialogTitle>Você tem certeza absoluta?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        Esta ação não pode ser desfeita. Isso excluirá permanentemente sua conta
+                        e removerá todos os seus dados de nossos servidores.
+                    </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDeleteAccount} className="bg-destructive hover:bg-destructive/90">
+                            Sim, excluir minha conta
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

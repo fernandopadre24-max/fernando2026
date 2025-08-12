@@ -39,27 +39,37 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     return pathname === path;
   };
 
-  React.useEffect(() => {
-    const loadIcons = () => {
-        const savedTheme = localStorage.getItem('app-theme');
-        if (savedTheme) {
-            const { icons } = JSON.parse(savedTheme);
-            if (icons) {
-                setCustomIcons(icons);
+  const updateTheme = React.useCallback(() => {
+    const savedTheme = localStorage.getItem('app-theme');
+    if (savedTheme) {
+        const { icons, backgrounds } = JSON.parse(savedTheme);
+        if (icons) {
+            setCustomIcons(icons);
+        } else {
+            setCustomIcons({});
+        }
+        if (backgrounds) {
+            const currentBg = backgrounds[pathname] || backgrounds['/'];
+            if (currentBg) {
+                document.body.style.setProperty('--background-image', `url(${currentBg})`);
             } else {
-                setCustomIcons({});
+                document.body.style.removeProperty('--background-image');
             }
         } else {
-             setCustomIcons({});
+             document.body.style.removeProperty('--background-image');
         }
+    } else {
+         setCustomIcons({});
+         document.body.style.removeProperty('--background-image');
     }
-    
-    loadIcons();
+  }, [pathname]);
 
-    // Listen for theme updates from the settings page
+  React.useEffect(() => {
+    updateTheme();
+
     const handleThemeUpdate = (event: MessageEvent) => {
       if (event.data?.type === 'theme-updated') {
-        loadIcons();
+        updateTheme();
       }
     };
 
@@ -67,7 +77,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     return () => {
       window.removeEventListener('message', handleThemeUpdate);
     };
-  }, []);
+  }, [updateTheme]);
 
   return (
     <SidebarProvider>

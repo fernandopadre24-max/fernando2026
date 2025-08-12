@@ -84,13 +84,13 @@ export default function SettingsPage() {
     const [primaryColor, setPrimaryColor] = useState('262 52% 50%');
     const [accentColor, setAccentColor] = useState('45 95% 55%');
     const [moduleIcons, setModuleIcons] = useState<{ [key: string]: string }>({});
-    const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
+    const [moduleBackgrounds, setModuleBackgrounds] = useState<{ [key: string]: string }>({});
 
     useEffect(() => {
         setIsClient(true);
         const savedTheme = localStorage.getItem('app-theme');
         if (savedTheme) {
-            const { fonts, colors, fontSize: savedFontSize, icons, backgroundImage: savedBgImage } = JSON.parse(savedTheme);
+            const { fonts, colors, fontSize: savedFontSize, icons, backgrounds } = JSON.parse(savedTheme);
             if (fonts) {
                 setHeadlineFont(fonts.headline?.family || 'Poppins, sans-serif');
                 setBodyFont(fonts.body?.family || 'PT Sans, sans-serif');
@@ -106,8 +106,8 @@ export default function SettingsPage() {
             if (icons) {
                 setModuleIcons(icons);
             }
-            if (savedBgImage) {
-                setBackgroundImage(savedBgImage);
+            if (backgrounds) {
+                setModuleBackgrounds(backgrounds);
             }
         }
     }, []);
@@ -115,12 +115,10 @@ export default function SettingsPage() {
     const applyTheme = () => {
         const root = document.documentElement;
         
-        // Font Size
         root.style.fontSize = `${fontSize}px`;
-
-        // Fonts
         root.style.setProperty('--font-headline', headlineFont);
         root.style.setProperty('--font-body', bodyFont);
+        
         const fontFamilies = [bodyFont, headlineFont].filter(Boolean).join(':wght@400;700&family=');
         if (fontFamilies) {
           const linkId = 'dynamic-google-font';
@@ -134,22 +132,13 @@ export default function SettingsPage() {
           link.href = `https://fonts.googleapis.com/css2?family=${fontFamilies.replace(/ /g, '+')}:wght@400;500;600;700&display=swap`;
         }
 
-        // Colors
         root.style.setProperty('--background-hsl', backgroundColor);
         root.style.setProperty('--primary-hsl', primaryColor);
         root.style.setProperty('--accent-hsl', accentColor);
-        
-        // Background Image
-        if (backgroundImage) {
-            document.body.style.setProperty('--background-image', `url(${backgroundImage})`);
-        } else {
-            document.body.style.removeProperty('--background-image');
-        }
     };
 
     const handleSave = () => {
         applyTheme();
-        // Post a message to update the sidebar icons in real-time
         window.postMessage({ type: 'theme-updated' }, '*');
         const theme = {
             fonts: {
@@ -163,7 +152,7 @@ export default function SettingsPage() {
             },
             fontSize: fontSize,
             icons: moduleIcons,
-            backgroundImage: backgroundImage,
+            backgrounds: moduleBackgrounds,
         };
         localStorage.setItem('app-theme', JSON.stringify(theme));
         toast({
@@ -180,7 +169,7 @@ export default function SettingsPage() {
         background: '220 20% 96%',
         primary: '262 52% 50%',
         accent: '45 95% 55%',
-        backgroundImage: null,
+        backgrounds: {},
       };
 
       setHeadlineFont(defaultSettings.headline);
@@ -190,7 +179,7 @@ export default function SettingsPage() {
       setPrimaryColor(defaultSettings.primary);
       setAccentColor(defaultSettings.accent);
       setModuleIcons({});
-      setBackgroundImage(null);
+      setModuleBackgrounds({});
       
       const root = document.documentElement;
       root.style.fontSize = `${defaultSettings.fontSize}px`;
@@ -201,9 +190,8 @@ export default function SettingsPage() {
       root.style.setProperty('--accent-hsl', defaultSettings.accent);
       document.body.style.removeProperty('--background-image');
 
-
       localStorage.removeItem('app-theme');
-       window.postMessage({ type: 'theme-updated' }, '*');
+      window.postMessage({ type: 'theme-updated' }, '*');
       toast({
           title: 'Tema Restaurado',
           description: 'As configurações de aparência foram restauradas para o padrão.',
@@ -223,19 +211,18 @@ export default function SettingsPage() {
         }
     };
     
-    const handleBackgroundImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleBackgroundImageChange = (modulePath: string, e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
             const reader = new FileReader();
             reader.onload = (event) => {
                 if (event.target?.result) {
-                    setBackgroundImage(event.target.result as string);
+                    setModuleBackgrounds(prev => ({ ...prev, [modulePath]: event.target!.result as string }));
                 }
             };
             reader.readAsDataURL(file);
         }
     };
-
 
     if (!isClient) {
         return null;
@@ -257,8 +244,8 @@ export default function SettingsPage() {
                     <h1 className="text-2xl font-bold font-headline">Configurações de Aparência</h1>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <Card className="lg:col-span-2">
+                <div className="flex flex-col gap-8">
+                    <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2"><Type /> Tipografia</CardTitle>
                             <CardDescription>Personalize as fontes e o tamanho do texto.</CardDescription>
@@ -336,48 +323,51 @@ export default function SettingsPage() {
                             </div>
                         </CardContent>
                     </Card>
-                </div>
-                 <Card className="mt-8">
-                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><ImageIcon /> Imagem de Fundo</CardTitle>
-                        <CardDescription>Faça upload de uma imagem para o plano de fundo do aplicativo.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex flex-col items-center gap-4">
-                       <div className="w-48 h-27 rounded-lg bg-muted flex items-center justify-center overflow-hidden border">
-                            {backgroundImage ? (
-                                <Image src={backgroundImage} alt="Pré-visualização do fundo" width={192} height={108} className="object-cover" />
-                            ) : (
-                                <ImageIcon className="text-muted-foreground w-12 h-12" />
-                            )}
-                        </div>
-                        <input id="background-image-upload" type="file" accept="image/*" className="text-sm" onChange={handleBackgroundImageChange} />
-                         <Button variant="outline" size="sm" onClick={() => setBackgroundImage(null)} disabled={!backgroundImage}>
-                            Remover Imagem
-                        </Button>
-                    </CardContent>
-                </Card>
-
-                <Card className="mt-8">
-                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><ImageIcon /> Personalizar Ícones dos Módulos</CardTitle>
-                        <CardDescription>Faça upload de imagens para usar como ícones no menu lateral.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                        {modules.map(module => (
-                            <div key={module.path} className="flex flex-col items-center gap-2">
-                                <Label htmlFor={`icon-upload-${module.path}`}>{module.name}</Label>
-                                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center overflow-hidden">
-                                     {moduleIcons[module.path] ? (
-                                        <Image src={moduleIcons[module.path]} alt={`Ícone de ${module.name}`} width={64} height={64} className="object-cover" />
-                                    ) : (
-                                        <ImageIcon className="text-muted-foreground" />
-                                    )}
+                
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2"><ImageIcon /> Imagens de Fundo dos Módulos</CardTitle>
+                            <CardDescription>Faça upload de imagens para usar como plano de fundo em cada módulo.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                            {modules.map(module => (
+                                <div key={module.path} className="flex flex-col items-center gap-2">
+                                    <Label htmlFor={`bg-upload-${module.path}`}>{module.name}</Label>
+                                    <div className="w-24 h-16 rounded-md bg-muted flex items-center justify-center overflow-hidden border">
+                                        {moduleBackgrounds[module.path] ? (
+                                            <Image src={moduleBackgrounds[module.path]} alt={`Fundo de ${module.name}`} width={96} height={64} className="object-cover" />
+                                        ) : (
+                                            <ImageIcon className="text-muted-foreground w-8 h-8" />
+                                        )}
+                                    </div>
+                                    <input id={`bg-upload-${module.path}`} type="file" accept="image/*" className="text-sm w-full max-w-[180px]" onChange={(e) => handleBackgroundImageChange(module.path, e)} />
                                 </div>
-                                <input id={`icon-upload-${module.path}`} type="file" accept="image/*" className="text-sm" onChange={(e) => handleIconChange(module.path, e)} />
-                            </div>
-                        ))}
-                    </CardContent>
-                </Card>
+                            ))}
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2"><ImageIcon /> Personalizar Ícones dos Módulos</CardTitle>
+                            <CardDescription>Faça upload de imagens para usar como ícones no menu lateral.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                            {modules.map(module => (
+                                <div key={module.path} className="flex flex-col items-center gap-2">
+                                    <Label htmlFor={`icon-upload-${module.path}`}>{module.name}</Label>
+                                    <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center overflow-hidden">
+                                        {moduleIcons[module.path] ? (
+                                            <Image src={moduleIcons[module.path]} alt={`Ícone de ${module.name}`} width={64} height={64} className="object-cover" />
+                                        ) : (
+                                            <ImageIcon className="text-muted-foreground" />
+                                        )}
+                                    </div>
+                                    <input id={`icon-upload-${module.path}`} type="file" accept="image/*" className="text-sm w-full max-w-[180px]" onChange={(e) => handleIconChange(module.path, e)} />
+                                </div>
+                            ))}
+                        </CardContent>
+                    </Card>
+                </div>
 
                 <div className="mt-8 flex justify-end gap-2">
                     <Button variant="outline" onClick={handleReset}>Restaurar Padrão</Button>

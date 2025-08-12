@@ -6,7 +6,7 @@ import { useRouter, usePathname } from 'next/navigation';
 
 interface AuthContextType {
   user: string | null;
-  login: (username: string, pass: string) => void;
+  login: (username: string, pass: string) => Promise<void>;
   logout: () => void;
   signup: (username: string, pass: string, confirmPass: string) => Promise<void>;
 }
@@ -17,19 +17,13 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 // For this simulation, we load/save the user list from/to localStorage.
 const loadUsers = (): Map<string, { id: string, pass: string }> => {
     if (typeof window === 'undefined') {
-        return new Map([
-            ['produtor1', { id: 'user1', pass: 'senha1' }],
-            ['produtor2', { id: 'user2', pass: 'senha2' }]
-        ]);
+        return new Map();
     }
     const storedUsers = localStorage.getItem('users');
     if (storedUsers) {
         return new Map(JSON.parse(storedUsers));
     }
-    return new Map([
-        ['produtor1', { id: 'user1', pass: 'senha1' }],
-        ['produtor2', { id: 'user2', pass: 'senha2' }]
-    ]);
+    return new Map();
 }
 
 const saveUsers = (users: Map<string, { id: string, pass: string }>) => {
@@ -64,7 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     checkUser();
   }, [pathname, router]);
 
-  const login = (username: string, pass: string) => {
+  const login = async (username: string, pass: string): Promise<void> => {
     const userData = users.get(username);
     if (userData && userData.pass === pass) {
       localStorage.setItem('userId', userData.id);
@@ -88,7 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     saveUsers(users);
     
     // Automatically log in the new user
-    login(username, pass);
+    await login(username, pass);
   };
 
   const logout = () => {

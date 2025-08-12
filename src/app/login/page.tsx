@@ -24,7 +24,7 @@ export default function LoginPage() {
     e.preventDefault();
     try {
       if (isLoginMode) {
-        login(username, password);
+        await login(username, password);
         router.push('/');
       } else {
         await signup(username, password, confirmPassword);
@@ -98,13 +98,6 @@ export default function LoginPage() {
                     {isLoginMode ? 'Não tem uma conta? Cadastre-se' : 'Já tem uma conta? Faça login'}
                 </Button>
             </div>
-            {isLoginMode && (
-                 <div className="text-center text-xs text-muted-foreground pt-4">
-                    <p>Usuários de teste:</p>
-                    <p>1. user: <strong>produtor1</strong>, pass: <strong>senha1</strong></p>
-                    <p>2. user: <strong>produtor2</strong>, pass: <strong>senha2</strong></p>
-                </div>
-            )}
           </form>
         </CardContent>
       </Card>

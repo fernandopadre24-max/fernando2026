@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { loadData } from '@/lib/storage';
 import { Event, Transaction, ExpenseCategory } from '@/types';
@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { MonthlyRevenueChart } from '@/components/dashboard/monthly-revenue-chart';
 import { ExpensesByCategoryChart } from '@/components/dashboard/expenses-by-category-chart';
 import { FinancialSummary } from '@/components/finance/financial-summary';
+import { EventsSummary } from '@/components/dashboard/events-summary';
 
 
 const formatCurrency = (value: number) => {
@@ -37,14 +38,18 @@ export default function Home() {
     setLoading(false);
   }, []);
     
-  const upcomingEvents = [...events]
-    .filter(e => !e.isDone)
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-    .slice(0, 5);
+  const upcomingEvents = useMemo(() => {
+    return [...events]
+      .filter(e => !e.isDone)
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .slice(0, 5);
+  }, [events]);
 
-  const recentTransactions = [...transactions]
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .slice(0, 5);
+  const recentTransactions = useMemo(() => {
+    return [...transactions]
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, 5);
+  }, [transactions]);
 
 
   if (loading) {
@@ -62,7 +67,11 @@ export default function Home() {
             <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
         </div>
 
-        <FinancialSummary transactions={transactions} />
+        <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
+            <FinancialSummary transactions={transactions} />
+            <EventsSummary events={events} />
+        </div>
+
 
         <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
              <MonthlyRevenueChart transactions={transactions} />

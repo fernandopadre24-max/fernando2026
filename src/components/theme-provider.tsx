@@ -38,10 +38,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         body.style.setProperty('--font-headline', `'${settings.fontHeadline}', sans-serif`);
         body.style.setProperty('--font-body', `'${settings.fontBody}', sans-serif`);
         
-
-        body.classList.remove('text-sm', 'text-base', 'text-lg', 'text-xl');
+        // Apply font size
+        body.classList.remove('text-sm', 'text-base', 'text-lg');
         body.classList.add(`text-${settings.fontSize}`);
-
 
         saveData('themeSettings', settings);
     }, [settings]);

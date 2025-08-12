@@ -61,7 +61,7 @@ export type ExpenseCategory = {
 }
 
 export type FontOption = 'Poppins' | 'PT Sans' | 'Roboto' | 'Lato' | 'Open Sans' | 'Montserrat';
-export type FontSize = 'sm' | 'base' | 'lg' | 'xl';
+export type FontSize = 'sm' | 'base' | 'lg';
 
 export type ThemeSettings = {
     theme: 'light' | 'dark';

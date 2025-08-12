@@ -27,7 +27,13 @@ const loadUsers = (): Map<string, User> => {
     if (storedUsers) {
         return new Map(JSON.parse(storedUsers));
     }
-    return new Map();
+    
+    // If no users, create a default admin user
+    const adminUser: User = { id: 'user-admin-0', username: 'admin', pass: 'admin', role: 'admin' };
+    const defaultUsers = new Map<string, User>();
+    defaultUsers.set('admin', adminUser);
+    saveUsers(defaultUsers); // Save it so it persists
+    return defaultUsers;
 }
 
 const saveUsers = (users: Map<string, User>) => {
@@ -83,7 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     const newUserId = `user-${Date.now()}`;
-    const role: UserRole = username.toLowerCase() === 'admin' && users.size === 0 ? 'admin' : 'user';
+    const role: UserRole = 'user'; // Only admin can create other admins now.
 
     const newUser: User = {
         id: newUserId,

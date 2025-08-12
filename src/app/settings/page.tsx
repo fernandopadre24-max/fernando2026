@@ -359,6 +359,5 @@ export default function SettingsPage() {
             </main>
         </AppShell>
     );
-}
 
     

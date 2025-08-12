@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/components/theme-provider';
 import { ThemeSettings, FontOption } from '@/types';
+import { useToast } from '@/hooks/use-toast';
+
 
 const defaultSettings: ThemeSettings = {
     theme: 'light',
@@ -29,9 +31,27 @@ const fontOptions: { value: FontOption, label: string }[] = [
 
 export default function SettingsPage() {
     const { settings, setSettings } = useTheme();
+    const [localSettings, setLocalSettings] = useState<ThemeSettings>(settings);
+    const { toast } = useToast();
+
+    useEffect(() => {
+        setLocalSettings(settings);
+    }, [settings]);
+
+    const handleSaveChanges = () => {
+        setSettings(localSettings);
+        toast({
+            title: "Configurações Salvas",
+            description: "A aparência do aplicativo foi atualizada.",
+        });
+    };
+
+    const handleCancel = () => {
+        setLocalSettings(settings);
+    };
 
     const handleRestoreDefaults = () => {
-        setSettings(defaultSettings);
+        setLocalSettings(defaultSettings);
     };
 
     return (
@@ -42,15 +62,15 @@ export default function SettingsPage() {
                 <CardHeader>
                     <CardTitle>Aparência</CardTitle>
                     <CardDescription>
-                        Personalize a aparência do seu aplicativo.
+                        Personalize a aparência do seu aplicativo. As alterações serão aplicadas após salvar.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-8">
                     <div className="space-y-4">
                         <Label className="text-lg font-semibold">Tema</Label>
                         <RadioGroup
-                            value={settings.theme}
-                            onValueChange={(value: 'light' | 'dark') => setSettings({ ...settings, theme: value })}
+                            value={localSettings.theme}
+                            onValueChange={(value: 'light' | 'dark') => setLocalSettings({ ...localSettings, theme: value })}
                         >
                             <div className="flex items-center space-x-2">
                                 <RadioGroupItem value="light" id="light" />
@@ -67,8 +87,8 @@ export default function SettingsPage() {
                         <div className="space-y-4">
                             <Label className="text-lg font-semibold" htmlFor="font-headline-select">Fonte dos Títulos</Label>
                             <Select
-                                value={settings.fontHeadline}
-                                onValueChange={(value: FontOption) => setSettings({ ...settings, fontHeadline: value })}
+                                value={localSettings.fontHeadline}
+                                onValueChange={(value: FontOption) => setLocalSettings({ ...localSettings, fontHeadline: value })}
                             >
                                 <SelectTrigger id="font-headline-select" className="w-full">
                                     <SelectValue placeholder="Selecione uma fonte" />
@@ -84,8 +104,8 @@ export default function SettingsPage() {
                         <div className="space-y-4">
                             <Label className="text-lg font-semibold" htmlFor="font-body-select">Fonte do Corpo</Label>
                             <Select
-                                value={settings.fontBody}
-                                onValueChange={(value: FontOption) => setSettings({ ...settings, fontBody: value })}
+                                value={localSettings.fontBody}
+                                onValueChange={(value: FontOption) => setLocalSettings({ ...localSettings, fontBody: value })}
                             >
                                 <SelectTrigger id="font-body-select" className="w-full">
                                     <SelectValue placeholder="Selecione uma fonte" />
@@ -103,8 +123,8 @@ export default function SettingsPage() {
                     <div className="space-y-4">
                         <Label className="text-lg font-semibold">Tamanho da Fonte</Label>
                          <RadioGroup
-                            value={settings.fontSize}
-                            onValueChange={(value: 'sm' | 'base' | 'lg') => setSettings({ ...settings, fontSize: value })}
+                            value={localSettings.fontSize}
+                            onValueChange={(value: 'sm' | 'base' | 'lg') => setLocalSettings({ ...localSettings, fontSize: value })}
                         >
                             <div className="flex items-center space-x-2">
                                 <RadioGroupItem value="sm" id="sm" />
@@ -127,18 +147,26 @@ export default function SettingsPage() {
                             {['262 52% 50%', '346.8 77.2% 49.8%', '24.6 95% 53.1%', '142.1 76.2% 36.3%', '217.2 91.2% 59.8%'].map(color => (
                                 <button
                                     key={color}
-                                    onClick={() => setSettings({ ...settings, primaryColor: color })}
-                                    className={`h-10 w-10 rounded-full border-2 ${settings.primaryColor === color ? 'border-primary' : 'border-transparent'}`}
+                                    onClick={() => setLocalSettings({ ...localSettings, primaryColor: color })}
+                                    className={`h-10 w-10 rounded-full border-2 ${localSettings.primaryColor === color ? 'border-primary' : 'border-transparent'}`}
                                     style={{ backgroundColor: `hsl(${color})` }}
                                     aria-label={`Select color ${color}`}
                                 />
                             ))}
                         </div>
                     </div>
-                     <div className="pt-4">
+                     <div className="pt-4 flex justify-between">
                         <Button onClick={handleRestoreDefaults} variant="outline">
                             Restaurar Padrão
                         </Button>
+                        <div className="flex gap-2">
+                             <Button onClick={handleCancel} variant="ghost">
+                                Cancelar
+                            </Button>
+                            <Button onClick={handleSaveChanges}>
+                                Salvar e Aplicar
+                            </Button>
+                        </div>
                     </div>
                 </CardContent>
             </Card>

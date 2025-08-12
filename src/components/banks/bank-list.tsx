@@ -160,7 +160,16 @@ export function BankList({ accounts, transactions, artists, contractors, onEdit,
                                                          <TableRow key={t.id}>
                                                              <TableCell>{formatDate(t.date)}</TableCell>
                                                              <TableCell>{t.description}</TableCell>
-                                                             <TableCell>{t.paymentMethod || '-'}</TableCell>
+                                                             <TableCell>
+                                                                {t.paymentMethod ? (
+                                                                    <div>
+                                                                        <span className="font-medium">{t.paymentMethod}</span>
+                                                                        {t.paymentMethod === 'PIX' && t.pixKey && (
+                                                                            <span className="block text-xs text-muted-foreground">{t.pixKey}</span>
+                                                                        )}
+                                                                    </div>
+                                                                ) : '-'}
+                                                            </TableCell>
                                                              <TableCell>{getAssociatedName(t)}</TableCell>
                                                              <TableCell className={`text-right ${t.type === 'Receita' ? 'text-green-600' : 'text-red-600'}`}>
                                                                 {t.type === 'Receita' ? '+' : '-'} {formatCurrency(t.value)}

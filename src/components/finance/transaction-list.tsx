@@ -56,6 +56,7 @@ export function TransactionList({ transactions, categories, artists, contractors
             <TableHead>Data</TableHead>
             <TableHead>Tipo</TableHead>
             <TableHead>Categoria</TableHead>
+            <TableHead>Forma de Pgto.</TableHead>
             <TableHead>Associado a</TableHead>
             <TableHead className="text-right">Ações</TableHead>
           </TableRow>
@@ -82,6 +83,16 @@ export function TransactionList({ transactions, categories, artists, contractors
                 <TableCell>
                   {transaction.type === 'Despesa' ? getCategoryName(transaction.categoryId) : '-'}
                 </TableCell>
+                <TableCell>
+                    {transaction.paymentMethod ? (
+                        <div>
+                            <span className="font-medium">{transaction.paymentMethod}</span>
+                            {transaction.paymentMethod === 'PIX' && transaction.pixKey && (
+                                <span className="block text-xs text-muted-foreground">{transaction.pixKey}</span>
+                            )}
+                        </div>
+                    ) : '-'}
+                </TableCell>
                 <TableCell>{getAssociatedName(transaction)}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-2">
@@ -99,7 +110,7 @@ export function TransactionList({ transactions, categories, artists, contractors
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={7} className="h-24 text-center">
+              <TableCell colSpan={8} className="h-24 text-center">
                 Nenhuma transação encontrada.
               </TableCell>
             </TableRow>

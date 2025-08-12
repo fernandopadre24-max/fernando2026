@@ -31,10 +31,12 @@ interface BankListProps {
   transactions: Transaction[];
   artists: Artist[];
   contractors: Contractor[];
-  onEdit: (account: BankAccount) => void;
-  onDelete: (id: string) => void;
+  onEditAccount: (account: BankAccount) => void;
+  onDeleteAccount: (id: string) => void;
   onDeposit: (account: BankAccount) => void;
   onWithdraw: (account: BankAccount) => void;
+  onEditTransaction: (transaction: Transaction) => void;
+  onDeleteTransaction: (id: string) => void;
 }
 
 const formatCurrency = (value: number) => {
@@ -45,7 +47,18 @@ const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
 };
 
-export function BankList({ accounts, transactions, artists, contractors, onEdit, onDelete, onDeposit, onWithdraw }: BankListProps) {
+export function BankList({ 
+    accounts, 
+    transactions, 
+    artists, 
+    contractors, 
+    onEditAccount, 
+    onDeleteAccount, 
+    onDeposit, 
+    onWithdraw,
+    onEditTransaction,
+    onDeleteTransaction
+}: BankListProps) {
     const [openAccountId, setOpenAccountId] = React.useState<string | null>(null);
 
     const getAssociatedName = (transaction: Transaction) => {
@@ -120,21 +133,21 @@ export function BankList({ accounts, transactions, artists, contractors, onEdit,
                                     </Tooltip>
                                      <Tooltip>
                                         <TooltipTrigger asChild>
-                                           <Button variant="ghost" size="icon" onClick={() => onEdit(account)}>
+                                           <Button variant="ghost" size="icon" onClick={() => onEditAccount(account)}>
                                               <Pen className="h-4 w-4" />
                                               <span className="sr-only">Editar</span>
                                             </Button>
                                         </TooltipTrigger>
-                                        <TooltipContent>Editar</TooltipContent>
+                                        <TooltipContent>Editar Conta</TooltipContent>
                                      </Tooltip>
                                      <Tooltip>
                                         <TooltipTrigger asChild>
-                                            <Button variant="ghost" size="icon" onClick={() => onDelete(account.id)} className="text-red-600 hover:text-red-700">
+                                            <Button variant="ghost" size="icon" onClick={() => onDeleteAccount(account.id)} className="text-red-600 hover:text-red-700">
                                               <Trash2 className="h-4 w-4" />
                                               <span className="sr-only">Excluir</span>
                                             </Button>
                                         </TooltipTrigger>
-                                        <TooltipContent>Excluir</TooltipContent>
+                                        <TooltipContent>Excluir Conta</TooltipContent>
                                     </Tooltip>
                                   </div>
                                 </TableCell>
@@ -153,6 +166,7 @@ export function BankList({ accounts, transactions, artists, contractors, onEdit,
                                                          <TableHead>Forma Pgto.</TableHead>
                                                          <TableHead>Associado a</TableHead>
                                                          <TableHead className="text-right">Valor</TableHead>
+                                                         <TableHead className="text-right">Ações</TableHead>
                                                      </TableRow>
                                                  </TableHeader>
                                                  <TableBody>
@@ -174,6 +188,28 @@ export function BankList({ accounts, transactions, artists, contractors, onEdit,
                                                              <TableCell className={`text-right ${t.type === 'Receita' ? 'text-green-600' : 'text-red-600'}`}>
                                                                 {t.type === 'Receita' ? '+' : '-'} {formatCurrency(t.value)}
                                                             </TableCell>
+                                                             <TableCell className="text-right">
+                                                                <div className="flex items-center justify-end gap-2">
+                                                                    <Tooltip>
+                                                                        <TooltipTrigger asChild>
+                                                                            <Button variant="ghost" size="icon" onClick={() => onEditTransaction(t)}>
+                                                                                <Pen className="h-4 w-4" />
+                                                                                <span className="sr-only">Editar</span>
+                                                                            </Button>
+                                                                        </TooltipTrigger>
+                                                                        <TooltipContent>Editar Transação</TooltipContent>
+                                                                    </Tooltip>
+                                                                    <Tooltip>
+                                                                        <TooltipTrigger asChild>
+                                                                            <Button variant="ghost" size="icon" onClick={() => onDeleteTransaction(t.id)} className="text-red-600 hover:text-red-700">
+                                                                                <Trash2 className="h-4 w-4" />
+                                                                                <span className="sr-only">Excluir</span>
+                                                                            </Button>
+                                                                        </TooltipTrigger>
+                                                                        <TooltipContent>Excluir Transação</TooltipContent>
+                                                                    </Tooltip>
+                                                                </div>
+                                                             </TableCell>
                                                          </TableRow>
                                                      ))}
                                                  </TableBody>

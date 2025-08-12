@@ -12,6 +12,7 @@ import { loadData, saveData } from '@/lib/storage';
 
 const BanksPage = () => {
   const [accounts, setAccounts] = useState<BankAccount[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isMovementFormOpen, setIsMovementFormOpen] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<BankAccount | null>(null);
@@ -20,6 +21,7 @@ const BanksPage = () => {
 
   useEffect(() => {
     setAccounts(loadData('bankAccounts', []));
+    setTransactions(loadData('transactions', []));
   }, []);
 
   const handleSaveAccount = (account: Omit<BankAccount, 'id' | 'balance'>) => {
@@ -55,7 +57,6 @@ const BanksPage = () => {
     saveData('bankAccounts', updatedAccounts);
 
     // Create a new transaction
-    const transactions = loadData('transactions', []);
     const newTransaction: Transaction = {
       id: new Date().toISOString(),
       description: data.description,
@@ -66,6 +67,7 @@ const BanksPage = () => {
       bankAccountId: selectedAccount.id,
     };
     const updatedTransactions = [...transactions, newTransaction];
+    setTransactions(updatedTransactions);
     saveData('transactions', updatedTransactions);
 
     setIsMovementFormOpen(false);
@@ -111,6 +113,7 @@ const BanksPage = () => {
       <div className="mt-8">
         <BankList 
             accounts={accounts} 
+            transactions={transactions}
             onEdit={handleEditAccount}
             onDelete={handleDeleteAccount}
             onDeposit={(account) => handleOpenMovementForm(account, 'deposit')}

@@ -1,6 +1,7 @@
 
 'use client';
 
+import * as React from 'react';
 import {
   Table,
   TableBody,
@@ -10,8 +11,13 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Pen, Trash2, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
-import { BankAccount } from '@/types';
+import { Pen, Trash2, ArrowUpCircle, ArrowDownCircle, ChevronDown } from 'lucide-react';
+import { BankAccount, Transaction } from '@/types';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import {
   Tooltip,
   TooltipContent,
@@ -22,6 +28,7 @@ import {
 
 interface BankListProps {
   accounts: BankAccount[];
+  transactions: Transaction[];
   onEdit: (account: BankAccount) => void;
   onDelete: (id: string) => void;
   onDeposit: (account: BankAccount) => void;
@@ -32,13 +39,20 @@ const formatCurrency = (value: number) => {
   return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 };
 
-export function BankList({ accounts, onEdit, onDelete, onDeposit, onWithdraw }: BankListProps) {
+const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+};
+
+export function BankList({ accounts, transactions, onEdit, onDelete, onDeposit, onWithdraw }: BankListProps) {
+    const [openAccountId, setOpenAccountId] = React.useState<string | null>(null);
+
   return (
     <div className="bg-notebook">
       <TooltipProvider>
       <Table>
         <TableHeader>
           <TableRow className="bg-primary/5 border-b-primary/20">
+            <TableHead className="w-[50px]"></TableHead>
             <TableHead>Banco</TableHead>
             <TableHead>Agência</TableHead>
             <TableHead>Conta</TableHead>
@@ -48,59 +62,110 @@ export function BankList({ accounts, onEdit, onDelete, onDeposit, onWithdraw }: 
         </TableHeader>
         <TableBody>
           {accounts.length > 0 ? (
-            accounts.map((account) => (
-              <TableRow key={account.id}>
-                <TableCell className="font-medium">{account.bankName}</TableCell>
-                <TableCell>{account.agency}</TableCell>
-                <TableCell>{account.accountNumber}</TableCell>
-                <TableCell className={account.balance >= 0 ? 'text-green-600' : 'text-red-600'}>
-                    {formatCurrency(account.balance)}
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex items-center justify-end gap-2">
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Button variant="ghost" size="icon" onClick={() => onDeposit(account)}>
-                                <ArrowUpCircle className="h-4 w-4 text-green-600" />
-                                <span className="sr-only">Depositar</span>
-                            </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Depositar</TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                           <Button variant="ghost" size="icon" onClick={() => onWithdraw(account)}>
-                                <ArrowDownCircle className="h-4 w-4 text-red-600" />
-                                <span className="sr-only">Retirar</span>
-                            </Button>
-                        </TooltipTrigger>
-                         <TooltipContent>Retirar</TooltipContent>
-                    </Tooltip>
-                     <Tooltip>
-                        <TooltipTrigger asChild>
-                           <Button variant="ghost" size="icon" onClick={() => onEdit(account)}>
-                              <Pen className="h-4 w-4" />
-                              <span className="sr-only">Editar</span>
-                            </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Editar</TooltipContent>
-                     </Tooltip>
-                     <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Button variant="ghost" size="icon" onClick={() => onDelete(account.id)} className="text-red-600 hover:text-red-700">
-                              <Trash2 className="h-4 w-4" />
-                              <span className="sr-only">Excluir</span>
-                            </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Excluir</TooltipContent>
-                    </Tooltip>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))
+            accounts.map((account) => {
+                const accountTransactions = transactions
+                    .filter(t => t.bankAccountId === account.id)
+                    .sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+                return (
+                    <Collapsible asChild key={account.id} open={openAccountId === account.id} onOpenChange={() => setOpenAccountId(prevId => prevId === account.id ? null : account.id)}>
+                        <>
+                            <TableRow>
+                                <TableCell>
+                                    <CollapsibleTrigger asChild>
+                                        <Button variant="ghost" size="icon">
+                                            <ChevronDown className="h-4 w-4 transition-transform data-[state=open]:rotate-180" />
+                                            <span className="sr-only">Ver transações</span>
+                                        </Button>
+                                    </CollapsibleTrigger>
+                                </TableCell>
+                                <TableCell className="font-medium">{account.bankName}</TableCell>
+                                <TableCell>{account.agency}</TableCell>
+                                <TableCell>{account.accountNumber}</TableCell>
+                                <TableCell className={account.balance >= 0 ? 'text-green-600' : 'text-red-600'}>
+                                    {formatCurrency(account.balance)}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <div className="flex items-center justify-end gap-2">
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <Button variant="ghost" size="icon" onClick={() => onDeposit(account)}>
+                                                <ArrowUpCircle className="h-4 w-4 text-green-600" />
+                                                <span className="sr-only">Depositar</span>
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>Depositar</TooltipContent>
+                                    </Tooltip>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                           <Button variant="ghost" size="icon" onClick={() => onWithdraw(account)}>
+                                                <ArrowDownCircle className="h-4 w-4 text-red-600" />
+                                                <span className="sr-only">Retirar</span>
+                                            </Button>
+                                        </TooltipTrigger>
+                                         <TooltipContent>Retirar</TooltipContent>
+                                    </Tooltip>
+                                     <Tooltip>
+                                        <TooltipTrigger asChild>
+                                           <Button variant="ghost" size="icon" onClick={() => onEdit(account)}>
+                                              <Pen className="h-4 w-4" />
+                                              <span className="sr-only">Editar</span>
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>Editar</TooltipContent>
+                                     </Tooltip>
+                                     <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <Button variant="ghost" size="icon" onClick={() => onDelete(account.id)} className="text-red-600 hover:text-red-700">
+                                              <Trash2 className="h-4 w-4" />
+                                              <span className="sr-only">Excluir</span>
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>Excluir</TooltipContent>
+                                    </Tooltip>
+                                  </div>
+                                </TableCell>
+                            </TableRow>
+                            <CollapsibleContent asChild>
+                                <TableRow className="bg-muted/50">
+                                    <TableCell colSpan={6} className="p-0">
+                                       <div className="p-4">
+                                         <h4 className="font-bold mb-2">Histórico de Movimentações</h4>
+                                         {accountTransactions.length > 0 ? (
+                                             <Table>
+                                                 <TableHeader>
+                                                     <TableRow>
+                                                         <TableHead>Data</TableHead>
+                                                         <TableHead>Descrição</TableHead>
+                                                         <TableHead className="text-right">Valor</TableHead>
+                                                     </TableRow>
+                                                 </TableHeader>
+                                                 <TableBody>
+                                                     {accountTransactions.map(t => (
+                                                         <TableRow key={t.id}>
+                                                             <TableCell>{formatDate(t.date)}</TableCell>
+                                                             <TableCell>{t.description}</TableCell>
+                                                             <TableCell className={`text-right ${t.type === 'Receita' ? 'text-green-600' : 'text-red-600'}`}>
+                                                                {t.type === 'Receita' ? '+' : '-'} {formatCurrency(t.value)}
+                                                            </TableCell>
+                                                         </TableRow>
+                                                     ))}
+                                                 </TableBody>
+                                             </Table>
+                                         ) : (
+                                             <p className="text-sm text-muted-foreground">Nenhuma movimentação nesta conta.</p>
+                                         )}
+                                       </div>
+                                    </TableCell>
+                                </TableRow>
+                            </CollapsibleContent>
+                        </>
+                    </Collapsible>
+                )
+            })
           ) : (
             <TableRow>
-              <TableCell colSpan={5} className="h-24 text-center">
+              <TableCell colSpan={6} className="h-24 text-center">
                 Nenhuma conta encontrada.
               </TableCell>
             </TableRow>

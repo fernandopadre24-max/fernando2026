@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import { EventList } from '@/components/events/event-list';
@@ -9,6 +9,9 @@ import { EventForm } from '@/components/events/event-form';
 import { TransferDialog } from '@/components/events/transfer-dialog';
 import { Event, Artist, Contractor, BankAccount, Transaction } from '@/types';
 import { loadData, saveData } from '@/lib/storage';
+import { EventFilters } from '@/components/events/event-filters';
+import { DateRange } from 'react-day-picker';
+
 
 const EventsPage = () => {
   const [events, setEvents] = useState<Event[]>([]);
@@ -18,6 +21,13 @@ const EventsPage = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isTransferDialogOpen, setIsTransferDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+
+  // Filter states
+  const [artistFilter, setArtistFilter] = useState('all');
+  const [contractorFilter, setContractorFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [paymentStatusFilter, setPaymentStatusFilter] = useState('all');
+  const [dateRangeFilter, setDateRangeFilter] = useState<DateRange | undefined>();
 
   useEffect(() => {
     setEvents(loadData('events', []));
@@ -115,6 +125,42 @@ const EventsPage = () => {
     setSelectedEvent(null);
   };
 
+  const handleClearFilters = () => {
+    setArtistFilter('all');
+    setContractorFilter('all');
+    setStatusFilter('all');
+    setPaymentStatusFilter('all');
+    setDateRangeFilter(undefined);
+  };
+
+  const filteredEvents = useMemo(() => {
+    return events.filter(event => {
+      const artistMatch = artistFilter !== 'all' ? event.artistId === artistFilter : true;
+      const contractorMatch = contractorFilter !== 'all' ? event.contractorId === contractorFilter : true;
+      const statusMatch = statusFilter !== 'all' ? String(event.isDone) === statusFilter : true;
+      const paymentStatusMatch = paymentStatusFilter !== 'all' ? String(event.isPaid) === paymentStatusFilter : true;
+      
+      let dateMatch = true;
+      if (dateRangeFilter?.from) {
+          const eventDate = new Date(event.date);
+          eventDate.setUTCHours(0,0,0,0);
+          
+          const fromDate = new Date(dateRangeFilter.from);
+          fromDate.setUTCHours(0,0,0,0);
+
+          if (dateRangeFilter.to) {
+                const toDate = new Date(dateRangeFilter.to);
+                toDate.setUTCHours(0,0,0,0);
+                dateMatch = eventDate >= fromDate && eventDate <= toDate;
+          } else {
+              dateMatch = eventDate.getTime() === fromDate.getTime();
+          }
+      }
+
+      return artistMatch && contractorMatch && statusMatch && paymentStatusMatch && dateMatch;
+    });
+  }, [events, artistFilter, contractorFilter, statusFilter, paymentStatusFilter, dateRangeFilter]);
+
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
@@ -127,9 +173,25 @@ const EventsPage = () => {
         </div>
       </div>
 
+      <EventFilters
+        artists={artists}
+        contractors={contractors}
+        artistFilter={artistFilter}
+        onArtistChange={setArtistFilter}
+        contractorFilter={contractorFilter}
+        onContractorChange={setContractorFilter}
+        statusFilter={statusFilter}
+        onStatusChange={setStatusFilter}
+        paymentStatusFilter={paymentStatusFilter}
+        onPaymentStatusChange={setPaymentStatusFilter}
+        dateRange={dateRangeFilter}
+        onDateRangeChange={setDateRangeFilter}
+        onClearFilters={handleClearFilters}
+      />
+
       <div className="mt-8">
         <EventList 
-            events={events} 
+            events={filteredEvents} 
             artists={artists}
             contractors={contractors}
             onEdit={handleEditEvent}

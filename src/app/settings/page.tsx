@@ -84,12 +84,13 @@ export default function SettingsPage() {
     const [primaryColor, setPrimaryColor] = useState('262 52% 50%');
     const [accentColor, setAccentColor] = useState('45 95% 55%');
     const [moduleIcons, setModuleIcons] = useState<{ [key: string]: string }>({});
+    const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
 
     useEffect(() => {
         setIsClient(true);
         const savedTheme = localStorage.getItem('app-theme');
         if (savedTheme) {
-            const { fonts, colors, fontSize: savedFontSize, icons } = JSON.parse(savedTheme);
+            const { fonts, colors, fontSize: savedFontSize, icons, backgroundImage: savedBgImage } = JSON.parse(savedTheme);
             if (fonts) {
                 setHeadlineFont(fonts.headline?.family || 'Poppins, sans-serif');
                 setBodyFont(fonts.body?.family || 'PT Sans, sans-serif');
@@ -104,6 +105,9 @@ export default function SettingsPage() {
             }
             if (icons) {
                 setModuleIcons(icons);
+            }
+            if (savedBgImage) {
+                setBackgroundImage(savedBgImage);
             }
         }
     }, []);
@@ -134,6 +138,13 @@ export default function SettingsPage() {
         root.style.setProperty('--background-hsl', backgroundColor);
         root.style.setProperty('--primary-hsl', primaryColor);
         root.style.setProperty('--accent-hsl', accentColor);
+        
+        // Background Image
+        if (backgroundImage) {
+            document.body.style.setProperty('--background-image', `url(${backgroundImage})`);
+        } else {
+            document.body.style.removeProperty('--background-image');
+        }
     };
 
     const handleSave = () => {
@@ -152,6 +163,7 @@ export default function SettingsPage() {
             },
             fontSize: fontSize,
             icons: moduleIcons,
+            backgroundImage: backgroundImage,
         };
         localStorage.setItem('app-theme', JSON.stringify(theme));
         toast({
@@ -168,6 +180,7 @@ export default function SettingsPage() {
         background: '220 20% 96%',
         primary: '262 52% 50%',
         accent: '45 95% 55%',
+        backgroundImage: null,
       };
 
       setHeadlineFont(defaultSettings.headline);
@@ -177,6 +190,7 @@ export default function SettingsPage() {
       setPrimaryColor(defaultSettings.primary);
       setAccentColor(defaultSettings.accent);
       setModuleIcons({});
+      setBackgroundImage(null);
       
       const root = document.documentElement;
       root.style.fontSize = `${defaultSettings.fontSize}px`;
@@ -185,6 +199,8 @@ export default function SettingsPage() {
       root.style.setProperty('--background-hsl', defaultSettings.background);
       root.style.setProperty('--primary-hsl', defaultSettings.primary);
       root.style.setProperty('--accent-hsl', defaultSettings.accent);
+      document.body.style.removeProperty('--background-image');
+
 
       localStorage.removeItem('app-theme');
        window.postMessage({ type: 'theme-updated' }, '*');
@@ -201,6 +217,19 @@ export default function SettingsPage() {
             reader.onload = (event) => {
                 if (event.target?.result) {
                     setModuleIcons(prev => ({ ...prev, [modulePath]: event.target!.result as string }));
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+    
+    const handleBackgroundImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                if (event.target?.result) {
+                    setBackgroundImage(event.target.result as string);
                 }
             };
             reader.readAsDataURL(file);
@@ -308,6 +337,25 @@ export default function SettingsPage() {
                         </CardContent>
                     </Card>
                 </div>
+                 <Card className="mt-8">
+                     <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><ImageIcon /> Imagem de Fundo</CardTitle>
+                        <CardDescription>Faça upload de uma imagem para o plano de fundo do aplicativo.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex flex-col items-center gap-4">
+                       <div className="w-48 h-27 rounded-lg bg-muted flex items-center justify-center overflow-hidden border">
+                            {backgroundImage ? (
+                                <Image src={backgroundImage} alt="Pré-visualização do fundo" width={192} height={108} className="object-cover" />
+                            ) : (
+                                <ImageIcon className="text-muted-foreground w-12 h-12" />
+                            )}
+                        </div>
+                        <input id="background-image-upload" type="file" accept="image/*" className="text-sm" onChange={handleBackgroundImageChange} />
+                         <Button variant="outline" size="sm" onClick={() => setBackgroundImage(null)} disabled={!backgroundImage}>
+                            Remover Imagem
+                        </Button>
+                    </CardContent>
+                </Card>
 
                 <Card className="mt-8">
                      <CardHeader>

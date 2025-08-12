@@ -15,7 +15,7 @@ const applyThemeScript = `
     try {
       const theme = localStorage.getItem('app-theme');
       if (theme) {
-        const { fonts, colors, fontSize, icons } = JSON.parse(theme);
+        const { fonts, colors, fontSize, icons, backgroundImage } = JSON.parse(theme);
         const root = document.documentElement;
         
         if (fonts) {
@@ -44,6 +44,10 @@ const applyThemeScript = `
         if (fontSize) {
           root.style.fontSize = \`\${fontSize}px\`;
         }
+
+        if (backgroundImage) {
+            document.body.style.setProperty('--background-image', \`url(\${backgroundImage})\`);
+        }
       }
     } catch (e) {
       console.error('Failed to apply theme from localStorage', e);
@@ -68,6 +72,7 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased">
+        <div className="background-overlay"></div>
         {children}
         <Toaster />
       </body>

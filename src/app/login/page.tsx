@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/auth-context';
 import { Button } from '@/components/ui/button';
@@ -10,15 +10,47 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Banknote } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { loadData } from '@/lib/storage';
+
+const loadUsernames = (): string[] => {
+    if (typeof window === 'undefined') {
+        return [];
+    }
+    const storedUsers = localStorage.getItem('users');
+    if (storedUsers) {
+        const usersMap: Map<string, any> = new Map(JSON.parse(storedUsers));
+        return Array.from(usersMap.keys());
+    }
+    return [];
+}
+
 
 export default function LoginPage() {
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [userList, setUserList] = useState<string[]>([]);
   const { login, signup } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
+
+  useEffect(() => {
+    setUserList(loadUsernames());
+  }, []);
+
+  const handleModeChange = () => {
+    setIsLoginMode(!isLoginMode);
+    setUsername('');
+    setPassword('');
+    setConfirmPassword('');
+    // Refresh user list in case a new user was just added, though signup redirects.
+    if (!isLoginMode) {
+        setUserList(loadUsernames());
+    }
+  }
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,12 +93,26 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="username">Usuário</Label>
-              <Input
-                id="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-              />
+              {isLoginMode && userList.length > 0 ? (
+                <Select value={username} onValueChange={setUsername}>
+                    <SelectTrigger id="username-select">
+                        <SelectValue placeholder="Selecione um usuário" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {userList.map(user => (
+                            <SelectItem key={user} value={user}>{user}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+              ) : (
+                <Input
+                    id="username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    required
+                    placeholder={isLoginMode ? '' : 'Crie um nome de usuário'}
+                />
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Senha</Label>
@@ -94,7 +140,7 @@ export default function LoginPage() {
               {isLoginMode ? 'Entrar' : 'Cadastrar'}
             </Button>
             <div className="text-center text-sm pt-4">
-                 <Button variant="link" type="button" onClick={() => setIsLoginMode(!isLoginMode)}>
+                 <Button variant="link" type="button" onClick={handleModeChange}>
                     {isLoginMode ? 'Não tem uma conta? Cadastre-se' : 'Já tem uma conta? Faça login'}
                 </Button>
             </div>

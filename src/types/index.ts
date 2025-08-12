@@ -49,7 +49,7 @@ export type Transaction = {
     date: string;
     type: 'Receita' | 'Despesa';
     categoryId?: string | null;
-    category?: string; // Optional, for display purposes
+    categoryName?: string;
     isTransferred: boolean;
     transferredToBankAccountId?: string | null;
     transferDate?: string;

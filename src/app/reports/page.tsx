@@ -1,22 +1,135 @@
 
 'use client';
 
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ReportView } from '@/components/reports/report-view';
+import { Event, Transaction, ExpenseCategory } from '@/types';
+import { loadData } from '@/lib/storage';
+import { EventsByStatusChart } from '@/components/reports/events-by-status-chart';
+import { FinancialSummaryChart } from '@/components/reports/financial-summary-chart';
+
+
+const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
 export default function ReportsPage() {
+  const [events, setEvents] = useState<Event[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [categories, setCategories] = useState<ExpenseCategory[]>([]);
+
+  useEffect(() => {
+    setEvents(loadData('events', []));
+    setTransactions(loadData('transactions', []));
+    setCategories(loadData('expenseCategories', []));
+  }, []);
+
+  const getCategoryName = (categoryId?: string | null) => {
+    return categories.find((c) => c.id === categoryId)?.name || 'N/A';
+  };
+
+  const eventColumns = [
+    { header: 'Data', dataKey: 'date' },
+    { header: 'Artista', dataKey: 'artist' },
+    { header: 'Contratante', dataKey: 'contractor' },
+    { header: 'Valor', dataKey: 'value' },
+    { header: 'Status', dataKey: 'status' },
+    { header: 'Pagamento', dataKey: 'paymentStatus' },
+  ];
+
+  const eventData = events.map(event => ({
+    ...event,
+    date: `${formatDate(event.date)} às ${event.time}`,
+    value: formatCurrency(event.value),
+    status: event.isDone ? 'Realizado' : 'Pendente',
+    paymentStatus: event.isPaid ? 'Pago' : 'Pendente',
+  }));
+
+  const financialColumns = [
+    { header: 'Data', dataKey: 'date' },
+    { header: 'Descrição', dataKey: 'description' },
+    { header: 'Tipo', dataKey: 'type' },
+    { header: 'Categoria', dataKey: 'category' },
+    { header: 'Valor', dataKey: 'value' },
+  ];
+
+  const financialData = transactions.map(t => ({
+    ...t,
+    date: formatDate(t.date),
+    value: formatCurrency(t.value),
+    category: t.type === 'Despesa' ? getCategoryName(t.categoryId) : '-',
+  }));
+
+  const financialSummary = useMemo(() => {
+    const totalIncome = transactions.filter(t => t.type === 'Receita').reduce((sum, t) => sum + t.value, 0);
+    const totalExpenses = transactions.filter(t => t.type === 'Despesa').reduce((sum, t) => sum + t.value, 0);
+    return { totalIncome, totalExpenses, balance: totalIncome - totalExpenses };
+  }, [transactions]);
+
+
   return (
-    <div className="flex flex-1 items-start justify-center p-4">
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle>Relatórios</CardTitle>
+    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+       <div className="flex items-center justify-between space-y-2">
+        <h2 className="text-3xl font-bold tracking-tight">Relatórios</h2>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
+        <EventsByStatusChart events={events} />
+        <FinancialSummaryChart transactions={transactions} />
+      </div>
+
+      <Card>
+         <CardHeader>
+          <CardTitle>Relatórios Detalhados</CardTitle>
           <CardDescription>
-            Visualize seus relatórios financeiros aqui. Esta funcionalidade está em construção.
+            Exporte seus dados em PDF ou imprima-os.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">
-            Em breve, você poderá gerar e visualizar relatórios detalhados.
-          </p>
+          <Tabs defaultValue="events">
+            <TabsList>
+              <TabsTrigger value="events">Eventos</TabsTrigger>
+              <TabsTrigger value="finance">Financeiro</TabsTrigger>
+            </TabsList>
+            <TabsContent value="events">
+              <ReportView
+                title="Relatório de Eventos"
+                data={eventData}
+                columns={eventColumns}
+              />
+            </TabsContent>
+            <TabsContent value="finance">
+               <ReportView
+                title="Relatório Financeiro"
+                data={financialData}
+                columns={financialColumns}
+                footer={[
+                    [
+                        { content: 'Receitas:', styles: { fontStyle: 'bold' } },
+                        { content: formatCurrency(financialSummary.totalIncome) },
+                        { content: '' },
+                        { content: '' },
+                        { content: '' },
+                    ],
+                    [
+                        { content: 'Despesas:', styles: { fontStyle: 'bold' } },
+                        { content: formatCurrency(financialSummary.totalExpenses) },
+                        { content: '' },
+                        { content: '' },
+                        { content: '' },
+                    ],
+                    [
+                        { content: 'Saldo:', styles: { fontStyle: 'bold' } },
+                        { content: formatCurrency(financialSummary.balance) },
+                        { content: '' },
+                        { content: '' },
+                        { content: '' },
+                    ],
+                ]}
+              />
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
     </div>

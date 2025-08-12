@@ -1,20 +1,29 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import { FinancialSummary } from '@/components/finance/financial-summary';
 import { TransactionList } from '@/components/finance/transaction-list';
 import { TransactionForm } from '@/components/finance/transaction-form';
+import { TransactionFilters } from '@/components/finance/transaction-filters';
 import { Transaction, ExpenseCategory } from '@/types';
 import { loadData, saveData } from '@/lib/storage';
+import { DateRange } from 'react-day-picker';
 
 const FinancePage = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<ExpenseCategory[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+
+  // Filter states
+  const [descriptionFilter, setDescriptionFilter] = useState('');
+  const [typeFilter, setTypeFilter] = useState('all');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [dateRangeFilter, setDateRangeFilter] = useState<DateRange | undefined>();
+
 
   useEffect(() => {
     setTransactions(loadData('transactions', []));
@@ -49,6 +58,40 @@ const FinancePage = () => {
     setSelectedTransaction(null);
     setIsFormOpen(true);
   };
+  
+  const handleClearFilters = () => {
+    setDescriptionFilter('');
+    setTypeFilter('all');
+    setCategoryFilter('all');
+    setDateRangeFilter(undefined);
+  };
+
+  const filteredTransactions = useMemo(() => {
+    return transactions.filter(t => {
+        const descriptionMatch = descriptionFilter ? t.description.toLowerCase().includes(descriptionFilter.toLowerCase()) : true;
+        const typeMatch = typeFilter !== 'all' ? t.type === typeFilter : true;
+        const categoryMatch = typeFilter === 'Despesa' && categoryFilter !== 'all' ? t.categoryId === categoryFilter : true;
+        
+        let dateMatch = true;
+        if (dateRangeFilter?.from) {
+            const transactionDate = new Date(t.date);
+            transactionDate.setUTCHours(0,0,0,0);
+            
+            const fromDate = new Date(dateRangeFilter.from);
+            fromDate.setUTCHours(0,0,0,0);
+
+            if (dateRangeFilter.to) {
+                 const toDate = new Date(dateRangeFilter.to);
+                 toDate.setUTCHours(0,0,0,0);
+                 dateMatch = transactionDate >= fromDate && transactionDate <= toDate;
+            } else {
+                dateMatch = transactionDate.getTime() === fromDate.getTime();
+            }
+        }
+        
+        return descriptionMatch && typeMatch && categoryMatch && dateMatch;
+    });
+  }, [transactions, descriptionFilter, typeFilter, categoryFilter, dateRangeFilter]);
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
@@ -62,11 +105,24 @@ const FinancePage = () => {
         </div>
       </div>
       
-      <FinancialSummary transactions={transactions} />
+      <FinancialSummary transactions={filteredTransactions} />
+      
+      <TransactionFilters
+        description={descriptionFilter}
+        onDescriptionChange={setDescriptionFilter}
+        type={typeFilter}
+        onTypeChange={setTypeFilter}
+        category={categoryFilter}
+        onCategoryChange={setCategoryFilter}
+        dateRange={dateRangeFilter}
+        onDateRangeChange={setDateRangeFilter}
+        onClearFilters={handleClearFilters}
+        categories={categories}
+      />
 
       <div className="mt-8">
         <TransactionList 
-            transactions={transactions} 
+            transactions={filteredTransactions} 
             categories={categories}
             onEdit={handleEditTransaction}
             onDelete={handleDeleteTransaction}

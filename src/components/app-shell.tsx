@@ -75,10 +75,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, [isLoading, user, pathname, router]);
 
   React.useEffect(() => {
-    updateTheme();
-
+    if (user) {
+      updateTheme();
+    }
     const handleThemeUpdate = (event: MessageEvent) => {
-      if (event.data?.type === 'theme-updated') {
+      if (event.data?.type === 'theme-updated' && user) {
         updateTheme();
       }
     };
@@ -87,7 +88,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     return () => {
       window.removeEventListener('message', handleThemeUpdate);
     };
-  }, [updateTheme]);
+  }, [user, updateTheme]);
 
   if (isLoading) {
     return (

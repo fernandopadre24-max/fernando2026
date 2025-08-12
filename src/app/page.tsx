@@ -10,7 +10,6 @@ import { useToast } from '@/hooks/use-toast';
 import { AppShell } from '@/components/app-shell';
 import { DashboardSummary } from '@/components/dashboard-summary';
 import { useAuth } from '@/hooks/use-auth';
-import { useRouter } from 'next/navigation';
 
 const initialArtists: Artist[] = [
     { id: '1', name: 'Os Futuristas' },
@@ -26,21 +25,15 @@ const initialContractors: Contractor[] = [
 
 export default function Home() {
   const { user, getUserData, saveUserData, isLoading } = useAuth();
-  const router = useRouter();
-
+  
   const [events, setEvents] = useState<Event[]>([]);
   const { toast } = useToast();
-  const [isClient, setIsClient] = useState(false);
 
   const [artists, setArtists] = useState<Artist[]>([]);
   const [contractors, setContractors] = useState<Contractor[]>([]);
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-  
   useEffect(() => {
     if (!isLoading && user) {
       const storedEvents = getUserData('events') || [];
@@ -61,13 +54,13 @@ export default function Home() {
   }, [user, isLoading, getUserData]);
 
   useEffect(() => {
-    if(isClient && user) {
+    if(user) {
       saveUserData('events', events);
       saveUserData('artists', artists);
       saveUserData('contractors', contractors);
       saveUserData('bankAccounts', bankAccounts);
     }
-  }, [events, artists, contractors, bankAccounts, isClient, user, saveUserData]);
+  }, [events, artists, contractors, bankAccounts, user, saveUserData]);
 
 
   const handleEventAdd = async (data: EventFormValues) => {

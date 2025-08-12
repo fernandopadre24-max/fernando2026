@@ -84,13 +84,13 @@ export default function SettingsPage() {
     const [primaryColor, setPrimaryColor] = useState('262 52% 50%');
     const [accentColor, setAccentColor] = useState('45 95% 55%');
     const [moduleIcons, setModuleIcons] = useState<{ [key: string]: string }>({});
-    const [moduleBackgrounds, setModuleBackgrounds] = useState<{ [key: string]: string }>({});
+    const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
 
     useEffect(() => {
         setIsClient(true);
         const savedTheme = localStorage.getItem('app-theme');
         if (savedTheme) {
-            const { fonts, colors, fontSize: savedFontSize, icons, backgrounds } = JSON.parse(savedTheme);
+            const { fonts, colors, fontSize: savedFontSize, icons, background } = JSON.parse(savedTheme);
             if (fonts) {
                 setHeadlineFont(fonts.headline?.family || 'Poppins, sans-serif');
                 setBodyFont(fonts.body?.family || 'PT Sans, sans-serif');
@@ -106,8 +106,8 @@ export default function SettingsPage() {
             if (icons) {
                 setModuleIcons(icons);
             }
-            if (backgrounds) {
-                setModuleBackgrounds(backgrounds);
+            if (background) {
+                setBackgroundImage(background);
             }
         }
     }, []);
@@ -135,6 +135,12 @@ export default function SettingsPage() {
         root.style.setProperty('--background-hsl', backgroundColor);
         root.style.setProperty('--primary-hsl', primaryColor);
         root.style.setProperty('--accent-hsl', accentColor);
+
+        if(backgroundImage) {
+            document.body.style.setProperty('--background-image', `url(${backgroundImage})`);
+        } else {
+            document.body.style.removeProperty('--background-image');
+        }
     };
 
     const handleSave = () => {
@@ -152,7 +158,7 @@ export default function SettingsPage() {
             },
             fontSize: fontSize,
             icons: moduleIcons,
-            backgrounds: moduleBackgrounds,
+            background: backgroundImage,
         };
         localStorage.setItem('app-theme', JSON.stringify(theme));
         toast({
@@ -169,7 +175,6 @@ export default function SettingsPage() {
         background: '220 20% 96%',
         primary: '262 52% 50%',
         accent: '45 95% 55%',
-        backgrounds: {},
       };
 
       setHeadlineFont(defaultSettings.headline);
@@ -179,7 +184,7 @@ export default function SettingsPage() {
       setPrimaryColor(defaultSettings.primary);
       setAccentColor(defaultSettings.accent);
       setModuleIcons({});
-      setModuleBackgrounds({});
+      setBackgroundImage(null);
       
       const root = document.documentElement;
       root.style.fontSize = `${defaultSettings.fontSize}px`;
@@ -211,14 +216,12 @@ export default function SettingsPage() {
         }
     };
     
-    const handleBackgroundImageChange = (modulePath: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleBackgroundImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
             const reader = new FileReader();
             reader.onload = (event) => {
-                if (event.target?.result) {
-                    setModuleBackgrounds(prev => ({ ...prev, [modulePath]: event.target!.result as string }));
-                }
+                setBackgroundImage(event.target?.result as string | null);
             };
             reader.readAsDataURL(file);
         }
@@ -323,26 +326,20 @@ export default function SettingsPage() {
                             </div>
                         </CardContent>
                     </Card>
-                
-                    <Card>
+                     <Card>
                         <CardHeader>
-                            <CardTitle className="flex items-center gap-2"><ImageIcon /> Imagens de Fundo dos Módulos</CardTitle>
-                            <CardDescription>Faça upload de imagens para usar como plano de fundo em cada módulo.</CardDescription>
+                            <CardTitle className="flex items-center gap-2"><ImageIcon /> Imagem de Fundo</CardTitle>
+                            <CardDescription>Faça upload de uma imagem para usar como plano de fundo global do aplicativo.</CardDescription>
                         </CardHeader>
-                        <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                            {modules.map(module => (
-                                <div key={module.path} className="flex flex-col items-center gap-2">
-                                    <Label htmlFor={`bg-upload-${module.path}`}>{module.name}</Label>
-                                    <div className="w-24 h-16 rounded-md bg-muted flex items-center justify-center overflow-hidden border">
-                                        {moduleBackgrounds[module.path] ? (
-                                            <Image src={moduleBackgrounds[module.path]} alt={`Fundo de ${module.name}`} width={96} height={64} className="object-cover" />
-                                        ) : (
-                                            <ImageIcon className="text-muted-foreground w-8 h-8" />
-                                        )}
-                                    </div>
-                                    <input id={`bg-upload-${module.path}`} type="file" accept="image/*" className="text-sm w-full max-w-[180px]" onChange={(e) => handleBackgroundImageChange(module.path, e)} />
-                                </div>
-                            ))}
+                        <CardContent className="flex flex-col items-center gap-4">
+                             <div className="w-48 h-32 rounded-md bg-muted flex items-center justify-center overflow-hidden border">
+                                {backgroundImage ? (
+                                    <Image src={backgroundImage} alt={`Fundo`} width={192} height={128} className="object-cover" />
+                                ) : (
+                                    <ImageIcon className="text-muted-foreground w-12 h-12" />
+                                )}
+                            </div>
+                            <input id={`bg-upload`} type="file" accept="image/*" className="text-sm w-full max-w-xs" onChange={handleBackgroundImageChange} />
                         </CardContent>
                     </Card>
 

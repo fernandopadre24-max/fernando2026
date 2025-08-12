@@ -15,7 +15,7 @@ const applyThemeScript = `
     try {
       const theme = localStorage.getItem('app-theme');
       if (theme) {
-        const { fonts, colors, fontSize, icons } = JSON.parse(theme);
+        const { fonts, colors, fontSize, background } = JSON.parse(theme);
         const root = document.documentElement;
         
         if (fonts) {
@@ -43,6 +43,10 @@ const applyThemeScript = `
 
         if (fontSize) {
           root.style.fontSize = \`\${fontSize}px\`;
+        }
+        
+        if (background) {
+            document.body.style.setProperty('--background-image', \`url(\${background})\`);
         }
       }
     } catch (e) {

@@ -2,14 +2,20 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { loadData } from '@/lib/storage';
 import { Event, Artist, Contractor, BankAccount, Transaction } from '@/types';
-import { Calendar, Users, Banknote, Landmark, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
+import { Calendar, Users, Banknote, Landmark, ArrowUpCircle, ArrowDownCircle, Wallet, ListTodo } from 'lucide-react';
 import Link from 'next/link';
 
 const formatCurrency = (value: number) => {
     return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+};
+
+const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
 };
 
 export default function Home() {
@@ -37,12 +43,19 @@ export default function Home() {
     .filter((t) => t.type === 'Despesa')
     .reduce((acc, t) => acc + t.value, 0);
 
-  const summaryCards = [
-    { title: 'Eventos', value: events.length, icon: Calendar, href: '/events', description: 'Eventos cadastrados' },
-    { title: 'Artistas', value: artists.length, icon: Users, href: '/artists', description: 'Artistas cadastrados' },
-    { title: 'Contratantes', value: contractors.length, icon: Banknote, href: '/contractors', description: 'Contratantes cadastrados' },
-    { title: 'Contas Bancárias', value: bankAccounts.length, icon: Landmark, href: '/banks', description: 'Contas gerenciadas' },
-  ];
+  const totalBalance = bankAccounts.reduce((acc, b) => acc + b.balance, 0);
+  
+  const pendingEvents = events.filter(e => !e.isDone);
+
+  const recentTransactions = [...transactions]
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, 5);
+    
+  const upcomingEvents = [...events]
+    .filter(e => !e.isDone)
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    .slice(0, 5);
+
 
   if (loading) {
     return (
@@ -60,23 +73,57 @@ export default function Home() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {summaryCards.map((card, index) => (
-                <Link href={card.href} key={index}>
-                    <Card className="hover:bg-muted/50 transition-colors">
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
-                            <card.icon className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{card.value}</div>
-                            <p className="text-xs text-muted-foreground">{card.description}</p>
-                        </CardContent>
-                    </Card>
+            <Card>
+                <Link href="/events">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Total de Eventos</CardTitle>
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{events.length}</div>
+                        <p className="text-xs text-muted-foreground">Eventos cadastrados</p>
+                    </CardContent>
                 </Link>
-            ))}
+            </Card>
+            <Card>
+                 <Link href="/events">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Eventos Pendentes</CardTitle>
+                        <ListTodo className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{pendingEvents.length}</div>
+                        <p className="text-xs text-muted-foreground">Eventos a serem realizados</p>
+                    </CardContent>
+                 </Link>
+            </Card>
+            <Card>
+                 <Link href="/artists">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Artistas</CardTitle>
+                        <Users className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{artists.length}</div>
+                        <p className="text-xs text-muted-foreground">Artistas cadastrados</p>
+                    </CardContent>
+                </Link>
+            </Card>
+            <Card>
+                <Link href="/contractors">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Contratantes</CardTitle>
+                        <Banknote className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{contractors.length}</div>
+                        <p className="text-xs text-muted-foreground">Contratantes cadastrados</p>
+                    </CardContent>
+                </Link>
+            </Card>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
              <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">Receitas</CardTitle>
@@ -97,7 +144,85 @@ export default function Home() {
                     <p className="text-xs text-muted-foreground">Total de saídas</p>
                 </CardContent>
             </Card>
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Saldo em Contas</CardTitle>
+                    <Landmark className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                    <div className="text-2xl font-bold">{formatCurrency(totalBalance)}</div>
+                    <p className="text-xs text-muted-foreground">Soma dos saldos bancários</p>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Balanço Geral</CardTitle>
+                    <Wallet className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                    <div className={`text-2xl font-bold ${totalIncome - totalExpenses >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {formatCurrency(totalIncome - totalExpenses)}
+                    </div>
+                    <p className="text-xs text-muted-foreground">Receitas - Despesas</p>
+                </CardContent>
+            </Card>
         </div>
+
+         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+            <Card className="lg:col-span-4">
+              <CardHeader>
+                <CardTitle>Próximos Eventos</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {upcomingEvents.length > 0 ? (
+                    <div className="space-y-4">
+                    {upcomingEvents.map((event) => (
+                      <div key={event.id} className="flex items-center">
+                        <Calendar className="h-6 w-6 mr-4 text-muted-foreground" />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium leading-none">{event.artist}</p>
+                          <p className="text-sm text-muted-foreground">{event.contractor}</p>
+                        </div>
+                        <div className="text-right">
+                           <p className="text-sm font-medium">{formatDate(event.date)}</p>
+                           <p className="text-sm text-muted-foreground">{event.time}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                    <p className="text-sm text-muted-foreground">Nenhum evento pendente.</p>
+                )}
+              </CardContent>
+            </Card>
+            <Card className="lg:col-span-3">
+              <CardHeader>
+                <CardTitle>Transações Recentes</CardTitle>
+                <CardDescription>
+                  Suas últimas 5 movimentações.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                 {recentTransactions.length > 0 ? (
+                    <div className="space-y-4">
+                        {recentTransactions.map((transaction) => (
+                            <div key={transaction.id} className="flex items-center">
+                                <div className="flex-1">
+                                    <p className="text-sm font-medium">{transaction.description}</p>
+                                    <p className="text-sm text-muted-foreground">{formatDate(transaction.date)}</p>
+                                </div>
+                                <div className={`font-medium ${transaction.type === 'Receita' ? 'text-green-600' : 'text-red-600'}`}>
+                                    {transaction.type === 'Receita' ? '+' : '-'} {formatCurrency(transaction.value)}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                 ) : (
+                    <p className="text-sm text-muted-foreground">Nenhuma transação registrada.</p>
+                 )}
+              </CardContent>
+            </Card>
+          </div>
     </div>
   );
 }

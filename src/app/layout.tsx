@@ -15,7 +15,7 @@ const applyThemeScript = `
     try {
       const theme = localStorage.getItem('app-theme');
       if (theme) {
-        const { fonts, colors, fontSize } = JSON.parse(theme);
+        const { fonts, colors, fontSize, icons } = JSON.parse(theme);
         const root = document.documentElement;
         
         if (fonts) {

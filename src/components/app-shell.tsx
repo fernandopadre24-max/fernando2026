@@ -18,13 +18,56 @@ import { Header } from '@/components/header';
 import { cn } from '@/lib/utils';
 import { Calendar, Mic, Music4, UserSquare, LogOut, Landmark, DollarSign, Tag, PieChart, Cog } from 'lucide-react';
 import { Button } from './ui/button';
+import Image from 'next/image';
+
+const menuItems = [
+    { path: '/finance', icon: DollarSign, name: 'Financeiro' },
+    { path: '/banks', icon: Landmark, name: 'Bancos' },
+    { path: '/', icon: Calendar, name: 'Eventos' },
+    { path: '/artists', icon: Mic, name: 'Artistas' },
+    { path: '/contractors', icon: UserSquare, name: 'Contratantes' },
+    { path: '/finance/categories', icon: Tag, name: 'Categorias' },
+    { path: '/settings', icon: Cog, name: 'Configurações' },
+    { path: '/reports', icon: PieChart, name: 'Relatórios' },
+];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const [customIcons, setCustomIcons] = React.useState<{ [key: string]: string }>({});
 
   const isActive = (path: string) => {
     return pathname === path;
   };
+
+  React.useEffect(() => {
+    const loadIcons = () => {
+        const savedTheme = localStorage.getItem('app-theme');
+        if (savedTheme) {
+            const { icons } = JSON.parse(savedTheme);
+            if (icons) {
+                setCustomIcons(icons);
+            } else {
+                setCustomIcons({});
+            }
+        } else {
+             setCustomIcons({});
+        }
+    }
+    
+    loadIcons();
+
+    // Listen for theme updates from the settings page
+    const handleThemeUpdate = (event: MessageEvent) => {
+      if (event.data?.type === 'theme-updated') {
+        loadIcons();
+      }
+    };
+
+    window.addEventListener('message', handleThemeUpdate);
+    return () => {
+      window.removeEventListener('message', handleThemeUpdate);
+    };
+  }, []);
 
   return (
     <SidebarProvider>
@@ -41,70 +84,25 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </div>
           </SidebarHeader>
           <SidebarMenu>
-            <SidebarMenuItem>
-              <Link href="/finance">
-                <SidebarMenuButton isActive={isActive('/finance')} tooltip="Financeiro">
-                  <DollarSign />
-                  Financeiro
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <Link href="/banks">
-                <SidebarMenuButton isActive={isActive('/banks')} tooltip="Bancos">
-                  <Landmark />
-                  Bancos
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <Link href="/">
-                <SidebarMenuButton isActive={isActive('/')} tooltip="Eventos">
-                  <Calendar />
-                  Eventos
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <Link href="/artists">
-                <SidebarMenuButton isActive={isActive('/artists')} tooltip="Artistas">
-                  <Mic />
-                  Artistas
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <Link href="/contractors">
-                <SidebarMenuButton isActive={isActive('/contractors')} tooltip="Contratantes">
-                  <UserSquare />
-                  Contratantes
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <Link href="/finance/categories">
-                <SidebarMenuButton isActive={isActive('/finance/categories')} tooltip="Categorias">
-                  <Tag />
-                  Categorias
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
-             <SidebarMenuItem>
-              <Link href="/settings">
-                <SidebarMenuButton isActive={isActive('/settings')} tooltip="Configurações">
-                  <Cog />
-                  Configurações
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <Link href="/reports">
-                <SidebarMenuButton isActive={isActive('/reports')} tooltip="Relatórios">
-                  <PieChart />
-                  Relatórios
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
+            {menuItems.map(item => {
+                const IconComponent = item.icon;
+                return (
+                    <SidebarMenuItem key={item.path}>
+                        <Link href={item.path}>
+                            <SidebarMenuButton isActive={isActive(item.path)} tooltip={item.name}>
+                                {customIcons[item.path] ? (
+                                     <div className="w-5 h-5 flex items-center justify-center">
+                                        <Image src={customIcons[item.path]} alt={`Ícone de ${item.name}`} width={20} height={20} className="rounded-full object-cover"/>
+                                    </div>
+                                ) : (
+                                    <IconComponent />
+                                )}
+                                {item.name}
+                            </SidebarMenuButton>
+                        </Link>
+                    </SidebarMenuItem>
+                );
+            })}
           </SidebarMenu>
           <SidebarFooter>
             <div className="flex flex-col gap-2">

@@ -552,7 +552,7 @@ export default function FinancePage() {
       <Dialog open={isTransferDialogOpen} onOpenChange={setIsTransferDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Transferir para Conta Bancária</DialogTitle>
+            <DialogTitle>Selecione a Conta Bancária</DialogTitle>
           </DialogHeader>
           <div className="py-4">
             <p className="text-sm text-muted-foreground mb-2">

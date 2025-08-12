@@ -8,15 +8,19 @@ import { ContractorList } from '@/components/contractors/contractor-list';
 import { ContractorForm } from '@/components/contractors/contractor-form';
 import { Contractor } from '@/types';
 import { loadData, saveData } from '@/lib/storage';
+import { useAuth } from '@/contexts/auth-context';
 
 const ContractorsPage = () => {
   const [contractors, setContractors] = useState<Contractor[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedContractor, setSelectedContractor] = useState<Contractor | null>(null);
+  const { user } = useAuth();
 
   useEffect(() => {
-    setContractors(loadData('contractors', []));
-  }, []);
+    if (user) {
+        setContractors(loadData('contractors', []));
+    }
+  }, [user]);
 
   const handleSaveContractor = (contractorData: Omit<Contractor, 'id'>) => {
     let updatedContractors;

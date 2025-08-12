@@ -11,6 +11,7 @@ import { MonthlyRevenueChart } from '@/components/dashboard/monthly-revenue-char
 import { ExpensesByCategoryChart } from '@/components/dashboard/expenses-by-category-chart';
 import { FinancialSummary } from '@/components/finance/financial-summary';
 import { EventsSummary } from '@/components/dashboard/events-summary';
+import { useAuth } from '@/contexts/auth-context';
 
 
 const formatCurrency = (value: number) => {
@@ -26,17 +27,20 @@ export default function Home() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<ExpenseCategory[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
-    const loadedEvents = loadData<Event[]>('events', []);
-    const loadedTransactions = loadData<Transaction[]>('transactions', []);
-    const loadedCategories = loadData<ExpenseCategory[]>('expenseCategories', []);
+    if (user) {
+        const loadedEvents = loadData<Event[]>('events', []);
+        const loadedTransactions = loadData<Transaction[]>('transactions', []);
+        const loadedCategories = loadData<ExpenseCategory[]>('expenseCategories', []);
 
-    setEvents(loadedEvents);
-    setTransactions(loadedTransactions);
-    setCategories(loadedCategories);
-    setLoading(false);
-  }, []);
+        setEvents(loadedEvents);
+        setTransactions(loadedTransactions);
+        setCategories(loadedCategories);
+        setLoading(false);
+    }
+  }, [user]);
     
   const upcomingEvents = useMemo(() => {
     return [...events]

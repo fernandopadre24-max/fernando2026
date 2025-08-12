@@ -4,6 +4,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { AppShell } from '@/components/app-shell';
 import { ThemeProvider } from '@/components/theme-provider';
+import { AuthProvider } from '@/contexts/auth-context';
 
 
 export const metadata: Metadata = {
@@ -25,10 +26,12 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased">
           <ThemeProvider>
-            <AppShell>
-              {children}
-            </AppShell>
-            <Toaster />
+            <AuthProvider>
+              <AppShell>
+                {children}
+              </AppShell>
+              <Toaster />
+            </AuthProvider>
           </ThemeProvider>
       </body>
     </html>

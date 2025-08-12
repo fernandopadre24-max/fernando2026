@@ -2,7 +2,10 @@
 'use client';
 
 import { SidebarTrigger } from '@/components/ui/sidebar';
+import { Button } from '@/components/ui/button';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '@/contexts/auth-context';
+import { LogOut } from 'lucide-react';
 
 const getPageTitle = (pathname: string) => {
     if (pathname === '/') return 'Início';
@@ -19,6 +22,7 @@ const getPageTitle = (pathname: string) => {
 
 export function Header() {
   const pathname = usePathname();
+  const { logout } = useAuth();
   const pageTitle = getPageTitle(pathname);
 
   return (
@@ -30,6 +34,10 @@ export function Header() {
         </h1>
         <p className="text-sm text-muted-foreground">Controle Financeiro</p>
       </div>
+      <Button variant="ghost" size="icon" onClick={logout}>
+        <LogOut className="h-4 w-4" />
+        <span className="sr-only">Sair</span>
+      </Button>
     </header>
   );
 }

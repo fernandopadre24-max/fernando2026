@@ -10,6 +10,7 @@ import { MovementForm, MovementFormData } from '@/components/banks/movement-form
 import { TransactionForm } from '@/components/finance/transaction-form';
 import { BankAccount, Transaction, Artist, Contractor, ExpenseCategory } from '@/types';
 import { loadData, saveData } from '@/lib/storage';
+import { useAuth } from '@/contexts/auth-context';
 
 const BanksPage = () => {
   const [accounts, setAccounts] = useState<BankAccount[]>([]);
@@ -23,15 +24,18 @@ const BanksPage = () => {
   const [selectedAccount, setSelectedAccount] = useState<BankAccount | null>(null);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [movementType, setMovementType] = useState<'deposit' | 'withdrawal'>('deposit');
+  const { user } = useAuth();
 
 
   useEffect(() => {
-    setAccounts(loadData('bankAccounts', []));
-    setTransactions(loadData('transactions', []));
-    setArtists(loadData('artists', []));
-    setContractors(loadData('contractors', []));
-    setCategories(loadData('expenseCategories', []));
-  }, []);
+    if (user) {
+        setAccounts(loadData('bankAccounts', []));
+        setTransactions(loadData('transactions', []));
+        setArtists(loadData('artists', []));
+        setContractors(loadData('contractors', []));
+        setCategories(loadData('expenseCategories', []));
+    }
+  }, [user]);
 
   const handleSaveAccount = (accountData: Omit<BankAccount, 'id'>) => {
     let updatedAccounts;

@@ -11,6 +11,7 @@ import { TransactionFilters } from '@/components/finance/transaction-filters';
 import { Transaction, ExpenseCategory, Artist, Contractor } from '@/types';
 import { loadData, saveData } from '@/lib/storage';
 import { DateRange } from 'react-day-picker';
+import { useAuth } from '@/contexts/auth-context';
 
 const FinancePage = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -19,6 +20,7 @@ const FinancePage = () => {
   const [contractors, setContractors] = useState<Contractor[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const { user } = useAuth();
 
   // Filter states
   const [descriptionFilter, setDescriptionFilter] = useState('');
@@ -28,11 +30,13 @@ const FinancePage = () => {
 
 
   useEffect(() => {
-    setTransactions(loadData('transactions', []));
-    setCategories(loadData('expenseCategories', [{ id: '1', name: 'Alimentação' }, { id: '2', name: 'Transporte' }]));
-    setArtists(loadData('artists', []));
-    setContractors(loadData('contractors', []));
-  }, []);
+    if (user) {
+        setTransactions(loadData('transactions', []));
+        setCategories(loadData('expenseCategories', [{ id: '1', name: 'Alimentação' }, { id: '2', name: 'Transporte' }]));
+        setArtists(loadData('artists', []));
+        setContractors(loadData('contractors', []));
+    }
+  }, [user]);
 
   const handleSaveTransaction = (transaction: Transaction) => {
     let updatedTransactions;

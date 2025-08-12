@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { useTheme } from '@/components/theme-provider';
 import { ThemeSettings, FontOption, FontSize, ColorTheme } from '@/types';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/auth-context';
 
 const defaultSettings: ThemeSettings = {
     theme: 'light',
@@ -63,10 +64,13 @@ export default function SettingsPage() {
     const { settings, setSettings } = useTheme();
     const [localSettings, setLocalSettings] = useState<ThemeSettings>(settings);
     const { toast } = useToast();
+    const { user } = useAuth();
 
     useEffect(() => {
-        setLocalSettings(settings);
-    }, [settings]);
+        if (user) {
+            setLocalSettings(settings);
+        }
+    }, [settings, user]);
 
     const handleSaveChanges = () => {
         setSettings(localSettings);
@@ -83,6 +87,10 @@ export default function SettingsPage() {
     const handleRestoreDefaults = () => {
         setLocalSettings(defaultSettings);
     };
+
+    if (!user) {
+        return <p>Carregando...</p>;
+    }
 
     return (
         <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">

@@ -9,6 +9,7 @@ import { Event, Transaction, ExpenseCategory, BankAccount } from '@/types';
 import { loadData } from '@/lib/storage';
 import { EventsByStatusChart } from '@/components/reports/events-by-status-chart';
 import { FinancialSummaryChart } from '@/components/reports/financial-summary-chart';
+import { useAuth } from '@/contexts/auth-context';
 
 
 const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
@@ -19,13 +20,16 @@ export default function ReportsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<ExpenseCategory[]>([]);
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
+  const { user } = useAuth();
 
   useEffect(() => {
-    setEvents(loadData('events', []));
-    setTransactions(loadData('transactions', []));
-    setCategories(loadData('expenseCategories', []));
-    setBankAccounts(loadData('bankAccounts', []));
-  }, []);
+    if (user) {
+        setEvents(loadData('events', []));
+        setTransactions(loadData('transactions', []));
+        setCategories(loadData('expenseCategories', []));
+        setBankAccounts(loadData('bankAccounts', []));
+    }
+  }, [user]);
 
   const getCategoryName = (categoryId?: string | null) => {
     return categories.find((c) => c.id === categoryId)?.name || 'N/A';

@@ -26,11 +26,12 @@ const ThemeProviderContext = createContext<ThemeProviderState>({
 });
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-    const [settings, setSettings] = useState<ThemeSettings>(() => {
+    const [settings, setSettings] = useState<ThemeSettings>(defaultSettings);
+    
+    useEffect(() => {
         const savedSettings = loadData('themeSettings', defaultSettings);
-        // Ensure pageBackgroundColor exists
-        return { ...defaultSettings, ...savedSettings };
-    });
+        setSettings({ ...defaultSettings, ...savedSettings });
+    },[])
 
     useEffect(() => {
         const root = window.document.documentElement;

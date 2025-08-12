@@ -18,11 +18,13 @@ import {
   Landmark,
   LineChart,
   Wallet,
-  Settings
+  Settings,
+  LogOut,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Header } from './header';
+import { useAuth } from '@/contexts/auth-context';
 
 const menuItems = [
   { href: '/', label: 'Início', icon: Home },
@@ -37,6 +39,11 @@ const menuItems = [
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { user, logout } = useAuth();
+
+  if (!user) {
+    return <>{children}</>;
+  }
 
   return (
     <SidebarProvider>

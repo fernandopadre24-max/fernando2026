@@ -11,6 +11,7 @@ import { Event, Artist, Contractor, BankAccount, Transaction } from '@/types';
 import { loadData, saveData } from '@/lib/storage';
 import { EventFilters } from '@/components/events/event-filters';
 import { DateRange } from 'react-day-picker';
+import { useAuth } from '@/contexts/auth-context';
 
 
 const EventsPage = () => {
@@ -21,6 +22,7 @@ const EventsPage = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isTransferDialogOpen, setIsTransferDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const { user } = useAuth();
 
   // Filter states
   const [artistFilter, setArtistFilter] = useState('all');
@@ -30,11 +32,13 @@ const EventsPage = () => {
   const [dateRangeFilter, setDateRangeFilter] = useState<DateRange | undefined>();
 
   useEffect(() => {
-    setEvents(loadData('events', []));
-    setArtists(loadData('artists', [{ id: '1', name: 'Artista Padrão' }]));
-    setContractors(loadData('contractors', [{ id: '1', name: 'Contratante Padrão' }]));
-    setBankAccounts(loadData('bankAccounts', []));
-  }, []);
+    if (user) {
+        setEvents(loadData('events', []));
+        setArtists(loadData('artists', [{ id: '1', name: 'Artista Padrão' }]));
+        setContractors(loadData('contractors', [{ id: '1', name: 'Contratante Padrão' }]));
+        setBankAccounts(loadData('bankAccounts', []));
+    }
+  }, [user]);
 
   const handleSaveEvent = (event: Event) => {
     let updatedEvents;

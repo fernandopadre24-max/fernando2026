@@ -8,15 +8,19 @@ import { ArtistList } from '@/components/artists/artist-list';
 import { ArtistForm } from '@/components/artists/artist-form';
 import { Artist } from '@/types';
 import { loadData, saveData } from '@/lib/storage';
+import { useAuth } from '@/contexts/auth-context';
 
 const ArtistsPage = () => {
   const [artists, setArtists] = useState<Artist[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
+  const { user } = useAuth();
 
   useEffect(() => {
-    setArtists(loadData('artists', []));
-  }, []);
+    if (user) {
+        setArtists(loadData('artists', []));
+    }
+  }, [user]);
 
   const handleSaveArtist = (artistData: Omit<Artist, 'id'>) => {
     let updatedArtists;

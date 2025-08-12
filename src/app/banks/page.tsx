@@ -45,8 +45,8 @@ const BanksPage = () => {
       );
     } else {
       const newAccount: BankAccount = {
-        ...accountData,
         id: `bank-${Date.now()}`,
+        ...accountData,
         balance: accountData.balance || 0,
       };
       updatedAccounts = [...accounts, newAccount];

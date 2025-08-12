@@ -43,6 +43,7 @@ export type BankAccount = {
   agency: string;
   accountNumber: string;
   balance: number;
+  imageUrl?: string;
 };
 
 export type Transaction = {

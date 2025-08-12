@@ -11,8 +11,9 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Pen, Trash2, ArrowUpCircle, ArrowDownCircle, ChevronDown } from 'lucide-react';
+import { Pen, Trash2, ArrowUpCircle, ArrowDownCircle, ChevronDown, Banknote } from 'lucide-react';
 import { BankAccount, Transaction, Artist, Contractor } from '@/types';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Collapsible,
   CollapsibleContent,
@@ -24,6 +25,12 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+
 
 
 interface BankListProps {
@@ -79,6 +86,7 @@ export function BankList({
         <TableHeader>
           <TableRow className="bg-primary/5 border-b-primary/20">
             <TableHead className="w-[50px]"></TableHead>
+            <TableHead className="w-[80px]">Imagem</TableHead>
             <TableHead>Banco</TableHead>
             <TableHead>Agência</TableHead>
             <TableHead>Conta</TableHead>
@@ -104,6 +112,21 @@ export function BankList({
                                             <span className="sr-only">Ver transações</span>
                                         </Button>
                                     </CollapsibleTrigger>
+                                </TableCell>
+                                 <TableCell>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                        <Avatar className="cursor-pointer">
+                                            <AvatarImage src={account.imageUrl} />
+                                            <AvatarFallback><Banknote className="h-4 w-4 text-muted-foreground" /></AvatarFallback>
+                                        </Avatar>
+                                        </PopoverTrigger>
+                                        {account.imageUrl && (
+                                            <PopoverContent className="w-auto p-0">
+                                                <img src={account.imageUrl} alt={account.bankName} className="rounded-md" />
+                                            </PopoverContent>
+                                        )}
+                                    </Popover>
                                 </TableCell>
                                 <TableCell className="font-medium">{account.bankName}</TableCell>
                                 <TableCell>{account.agency}</TableCell>
@@ -154,7 +177,7 @@ export function BankList({
                             </TableRow>
                             <CollapsibleContent asChild>
                                 <TableRow className="bg-muted/50">
-                                    <TableCell colSpan={6} className="p-0">
+                                    <TableCell colSpan={7} className="p-0">
                                        <div className="p-4">
                                          <h4 className="font-bold mb-2">Histórico de Movimentações</h4>
                                          {accountTransactions.length > 0 ? (
@@ -227,7 +250,7 @@ export function BankList({
             })
           ) : (
             <TableRow>
-              <TableCell colSpan={6} className="h-24 text-center">
+              <TableCell colSpan={7} className="h-24 text-center">
                 Nenhuma conta encontrada.
               </TableCell>
             </TableRow>

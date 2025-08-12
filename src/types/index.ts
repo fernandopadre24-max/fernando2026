@@ -60,7 +60,7 @@ export type ExpenseCategory = {
     name: string;
 }
 
-export type FontOption = 'Poppins' | 'PT Sans' | 'Roboto' | 'Lato' | 'Open Sans' | 'Montserrat';
+export type FontOption = 'Poppins' | 'PT Sans' | 'Roboto' | 'Lato' | 'Open Sans' | 'Montserrat' | 'Nunito' | 'Raleway' | 'Merriweather' | 'Playfair Display';
 export type FontSize = 'sm' | 'base' | 'lg';
 export type ColorTheme = 'slate' | 'zinc' | 'stone';
 

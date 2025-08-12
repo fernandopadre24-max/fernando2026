@@ -27,7 +27,11 @@ const fontOptions: { value: FontOption, label: string }[] = [
     { value: 'Roboto', label: 'Roboto' },
     { value: 'Lato', label: 'Lato' },
     { value: 'Open Sans', label: 'Open Sans' },
-    { value: 'Montserrat', label: 'Montserrat' }
+    { value: 'Montserrat', label: 'Montserrat' },
+    { value: 'Nunito', label: 'Nunito' },
+    { value: 'Raleway', label: 'Raleway' },
+    { value: 'Merriweather', label: 'Merriweather' },
+    { value: 'Playfair Display', label: 'Playfair Display' },
 ];
 
 const primaryColorOptions = [

@@ -8,7 +8,7 @@ import { BankList } from '@/components/banks/bank-list';
 import { BankForm } from '@/components/banks/bank-form';
 import { MovementForm, MovementFormData } from '@/components/banks/movement-form';
 import { TransactionForm } from '@/components/finance/transaction-form';
-import { BankAccount, Transaction, Artist, Contractor, ExpenseCategory } from '@/types';
+import { BankAccount, Transaction, Artist, Contractor, Category } from '@/types';
 import { loadData, saveData } from '@/lib/storage';
 import { useAuth } from '@/contexts/auth-context';
 import Link from 'next/link';
@@ -18,7 +18,7 @@ const BanksPage = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [artists, setArtists] = useState<Artist[]>([]);
   const [contractors, setContractors] = useState<Contractor[]>([]);
-  const [categories, setCategories] = useState<ExpenseCategory[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [isAccountFormOpen, setIsAccountFormOpen] = useState(false);
   const [isMovementFormOpen, setIsMovementFormOpen] = useState(false);
   const [isTransactionFormOpen, setIsTransactionFormOpen] = useState(false);
@@ -81,6 +81,7 @@ const BanksPage = () => {
       pixKey: data.pixKey,
       paidTo: data.paidTo,
       contractorId: data.contractorId,
+      categoryId: data.categoryId,
     };
     const updatedTransactions = [...transactions, newTransaction];
     setTransactions(updatedTransactions);
@@ -186,6 +187,7 @@ const BanksPage = () => {
             transactions={transactions}
             artists={artists}
             contractors={contractors}
+            categories={categories}
             onEditAccount={handleEditAccount}
             onDeleteAccount={handleDeleteAccount}
             onDeposit={(account) => handleOpenMovementForm(account, 'deposit')}
@@ -219,6 +221,7 @@ const BanksPage = () => {
           type={movementType}
           artists={artists}
           contractors={contractors}
+          categories={categories}
         />
       )}
 

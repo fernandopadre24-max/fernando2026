@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Pen, Trash2, ArrowUpCircle, ArrowDownCircle, ChevronDown, Banknote } from 'lucide-react';
-import { BankAccount, Transaction, Artist, Contractor } from '@/types';
+import { BankAccount, Transaction, Artist, Contractor, Category } from '@/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Collapsible,
@@ -38,6 +38,7 @@ interface BankListProps {
   transactions: Transaction[];
   artists: Artist[];
   contractors: Contractor[];
+  categories: Category[];
   onEditAccount: (account: BankAccount) => void;
   onDeleteAccount: (id: string) => void;
   onDeposit: (account: BankAccount) => void;
@@ -59,6 +60,7 @@ export function BankList({
     transactions, 
     artists, 
     contractors, 
+    categories,
     onEditAccount, 
     onDeleteAccount, 
     onDeposit, 
@@ -76,6 +78,10 @@ export function BankList({
             return contractors.find(c => c.id === transaction.contractorId)?.name || '-';
         }
         return '-';
+    }
+
+    const getCategoryName = (categoryId?: string) => {
+        return categories.find(c => c.id === categoryId)?.name || 'N/A';
     }
 
 
@@ -186,7 +192,7 @@ export function BankList({
                                                      <TableRow>
                                                          <TableHead>Data</TableHead>
                                                          <TableHead>Descrição</TableHead>
-                                                         <TableHead>Forma Pgto.</TableHead>
+                                                         <TableHead>Categoria</TableHead>
                                                          <TableHead>Associado a</TableHead>
                                                          <TableHead className="text-right">Valor</TableHead>
                                                          <TableHead className="text-right">Ações</TableHead>
@@ -197,16 +203,7 @@ export function BankList({
                                                          <TableRow key={t.id}>
                                                              <TableCell>{formatDate(t.date)}</TableCell>
                                                              <TableCell>{t.description}</TableCell>
-                                                             <TableCell>
-                                                                {t.paymentMethod ? (
-                                                                    <div>
-                                                                        <span className="font-medium">{t.paymentMethod}</span>
-                                                                        {t.paymentMethod === 'PIX' && t.pixKey && (
-                                                                            <span className="block text-xs text-muted-foreground">{t.pixKey}</span>
-                                                                        )}
-                                                                    </div>
-                                                                ) : '-'}
-                                                            </TableCell>
+                                                             <TableCell>{getCategoryName(t.categoryId)}</TableCell>
                                                              <TableCell>{getAssociatedName(t)}</TableCell>
                                                              <TableCell className={`text-right ${t.type === 'Receita' ? 'text-green-600' : 'text-red-600'}`}>
                                                                 {t.type === 'Receita' ? '+' : '-'} {formatCurrency(t.value)}

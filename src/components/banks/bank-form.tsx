@@ -24,7 +24,7 @@ const accountSchema = z.object({
   bankName: z.string().min(1, 'O nome do banco é obrigatório.'),
   agency: z.string().min(1, 'A agência é obrigatória.'),
   accountNumber: z.string().min(1, 'O número da conta é obrigatório.'),
-  balance: z.coerce.number().optional(),
+  initialBalance: z.coerce.number().optional(),
   imageUrl: z.string().optional(),
 });
 
@@ -33,7 +33,7 @@ type AccountFormData = z.infer<typeof accountSchema>;
 interface BankFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (account: Omit<BankAccount, 'id'>) => void;
+  onSave: (account: Omit<BankAccount, 'id' | 'balance'> & { initialBalance?: number }) => void;
   account: BankAccount | null;
 }
 
@@ -53,7 +53,7 @@ export function BankForm({ isOpen, onClose, onSave, account }: BankFormProps) {
       bankName: '',
       agency: '',
       accountNumber: '',
-      balance: 0,
+      initialBalance: 0,
       imageUrl: '',
     },
   });
@@ -65,7 +65,6 @@ export function BankForm({ isOpen, onClose, onSave, account }: BankFormProps) {
                 bankName: account.bankName,
                 agency: account.agency,
                 accountNumber: account.accountNumber,
-                balance: account.balance,
                 imageUrl: account.imageUrl,
             });
             setPreviewImage(account.imageUrl || null);
@@ -74,7 +73,7 @@ export function BankForm({ isOpen, onClose, onSave, account }: BankFormProps) {
                 bankName: '',
                 agency: '',
                 accountNumber: '',
-                balance: 0,
+                initialBalance: 0,
                 imageUrl: '',
             });
             setPreviewImage(null);
@@ -135,12 +134,15 @@ export function BankForm({ isOpen, onClose, onSave, account }: BankFormProps) {
                 {errors.accountNumber && <p className="text-sm text-red-500">{errors.accountNumber.message}</p>}
             </div>
           </div>
-
-          <div className="space-y-2">
-              <Label htmlFor="balance">{account ? 'Saldo' : 'Saldo Inicial'}</Label>
-              <Input id="balance" type="number" step="0.01" {...register('balance')} />
-              {errors.balance && <p className="text-sm text-red-500">{errors.balance.message}</p>}
+          
+          {!account && (
+            <div className="space-y-2">
+              <Label htmlFor="initialBalance">Saldo Inicial</Label>
+              <Input id="initialBalance" type="number" step="0.01" {...register('initialBalance')} />
+              {errors.initialBalance && <p className="text-sm text-red-500">{errors.initialBalance.message}</p>}
           </div>
+          )}
+
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>

@@ -72,6 +72,9 @@ export function BankList({
 
     const getAssociatedName = (transaction: Transaction) => {
         if (transaction.type === 'Despesa') {
+            if (transaction.artistId) {
+                return artists.find(a => a.id === transaction.artistId)?.name || transaction.paidTo || '-';
+            }
             return transaction.paidTo || '-';
         }
         if (transaction.type === 'Receita' && transaction.contractorId) {
@@ -122,9 +125,9 @@ export function BankList({
                                  <TableCell>
                                     <Popover>
                                         <PopoverTrigger asChild>
-                                        <Avatar className="cursor-pointer">
-                                            <AvatarImage src={account.imageUrl} />
-                                            <AvatarFallback><Banknote className="h-4 w-4 text-muted-foreground" /></AvatarFallback>
+                                        <Avatar className="cursor-pointer rounded-md">
+                                            <AvatarImage src={account.imageUrl} className="rounded-md" />
+                                            <AvatarFallback className="rounded-md"><Banknote className="h-4 w-4 text-muted-foreground" /></AvatarFallback>
                                         </Avatar>
                                         </PopoverTrigger>
                                         {account.imageUrl && (

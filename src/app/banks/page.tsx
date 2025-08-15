@@ -38,17 +38,20 @@ const BanksPage = () => {
     }
   }, [user]);
 
-  const handleSaveAccount = (accountData: Omit<BankAccount, 'id' | 'balance'> & { balance?: number }) => {
+  const handleSaveAccount = (accountData: Omit<BankAccount, 'id' | 'balance'> & { initialBalance?: number }) => {
     let updatedAccounts;
     if (selectedAccount) {
       updatedAccounts = accounts.map((acc) =>
-        acc.id === selectedAccount.id ? { ...selectedAccount, ...accountData, balance: accountData.balance ?? selectedAccount.balance } : acc
+        acc.id === selectedAccount.id ? { ...selectedAccount, ...accountData } : acc
       );
     } else {
       const newAccount: BankAccount = {
         id: `bank-${Date.now()}`,
-        ...accountData,
-        balance: accountData.balance || 0,
+        bankName: accountData.bankName,
+        agency: accountData.agency,
+        accountNumber: accountData.accountNumber,
+        imageUrl: accountData.imageUrl,
+        balance: accountData.initialBalance || 0,
       };
       updatedAccounts = [...accounts, newAccount];
     }
@@ -81,6 +84,7 @@ const BanksPage = () => {
       pixKey: data.pixKey,
       paidTo: data.paidTo,
       contractorId: data.contractorId,
+      artistId: data.artistId,
       categoryId: data.categoryId,
     };
     const updatedTransactions = [...transactions, newTransaction];

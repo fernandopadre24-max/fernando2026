@@ -69,6 +69,7 @@ export type Transaction = {
     pixKey?: string | null;
     paidTo?: string | null;
     contractorId?: string | null;
+    artistId?: string | null;
 }
 
 export type Category = {

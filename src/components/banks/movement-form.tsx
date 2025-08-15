@@ -26,6 +26,7 @@ const movementSchema = z.object({
   paymentMethod: z.nativeEnum(PaymentMethod).nullable(),
   pixKey: z.string().optional().nullable(),
   paidTo: z.string().optional().nullable(),
+  artistId: z.string().optional().nullable(),
   contractorId: z.string().optional().nullable(),
   categoryId: z.string().optional().nullable(),
 });
@@ -68,6 +69,7 @@ export function MovementForm({
       paymentMethod: null,
       pixKey: '',
       paidTo: '',
+      artistId: null,
       contractorId: null,
       categoryId: null,
     },
@@ -161,9 +163,25 @@ export function MovementForm({
           )}
 
           {type === 'withdrawal' && (
-              <div className="space-y-2">
-                  <Label htmlFor="paidTo">Pago para (opcional)</Label>
-                  <Input id="paidTo" {...register('paidTo')} />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Pago para (Artista)</Label>
+                    <Controller name="artistId" control={control} render={({ field }) => (
+                      <Select onValueChange={field.onChange} defaultValue={field.value || ''}>
+                      <SelectTrigger><SelectValue placeholder="Selecione o artista" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="other">Outro / Não se aplica</SelectItem>
+                        {artists.map((c) => (
+                          <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                      </Select>
+                    )} />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="paidTo">Outro (opcional)</Label>
+                    <Input id="paidTo" {...register('paidTo')} placeholder="Especifique..."/>
+                </div>
               </div>
           )}
 
@@ -174,6 +192,7 @@ export function MovementForm({
                       <Select onValueChange={field.onChange} defaultValue={field.value || ''}>
                       <SelectTrigger><SelectValue placeholder="Selecione o contratante" /></SelectTrigger>
                       <SelectContent>
+                          <SelectItem value="other">Outro / Não se aplica</SelectItem>
                           {contractors.map((c) => (
                           <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                           ))}

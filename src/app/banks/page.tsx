@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Settings } from 'lucide-react';
 import { BankList } from '@/components/banks/bank-list';
 import { BankForm } from '@/components/banks/bank-form';
 import { MovementForm, MovementFormData } from '@/components/banks/movement-form';
@@ -11,6 +11,7 @@ import { TransactionForm } from '@/components/finance/transaction-form';
 import { BankAccount, Transaction, Artist, Contractor, ExpenseCategory } from '@/types';
 import { loadData, saveData } from '@/lib/storage';
 import { useAuth } from '@/contexts/auth-context';
+import Link from 'next/link';
 
 const BanksPage = () => {
   const [accounts, setAccounts] = useState<BankAccount[]>([]);
@@ -33,7 +34,7 @@ const BanksPage = () => {
         setTransactions(loadData('transactions', []));
         setArtists(loadData('artists', []));
         setContractors(loadData('contractors', []));
-        setCategories(loadData('expenseCategories', []));
+        setCategories(loadData('categories', []));
     }
   }, [user]);
 
@@ -166,6 +167,12 @@ const BanksPage = () => {
       <div className="flex items-center justify-between space-y-2">
         <h2 className="text-3xl font-bold tracking-tight">Bancos</h2>
         <div className="flex items-center space-x-2">
+           <Link href="/finance/categories">
+             <Button variant="outline">
+                <Settings className="mr-2 h-4 w-4" />
+                Gerenciar Categorias
+            </Button>
+          </Link>
           <Button onClick={handleOpenAccountForm}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Adicionar Conta

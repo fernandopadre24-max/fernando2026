@@ -39,6 +39,8 @@ export function ArtistList({ artists, onEdit, onDelete }: ArtistListProps) {
           <TableRow className="bg-primary/5 border-b-primary/20">
             <TableHead className="w-[80px]">Imagem</TableHead>
             <TableHead>Nome</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>Contato</TableHead>
             <TableHead className="text-right">Ações</TableHead>
           </TableRow>
         </TableHeader>
@@ -62,6 +64,8 @@ export function ArtistList({ artists, onEdit, onDelete }: ArtistListProps) {
                   </Popover>
                 </TableCell>
                 <TableCell className="font-medium">{artist.name}</TableCell>
+                <TableCell>{artist.email || '-'}</TableCell>
+                <TableCell>{artist.contact || '-'}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-2">
                     <Button variant="ghost" size="icon" onClick={() => onEdit(artist)}>
@@ -78,7 +82,7 @@ export function ArtistList({ artists, onEdit, onDelete }: ArtistListProps) {
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={3} className="h-24 text-center">
+              <TableCell colSpan={5} className="h-24 text-center">
                 Nenhum artista encontrado.
               </TableCell>
             </TableRow>

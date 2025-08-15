@@ -30,11 +30,15 @@ export type Artist = {
   id: string;
   name: string;
   imageUrl?: string;
+  email?: string;
+  contact?: string;
 };
 
 export type Contractor = {
   id: string;
   name: string;
+  email?: string;
+  contact?: string;
 };
 
 export type BankAccount = {

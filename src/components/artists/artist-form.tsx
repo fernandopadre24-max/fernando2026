@@ -22,6 +22,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 const artistSchema = z.object({
   name: z.string().min(1, 'O nome do artista é obrigatório.'),
   imageUrl: z.string().optional(),
+  email: z.string().email({ message: "Email inválido." }).optional().or(z.literal('')),
+  contact: z.string().optional(),
 });
 
 type ArtistFormData = z.infer<typeof artistSchema>;
@@ -48,6 +50,8 @@ export function ArtistForm({ isOpen, onClose, onSave, artist }: ArtistFormProps)
     defaultValues: {
       name: '',
       imageUrl: '',
+      email: '',
+      contact: '',
     },
   });
   
@@ -59,12 +63,16 @@ export function ArtistForm({ isOpen, onClose, onSave, artist }: ArtistFormProps)
             reset({
                 name: artist.name,
                 imageUrl: artist.imageUrl,
+                email: artist.email,
+                contact: artist.contact,
             });
             setPreviewImage(artist.imageUrl || null);
         } else {
             reset({
                 name: '',
                 imageUrl: '',
+                email: '',
+                contact: '',
             });
             setPreviewImage(null);
         }
@@ -95,7 +103,7 @@ export function ArtistForm({ isOpen, onClose, onSave, artist }: ArtistFormProps)
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{artist ? 'Editar Artista' : 'Novo Artista'}</DialogTitle>
         </DialogHeader>
@@ -105,6 +113,19 @@ export function ArtistForm({ isOpen, onClose, onSave, artist }: ArtistFormProps)
             <Input id="name" {...register('name')} />
             {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
           </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" type="email" {...register('email')} />
+              {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="contact">Contato</Label>
+              <Input id="contact" {...register('contact')} />
+            </div>
+          </div>
+
 
           <div className="space-y-2">
             <Label htmlFor="imageUpload">Foto do Artista</Label>

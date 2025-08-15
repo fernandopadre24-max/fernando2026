@@ -15,9 +15,12 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Contractor } from '@/types';
+import { useEffect } from 'react';
 
 const contractorSchema = z.object({
   name: z.string().min(1, 'O nome do contratante é obrigatório.'),
+  email: z.string().email({ message: "Email inválido." }).optional().or(z.literal('')),
+  contact: z.string().optional(),
 });
 
 type ContractorFormData = z.infer<typeof contractorSchema>;
@@ -33,13 +36,25 @@ export function ContractorForm({ isOpen, onClose, onSave, contractor }: Contract
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<ContractorFormData>({
     resolver: zodResolver(contractorSchema),
-    defaultValues: {
-      name: contractor?.name || '',
-    },
   });
+
+  useEffect(() => {
+    if(isOpen) {
+        reset(contractor ? {
+            name: contractor.name,
+            email: contractor.email,
+            contact: contractor.contact,
+        } : {
+            name: '',
+            email: '',
+            contact: '',
+        });
+    }
+  }, [contractor, isOpen, reset]);
 
   const onSubmit = (data: ContractorFormData) => {
     onSave(data);
@@ -47,7 +62,7 @@ export function ContractorForm({ isOpen, onClose, onSave, contractor }: Contract
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{contractor ? 'Editar Contratante' : 'Novo Contratante'}</DialogTitle>
         </DialogHeader>
@@ -56,6 +71,18 @@ export function ContractorForm({ isOpen, onClose, onSave, contractor }: Contract
             <Label htmlFor="name">Nome do Contratante</Label>
             <Input id="name" {...register('name')} />
             {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" type="email" {...register('email')} />
+              {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="contact">Contato</Label>
+              <Input id="contact" {...register('contact')} />
+            </div>
           </div>
 
           <DialogFooter>

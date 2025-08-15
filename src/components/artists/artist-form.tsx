@@ -35,6 +35,27 @@ interface ArtistFormProps {
   artist: Artist | null;
 }
 
+const formatPhoneNumber = (value: string) => {
+    if (!value) return '';
+    value = value.replace(/\D/g, '');
+    if (value.length > 11) value = value.substring(0, 11);
+    
+    if (value.length > 10) {
+        // (99) 9 9999-9999
+        value = value.replace(/^(\d{2})(\d)(\d{4})(\d{4}).*/, '($1) $2 $3-$4');
+    } else if (value.length > 6) {
+        // (99) 9999-9999
+        value = value.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, '($1) $2-$3');
+    } else if (value.length > 2) {
+        // (99) 9999
+        value = value.replace(/^(\d{2})(\d{0,5}).*/, '($1) $2');
+    } else if (value.length > 0) {
+        value = value.replace(/^(\d*)/, '($1');
+    }
+    return value;
+}
+
+
 export function ArtistForm({ isOpen, onClose, onSave, artist }: ArtistFormProps) {
     const [previewImage, setPreviewImage] = useState<string | null>(null);
 
@@ -92,6 +113,11 @@ export function ArtistForm({ isOpen, onClose, onSave, artist }: ArtistFormProps)
     }
   };
 
+  const handleContactChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setValue('contact', formatPhoneNumber(e.target.value));
+  };
+
+
   const onSubmit = (data: ArtistFormData) => {
     onSave(data);
   };
@@ -122,7 +148,13 @@ export function ArtistForm({ isOpen, onClose, onSave, artist }: ArtistFormProps)
             </div>
             <div className="space-y-2">
               <Label htmlFor="contact">Contato</Label>
-              <Input id="contact" type="tel" {...register('contact')} />
+              <Input 
+                id="contact" 
+                type="tel" 
+                {...register('contact')} 
+                onChange={handleContactChange}
+                maxLength={16}
+              />
             </div>
           </div>
 

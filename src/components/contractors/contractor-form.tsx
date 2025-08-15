@@ -15,7 +15,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Contractor } from '@/types';
-import { useEffect } from 'react';
+import { useEffect, ChangeEvent } from 'react';
 
 const contractorSchema = z.object({
   name: z.string().min(1, 'O nome do contratante é obrigatório.'),
@@ -32,11 +32,32 @@ interface ContractorFormProps {
   contractor: Contractor | null;
 }
 
+const formatPhoneNumber = (value: string) => {
+    if (!value) return '';
+    value = value.replace(/\D/g, '');
+    if (value.length > 11) value = value.substring(0, 11);
+    
+    if (value.length > 10) {
+        // (99) 9 9999-9999
+        value = value.replace(/^(\d{2})(\d)(\d{4})(\d{4}).*/, '($1) $2 $3-$4');
+    } else if (value.length > 6) {
+        // (99) 9999-9999
+        value = value.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, '($1) $2-$3');
+    } else if (value.length > 2) {
+        // (99) 9999
+        value = value.replace(/^(\d{2})(\d{0,5}).*/, '($1) $2');
+    } else if (value.length > 0) {
+        value = value.replace(/^(\d*)/, '($1');
+    }
+    return value;
+}
+
 export function ContractorForm({ isOpen, onClose, onSave, contractor }: ContractorFormProps) {
   const {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<ContractorFormData>({
     resolver: zodResolver(contractorSchema),
@@ -55,6 +76,11 @@ export function ContractorForm({ isOpen, onClose, onSave, contractor }: Contract
         });
     }
   }, [contractor, isOpen, reset]);
+
+  const handleContactChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setValue('contact', formatPhoneNumber(e.target.value));
+  };
+
 
   const onSubmit = (data: ContractorFormData) => {
     onSave(data);
@@ -81,7 +107,13 @@ export function ContractorForm({ isOpen, onClose, onSave, contractor }: Contract
             </div>
             <div className="space-y-2">
               <Label htmlFor="contact">Contato</Label>
-              <Input id="contact" type="tel" {...register('contact')} />
+              <Input 
+                id="contact" 
+                type="tel" 
+                {...register('contact')} 
+                onChange={handleContactChange}
+                maxLength={16}
+              />
             </div>
           </div>
 

@@ -64,9 +64,10 @@ export type Transaction = {
     contractorId?: string | null;
 }
 
-export type ExpenseCategory = {
+export type Category = {
     id: string;
     name: string;
+    type: 'Receita' | 'Despesa';
 }
 
 export type FontOption = 'Poppins' | 'PT Sans' | 'Roboto' | 'Lato' | 'Open Sans' | 'Montserrat' | 'Nunito' | 'Raleway' | 'Merriweather' | 'Playfair Display';

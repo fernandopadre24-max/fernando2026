@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { DatePickerWithRange } from '@/components/ui/date-picker';
-import { ExpenseCategory } from '@/types';
+import { Category } from '@/types';
 import { DateRange } from 'react-day-picker';
 import { X } from 'lucide-react';
 
@@ -19,7 +19,7 @@ interface TransactionFiltersProps {
   dateRange: DateRange | undefined;
   onDateRangeChange: (date: DateRange | undefined) => void;
   onClearFilters: () => void;
-  categories: ExpenseCategory[];
+  categories: Category[];
 }
 
 export function TransactionFilters({
@@ -53,7 +53,7 @@ export function TransactionFilters({
                 </SelectContent>
             </Select>
 
-            <Select value={category} onValueChange={onCategoryChange} disabled={type !== 'Despesa'}>
+            <Select value={category} onValueChange={onCategoryChange} disabled={type === 'all'}>
                  <SelectTrigger>
                     <SelectValue placeholder="Filtrar por categoria" />
                 </SelectTrigger>

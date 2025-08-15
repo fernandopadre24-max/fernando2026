@@ -8,7 +8,7 @@ import { FinancialSummary } from '@/components/finance/financial-summary';
 import { TransactionList } from '@/components/finance/transaction-list';
 import { TransactionForm } from '@/components/finance/transaction-form';
 import { TransactionFilters } from '@/components/finance/transaction-filters';
-import { Transaction, ExpenseCategory, Artist, Contractor } from '@/types';
+import { Transaction, Category, Artist, Contractor } from '@/types';
 import { loadData, saveData } from '@/lib/storage';
 import { DateRange } from 'react-day-picker';
 import { useAuth } from '@/contexts/auth-context';
@@ -16,7 +16,7 @@ import Link from 'next/link';
 
 const FinancePage = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [categories, setCategories] = useState<ExpenseCategory[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [artists, setArtists] = useState<Artist[]>([]);
   const [contractors, setContractors] = useState<Contractor[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -33,7 +33,7 @@ const FinancePage = () => {
   useEffect(() => {
     if (user) {
         setTransactions(loadData('transactions', []));
-        setCategories(loadData('expenseCategories', [{ id: 'cat-1', name: 'Alimentação' }, { id: 'cat-2', name: 'Transporte' }]));
+        setCategories(loadData('categories', []));
         setArtists(loadData('artists', []));
         setContractors(loadData('contractors', []));
     }
@@ -79,7 +79,11 @@ const FinancePage = () => {
     return transactions.filter(t => {
         const descriptionMatch = descriptionFilter ? t.description.toLowerCase().includes(descriptionFilter.toLowerCase()) : true;
         const typeMatch = typeFilter !== 'all' ? t.type === typeFilter : true;
-        const categoryMatch = typeFilter === 'Despesa' && categoryFilter !== 'all' ? t.categoryId === categoryFilter : true;
+        
+        let categoryMatch = true;
+        if (typeFilter !== 'all' && categoryFilter !== 'all') {
+            categoryMatch = t.categoryId === categoryFilter;
+        }
         
         let dateMatch = true;
         if (dateRangeFilter?.from) {
@@ -101,6 +105,11 @@ const FinancePage = () => {
         return descriptionMatch && typeMatch && categoryMatch && dateMatch;
     });
   }, [transactions, descriptionFilter, typeFilter, categoryFilter, dateRangeFilter]);
+  
+  const filteredCategories = useMemo(() => {
+    if (typeFilter === 'all') return [];
+    return categories.filter(c => c.type === typeFilter);
+  }, [categories, typeFilter]);
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
@@ -126,13 +135,16 @@ const FinancePage = () => {
         description={descriptionFilter}
         onDescriptionChange={setDescriptionFilter}
         type={typeFilter}
-        onTypeChange={setTypeFilter}
+        onTypeChange={(value) => {
+            setTypeFilter(value);
+            setCategoryFilter('all'); // Reset category filter when type changes
+        }}
         category={categoryFilter}
         onCategoryChange={setCategoryFilter}
         dateRange={dateRangeFilter}
         onDateRangeChange={setDateRangeFilter}
         onClearFilters={handleClearFilters}
-        categories={categories}
+        categories={filteredCategories}
       />
 
       <div className="mt-8">

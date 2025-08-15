@@ -19,11 +19,11 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Transaction, ExpenseCategory } from '@/types';
+import { Transaction, Category } from '@/types';
 
 interface ExpensesByCategoryChartProps {
     transactions: Transaction[];
-    categories: ExpenseCategory[];
+    categories: Category[];
 }
 
 const chartColors = [

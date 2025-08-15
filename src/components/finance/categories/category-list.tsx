@@ -11,11 +11,11 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Pen, Trash2 } from 'lucide-react';
-import { ExpenseCategory } from '@/types';
+import { Category } from '@/types';
 
 interface CategoryListProps {
-  categories: ExpenseCategory[];
-  onEdit: (category: ExpenseCategory) => void;
+  categories: Category[];
+  onEdit: (category: Category) => void;
   onDelete: (id: string) => void;
 }
 

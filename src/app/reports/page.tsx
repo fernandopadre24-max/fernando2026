@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ReportView } from '@/components/reports/report-view';
-import { Event, Transaction, ExpenseCategory, BankAccount } from '@/types';
+import { Event, Transaction, Category, BankAccount } from '@/types';
 import { loadData } from '@/lib/storage';
 import { EventsByStatusChart } from '@/components/reports/events-by-status-chart';
 import { FinancialSummaryChart } from '@/components/reports/financial-summary-chart';
@@ -18,7 +18,7 @@ const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { style:
 export default function ReportsPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [categories, setCategories] = useState<ExpenseCategory[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
   const { user } = useAuth();
 
@@ -26,7 +26,7 @@ export default function ReportsPage() {
     if (user) {
         setEvents(loadData('events', []));
         setTransactions(loadData('transactions', []));
-        setCategories(loadData('expenseCategories', []));
+        setCategories(loadData('categories', []));
         setBankAccounts(loadData('bankAccounts', []));
     }
   }, [user]);
@@ -74,7 +74,7 @@ export default function ReportsPage() {
     ...t,
     date: formatDate(t.date),
     value: formatCurrency(t.value),
-    category: t.type === 'Despesa' ? getCategoryName(t.categoryId) : '-',
+    category: getCategoryName(t.categoryId),
   }));
 
   const financialSummary = useMemo(() => {

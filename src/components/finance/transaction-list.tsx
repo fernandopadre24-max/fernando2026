@@ -12,11 +12,11 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Pen, Trash2 } from 'lucide-react';
-import { Transaction, ExpenseCategory, Artist, Contractor } from '@/types';
+import { Transaction, Category, Artist, Contractor } from '@/types';
 
 interface TransactionListProps {
   transactions: Transaction[];
-  categories: ExpenseCategory[];
+  categories: Category[];
   artists: Artist[];
   contractors: Contractor[];
   onEdit: (transaction: Transaction) => void;
@@ -81,7 +81,7 @@ export function TransactionList({ transactions, categories, artists, contractors
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  {transaction.type === 'Despesa' ? getCategoryName(transaction.categoryId) : '-'}
+                  {getCategoryName(transaction.categoryId)}
                 </TableCell>
                 <TableCell>
                     {transaction.paymentMethod ? (

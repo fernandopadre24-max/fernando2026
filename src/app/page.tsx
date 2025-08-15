@@ -4,7 +4,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { loadData } from '@/lib/storage';
-import { Event, Transaction, ExpenseCategory } from '@/types';
+import { Event, Transaction, Category } from '@/types';
 import { Calendar } from 'lucide-react';
 import Link from 'next/link';
 import { MonthlyRevenueChart } from '@/components/dashboard/monthly-revenue-chart';
@@ -25,7 +25,7 @@ const formatDate = (dateString: string) => {
 export default function Home() {
   const [events, setEvents] = useState<Event[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [categories, setCategories] = useState<ExpenseCategory[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
@@ -33,7 +33,7 @@ export default function Home() {
     if (user) {
         const loadedEvents = loadData<Event[]>('events', []);
         const loadedTransactions = loadData<Transaction[]>('transactions', []);
-        const loadedCategories = loadData<ExpenseCategory[]>('expenseCategories', []);
+        const loadedCategories = loadData<Category[]>('categories', []);
 
         setEvents(loadedEvents);
         setTransactions(loadedTransactions);

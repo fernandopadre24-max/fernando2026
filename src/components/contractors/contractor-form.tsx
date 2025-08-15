@@ -81,7 +81,7 @@ export function ContractorForm({ isOpen, onClose, onSave, contractor }: Contract
             </div>
             <div className="space-y-2">
               <Label htmlFor="contact">Contato</Label>
-              <Input id="contact" {...register('contact')} />
+              <Input id="contact" type="tel" {...register('contact')} />
             </div>
           </div>
 

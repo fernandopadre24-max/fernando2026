@@ -122,7 +122,7 @@ export function ArtistForm({ isOpen, onClose, onSave, artist }: ArtistFormProps)
             </div>
             <div className="space-y-2">
               <Label htmlFor="contact">Contato</Label>
-              <Input id="contact" {...register('contact')} />
+              <Input id="contact" type="tel" {...register('contact')} />
             </div>
           </div>
 

@@ -26,8 +26,11 @@ export function ContractorList({ contractors, onEdit, onDelete }: ContractorList
         <TableHeader>
           <TableRow className="bg-primary/5 border-b-primary/20">
             <TableHead>Nome</TableHead>
-            <TableHead>Email</TableHead>
+            <TableHead>Local</TableHead>
+            <TableHead>Cidade</TableHead>
+            <TableHead>Estado</TableHead>
             <TableHead>Contato</TableHead>
+            <TableHead>Email</TableHead>
             <TableHead className="text-right">Ações</TableHead>
           </TableRow>
         </TableHeader>
@@ -36,8 +39,11 @@ export function ContractorList({ contractors, onEdit, onDelete }: ContractorList
             contractors.map((contractor) => (
               <TableRow key={contractor.id}>
                 <TableCell className="font-medium">{contractor.name}</TableCell>
-                <TableCell>{contractor.email || '-'}</TableCell>
+                <TableCell>{contractor.location || '-'}</TableCell>
+                <TableCell>{contractor.city || '-'}</TableCell>
+                <TableCell>{contractor.state || '-'}</TableCell>
                 <TableCell>{contractor.contact || '-'}</TableCell>
+                <TableCell>{contractor.email || '-'}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-2">
                     <Button variant="ghost" size="icon" onClick={() => onEdit(contractor)}>
@@ -54,7 +60,7 @@ export function ContractorList({ contractors, onEdit, onDelete }: ContractorList
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={4} className="h-24 text-center">
+              <TableCell colSpan={7} className="h-24 text-center">
                 Nenhum contratante encontrado.
               </TableCell>
             </TableRow>

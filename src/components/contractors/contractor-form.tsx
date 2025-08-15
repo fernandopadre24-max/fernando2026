@@ -21,6 +21,9 @@ const contractorSchema = z.object({
   name: z.string().min(1, 'O nome do contratante é obrigatório.'),
   email: z.string().email({ message: "Email inválido." }).optional().or(z.literal('')),
   contact: z.string().optional(),
+  state: z.string().optional(),
+  city: z.string().optional(),
+  location: z.string().optional(),
 });
 
 type ContractorFormData = z.infer<typeof contractorSchema>;
@@ -69,10 +72,16 @@ export function ContractorForm({ isOpen, onClose, onSave, contractor }: Contract
             name: contractor.name,
             email: contractor.email,
             contact: contractor.contact,
+            state: contractor.state,
+            city: contractor.city,
+            location: contractor.location,
         } : {
             name: '',
             email: '',
             contact: '',
+            state: '',
+            city: '',
+            location: '',
         });
     }
   }, [contractor, isOpen, reset]);
@@ -98,6 +107,21 @@ export function ContractorForm({ isOpen, onClose, onSave, contractor }: Contract
             <Input id="name" {...register('name')} />
             {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
           </div>
+
+          <div className="grid grid-cols-2 gap-4">
+             <div className="space-y-2">
+                <Label htmlFor="state">Estado</Label>
+                <Input id="state" {...register('state')} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="city">Cidade</Label>
+                <Input id="city" {...register('city')} />
+              </div>
+          </div>
+           <div className="space-y-2">
+                <Label htmlFor="location">Local</Label>
+                <Input id="location" {...register('location')} />
+            </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">

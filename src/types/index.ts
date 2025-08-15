@@ -39,6 +39,9 @@ export type Contractor = {
   name: string;
   email?: string;
   contact?: string;
+  state?: string;
+  city?: string;
+  location?: string;
 };
 
 export type BankAccount = {

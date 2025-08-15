@@ -11,6 +11,7 @@ import { MonthlyRevenueChart } from '@/components/dashboard/monthly-revenue-char
 import { ExpensesByCategoryChart } from '@/components/dashboard/expenses-by-category-chart';
 import { FinancialSummary } from '@/components/finance/financial-summary';
 import { EventsSummary } from '@/components/dashboard/events-summary';
+import { AccountBalances } from '@/components/dashboard/account-balances';
 import { useAuth } from '@/contexts/auth-context';
 
 
@@ -85,8 +86,8 @@ export default function Home() {
              <ExpensesByCategoryChart transactions={transactions} categories={categories} />
         </div>
 
-         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-            <Card className="lg:col-span-4">
+         <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-3">
+            <Card className="lg:col-span-1">
               <CardHeader>
                 <CardTitle>Próximos Eventos</CardTitle>
                 <CardDescription>
@@ -117,7 +118,7 @@ export default function Home() {
                 )}
               </CardContent>
             </Card>
-            <Card className="lg:col-span-3">
+            <Card className="lg:col-span-1">
               <CardHeader>
                 <CardTitle>Transações Recentes</CardTitle>
                 <CardDescription>
@@ -146,6 +147,7 @@ export default function Home() {
                  )}
               </CardContent>
             </Card>
+            <AccountBalances accounts={bankAccounts} />
           </div>
     </div>
   );

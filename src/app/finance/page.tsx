@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Settings } from 'lucide-react';
 import { FinancialSummary } from '@/components/finance/financial-summary';
 import { TransactionList } from '@/components/finance/transaction-list';
 import { TransactionForm } from '@/components/finance/transaction-form';
@@ -12,6 +12,7 @@ import { Transaction, ExpenseCategory, Artist, Contractor } from '@/types';
 import { loadData, saveData } from '@/lib/storage';
 import { DateRange } from 'react-day-picker';
 import { useAuth } from '@/contexts/auth-context';
+import Link from 'next/link';
 
 const FinancePage = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -106,6 +107,12 @@ const FinancePage = () => {
       <div className="flex items-center justify-between space-y-2">
         <h2 className="text-3xl font-bold tracking-tight">Financeiro</h2>
         <div className="flex items-center space-x-2">
+           <Link href="/finance/categories">
+             <Button variant="outline">
+                <Settings className="mr-2 h-4 w-4" />
+                Gerenciar Categorias
+            </Button>
+          </Link>
           <Button onClick={handleOpenForm}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Adicionar Transação

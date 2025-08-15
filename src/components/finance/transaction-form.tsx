@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Transaction, Category, PaymentMethod, Artist, Contractor } from '@/types';
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 
 const transactionSchema = z.object({
   description: z.string().min(1, 'A descrição é obrigatória.'),

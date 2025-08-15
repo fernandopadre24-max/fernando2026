@@ -4,7 +4,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { loadData } from '@/lib/storage';
-import { Event, Transaction, Category } from '@/types';
+import { Event, Transaction, Category, BankAccount } from '@/types';
 import { Calendar } from 'lucide-react';
 import Link from 'next/link';
 import { MonthlyRevenueChart } from '@/components/dashboard/monthly-revenue-chart';
@@ -26,6 +26,7 @@ export default function Home() {
   const [events, setEvents] = useState<Event[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
@@ -34,10 +35,12 @@ export default function Home() {
         const loadedEvents = loadData<Event[]>('events', []);
         const loadedTransactions = loadData<Transaction[]>('transactions', []);
         const loadedCategories = loadData<Category[]>('categories', []);
+        const loadedBankAccounts = loadData<BankAccount[]>('bankAccounts', []);
 
         setEvents(loadedEvents);
         setTransactions(loadedTransactions);
         setCategories(loadedCategories);
+        setBankAccounts(loadedBankAccounts);
         setLoading(false);
     }
   }, [user]);
@@ -72,7 +75,7 @@ export default function Home() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-1">
-            <FinancialSummary transactions={transactions} />
+            <FinancialSummary transactions={transactions} bankAccounts={bankAccounts} />
             <EventsSummary events={events} />
         </div>
 

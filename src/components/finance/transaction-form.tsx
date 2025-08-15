@@ -34,6 +34,7 @@ const transactionSchema = z.object({
   pixKey: z.string().optional().nullable(),
   paidTo: z.string().optional().nullable(),
   contractorId: z.string().optional().nullable(),
+  bankAccountId: z.string().optional().nullable(), // Keep track of the bank account
 });
 
 type TransactionFormData = z.infer<typeof transactionSchema>;
@@ -76,6 +77,7 @@ export function TransactionForm({
       pixKey: transaction?.pixKey || '',
       paidTo: transaction?.paidTo || '',
       contractorId: transaction?.contractorId || null,
+      bankAccountId: transaction?.bankAccountId || null,
     },
   });
 

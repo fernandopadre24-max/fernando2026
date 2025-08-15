@@ -28,6 +28,8 @@ const FinancePage = () => {
   const [typeFilter, setTypeFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [dateRangeFilter, setDateRangeFilter] = useState<DateRange | undefined>();
+  const [monthFilter, setMonthFilter] = useState('all');
+  const [yearFilter, setYearFilter] = useState('all');
 
 
   useEffect(() => {
@@ -73,7 +75,15 @@ const FinancePage = () => {
     setTypeFilter('all');
     setCategoryFilter('all');
     setDateRangeFilter(undefined);
+    setMonthFilter('all');
+    setYearFilter('all');
   };
+
+  const availableYears = useMemo(() => {
+    const years = new Set(transactions.map(t => new Date(t.date).getFullYear().toString()));
+    return Array.from(years).sort((a,b) => b.localeCompare(a));
+  }, [transactions]);
+
 
   const filteredTransactions = useMemo(() => {
     return transactions.filter(t => {
@@ -84,10 +94,16 @@ const FinancePage = () => {
         if (typeFilter !== 'all' && categoryFilter !== 'all') {
             categoryMatch = t.categoryId === categoryFilter;
         }
+
+        const transactionDate = new Date(t.date);
         
+        const yearMatch = yearFilter !== 'all' ? transactionDate.getFullYear().toString() === yearFilter : true;
+        const monthMatch = monthFilter !== 'all' ? (transactionDate.getMonth() + 1).toString() === monthFilter : true;
+
         let dateMatch = true;
-        if (dateRangeFilter?.from) {
-            const transactionDate = new Date(t.date);
+        if (monthFilter !== 'all' || yearFilter !== 'all') {
+            dateMatch = yearMatch && monthMatch;
+        } else if (dateRangeFilter?.from) {
             transactionDate.setUTCHours(0,0,0,0);
             
             const fromDate = new Date(dateRangeFilter.from);
@@ -104,7 +120,7 @@ const FinancePage = () => {
         
         return descriptionMatch && typeMatch && categoryMatch && dateMatch;
     });
-  }, [transactions, descriptionFilter, typeFilter, categoryFilter, dateRangeFilter]);
+  }, [transactions, descriptionFilter, typeFilter, categoryFilter, dateRangeFilter, monthFilter, yearFilter]);
   
   const filteredCategories = useMemo(() => {
     if (typeFilter === 'all') return [];
@@ -143,8 +159,13 @@ const FinancePage = () => {
         onCategoryChange={setCategoryFilter}
         dateRange={dateRangeFilter}
         onDateRangeChange={setDateRangeFilter}
+        month={monthFilter}
+        onMonthChange={setMonthFilter}
+        year={yearFilter}
+        onYearChange={setYearFilter}
         onClearFilters={handleClearFilters}
         categories={filteredCategories}
+        availableYears={availableYears}
       />
 
       <div className="mt-8">
